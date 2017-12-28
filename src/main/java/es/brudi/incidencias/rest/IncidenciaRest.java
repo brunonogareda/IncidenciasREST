@@ -62,7 +62,6 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getByCliente(@QueryParam("cod_parte") String cod_parteS,
 								   @QueryParam("ot") String otS,
-								   @QueryParam("id_cliente") String id_clienteS,
 								   @QueryParam("id_instalacion") String id_instalacionS,
 								   @QueryParam("zona_apartamento") String zona_apartamento,
 								   @QueryParam("descripcion_curta") String descripcion_curta,
@@ -73,14 +72,13 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		
         logger.debug("Invocouse o método create() de Incidencia.");
 		
-		int cod_parte, ot, id_cliente, id_instalacion;
+		int cod_parte, ot, id_instalacion;
 		boolean sol_presuposto = false;
 
 		//Comprobase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
 		try {
 			cod_parte = Util.stringToInt(true, cod_parteS);
 			ot = Util.stringToInt(true, otS);
-			id_cliente = Util.stringToInt(true, id_clienteS);
 			id_instalacion = Util.stringToInt(false, id_instalacionS);
 			
 			//Se o parametro sol_presuposto ven en true deixase en true, en outro caso ponse a false.
@@ -109,7 +107,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.create(user, cod_parte, ot, id_cliente, id_instalacion, zona_apartamento, descripcion_curta, observacions, sol_presuposto);
+	        	json = xest.create(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, sol_presuposto);
 	        }
 	     
         }

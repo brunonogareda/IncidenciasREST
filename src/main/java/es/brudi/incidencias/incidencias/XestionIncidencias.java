@@ -31,7 +31,7 @@ import es.brudi.incidencias.usuarios.Usuario;
 public class XestionIncidencias {
 
 	@SuppressWarnings("unchecked")
-	public JSONObject create(Usuario user, int cod_parte, int ot, int id_cliente, int id_instalacion, String zona_apartamento,
+	public JSONObject create(Usuario user, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
 			String descripcion_curta, String observacions, boolean sol_presuposto) {
 		JSONObject ret = new JSONObject();
 		
@@ -40,15 +40,14 @@ public class XestionIncidencias {
 		String estado = "Pendente";
 		String autor = user.getNome();
 				
-		if(id_cliente != user.getCliente().getCod_cliente() && user.getCliente().getCod_cliente() != 0 ) {
-			id_cliente = user.getCliente().getCod_cliente();
-		}
+		//TODO - Comprobar que a instalación pertence ao cliente do usuario que crea a incidencia.
+		//TODO - Comprobar permisos de solicitar presuposto.
 		
 		if(!user.podeCrearIncidencia()) {
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
 		
-		int id = IncidenciaDAO.create(cod_parte, ot, id_cliente, id_instalacion, zona_apartamento,
+		int id = IncidenciaDAO.create(cod_parte, ot, id_instalacion, zona_apartamento,
 				descripcion_curta, observacions, estado, sol_presuposto, data, autor);
 		
 		if(id>=0) {

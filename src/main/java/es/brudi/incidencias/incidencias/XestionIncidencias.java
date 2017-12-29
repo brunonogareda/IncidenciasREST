@@ -7,9 +7,11 @@ import java.time.ZoneId;
 import org.json.simple.JSONObject;
 
 import es.brudi.incidencias.db.dao.IncidenciaDAO;
+import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
+import es.brudi.incidencias.instalacions.Instalacion;
 
 /**
  * 
@@ -32,7 +34,16 @@ public class XestionIncidencias {
 		String estado = "Pendente";
 		String autor = user.getNome();
 		
-		//TODO - Comprobar que a instalación pertence ao cliente do usuario que crea a incidencia.
+		Instalacion inst = InstalacionDAO.getInstalacionById(id_instalacion);
+		
+		if(inst == null) { //Comprobamos se existe a instalación
+			return Error.DEFAULT.toJSONError();
+		}
+		if(inst.getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+		  user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é Brudi.
+			return Error.DEFAULT.toJSONError();
+		}
+		
 		//TODO - Comprobar permisos de solicitar presuposto.
 		//TODO - Engadir comentario ao crear parte.
 		

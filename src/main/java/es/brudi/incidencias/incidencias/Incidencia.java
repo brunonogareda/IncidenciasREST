@@ -6,15 +6,9 @@ import java.util.Calendar;
 
 import org.json.simple.JSONObject;
 
-import es.brudi.incidencias.clientes.Cliente;
-import es.brudi.incidencias.db.dao.ClienteDAO;
 import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.estados.Estado;
-import es.brudi.incidencias.facturas.Factura;
-import es.brudi.incidencias.grupos.Grupo;
 import es.brudi.incidencias.instalacions.Instalacion;
-import es.brudi.incidencias.presupostos.Presuposto;
-import es.brudi.incidencias.usuarios.Usuario;
 
 /**
  * 
@@ -39,8 +33,8 @@ public class Incidencia {
 	private String presuposto;
 	private String factura;
 	private Calendar data = Calendar.getInstance();
-	private int grupo_asig;
-	private String usuario_asig;
+//	private int grupo_asig;
+//	private String usuario_asig;
 	private String autor;
 	
 	public Incidencia(int id, int cod_parte, int ot, Instalacion instalacion, String zona_apartamento,
@@ -59,8 +53,8 @@ public class Incidencia {
 		this.presuposto = presuposto;
 		this.factura = factura;
 		this.data = data;
-		this.grupo_asig = grupo_asig;
-		this.usuario_asig = usuario_asig;
+//		this.grupo_asig = grupo_asig;
+//		this.usuario_asig = usuario_asig;
 		this.autor = autor;
 	}
 	
@@ -77,8 +71,8 @@ public class Incidencia {
 		presuposto = res.getString("Presuposto");
 		factura = res.getString("Factura");
 		data.setTime(res.getDate("Data"));
-		grupo_asig = res.getInt("Grupo_asignado");
-		usuario_asig = res.getString("Usuario_asignado");
+//		grupo_asig = res.getInt("Grupo_asignado");
+//		usuario_asig = res.getString("Usuario_asignado");
 		autor = res.getString("Autor");
 	}
 	
@@ -93,6 +87,7 @@ public class Incidencia {
 		ret.put("descripcion_curta", descripcion_curta);
 		ret.put("observacions", observacions);
 		ret.put("sol_presuposto", sol_presuposto);
+		ret.put("Estado", estado);
 		ret.put("presuposto", presuposto);
 		ret.put("factura", factura);
 		ret.put("data", data);

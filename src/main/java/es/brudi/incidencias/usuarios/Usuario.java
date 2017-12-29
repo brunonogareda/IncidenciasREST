@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import es.brudi.incidencias.clientes.Cliente;
-import es.brudi.incidencias.db.dao.IncidenciaDAO;
 import es.brudi.incidencias.grupos.Grupo;
 import es.brudi.incidencias.permisos.Permiso;
 

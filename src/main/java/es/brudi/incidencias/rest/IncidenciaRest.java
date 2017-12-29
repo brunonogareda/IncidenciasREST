@@ -1,9 +1,7 @@
 package es.brudi.incidencias.rest;
 
-import java.io.IOException;
 import java.util.EmptyStackException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -19,7 +17,6 @@ import org.json.simple.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.XestionIncidencias;
-import es.brudi.incidencias.instalacions.XestionInstalacions;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.Util;

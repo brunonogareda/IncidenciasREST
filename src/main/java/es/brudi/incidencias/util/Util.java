@@ -1,6 +1,5 @@
 package es.brudi.incidencias.util;
 
-import java.sql.SQLException;
 import java.util.EmptyStackException;
 
 /**

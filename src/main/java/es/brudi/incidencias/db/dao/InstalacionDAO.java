@@ -4,13 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
-import es.brudi.incidencias.grupos.Grupo;
 import es.brudi.incidencias.instalacions.Instalacion;
 
 /**

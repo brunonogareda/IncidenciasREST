@@ -3,20 +3,12 @@ package es.brudi.incidencias.incidencias;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import es.brudi.incidencias.clientes.Cliente;
-import es.brudi.incidencias.db.dao.ClienteDAO;
 import es.brudi.incidencias.db.dao.IncidenciaDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
-import es.brudi.incidencias.permisos.Permiso;
 import es.brudi.incidencias.usuarios.Usuario;
 
 /**
@@ -39,9 +31,10 @@ public class XestionIncidencias {
 		Date data = Date.valueOf(dataLocal);
 		String estado = "Pendente";
 		String autor = user.getNome();
-				
+		
 		//TODO - Comprobar que a instalación pertence ao cliente do usuario que crea a incidencia.
 		//TODO - Comprobar permisos de solicitar presuposto.
+		//TODO - Engadir comentario ao crear parte.
 		
 		if(!user.podeCrearIncidencia()) {
 			return Error.USER_NOPERMISOS.toJSONError();

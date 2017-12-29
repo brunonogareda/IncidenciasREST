@@ -15,8 +15,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
-import com.mysql.jdbc.StringUtils;
-
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.instalacions.XestionInstalacions;

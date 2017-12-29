@@ -6,8 +6,6 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import es.brudi.incidencias.servlet.AppContextListener;
-
 /**
  * 
  * Clase que xestiona as conexións coa base de datos.

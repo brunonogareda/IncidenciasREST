@@ -1,6 +1,7 @@
 package es.brudi.incidencias.util;
 
 import java.util.EmptyStackException;
+import java.util.TimeZone;
 
 /**
  * Clase que conten diferentes métodos con utilidades para o sistema.
@@ -11,7 +12,9 @@ import java.util.EmptyStackException;
  * 
  */
 public class Util {
-
+	
+	public static final TimeZone timeZone = TimeZone.getTimeZone("Europe/Madrid");
+	
 	/**
 	 * Comproba se un String é numérico
 	 * @param text

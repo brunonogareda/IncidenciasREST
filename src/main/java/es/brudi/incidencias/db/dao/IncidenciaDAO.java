@@ -1,11 +1,11 @@
 package es.brudi.incidencias.db.dao;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import org.apache.log4j.Logger;
 
@@ -81,16 +81,15 @@ public class IncidenciaDAO {
 	 * @param autor
 	 * @return - Id da nova incidencia. (Se -1 existiu un erro creando a incidencia).
 	 */
-	public static int create(int cod_parte, int ot, int id_instalacion, String zona_apartamento,
-			String descripcion_curta, String observacions, String estado, boolean sol_presuposto, Date data, String autor) {
+	public static int crear(int cod_parte, int ot, int id_instalacion, String zona_apartamento,
+			String descripcion_curta, String observacions, String estado, boolean sol_presuposto, Timestamp data, String autor) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "INSERT INTO "+TABLENAME+" (Cod_parte, Orden_traballo, Instalacion, Zona_apartamento, Descripcion_curta, "
-						+ "Observacions, Estado, Solicitase_presuposto, Data, Autor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+						+ "Observacions, Estado, Solicitase_presuposto, Data, Autor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 		PreparedStatement incidencia;
 		try
 		 {
-			
 			incidencia = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			incidencia.setInt(1, cod_parte);
 			incidencia.setInt(2, ot);
@@ -100,7 +99,7 @@ public class IncidenciaDAO {
 			incidencia.setString(6, observacions);
 			incidencia.setString(7, estado);
 			incidencia.setBoolean(8, sol_presuposto);
-			incidencia.setDate(9, data);
+			incidencia.setTimestamp(9, data);
 			incidencia.setString(10, autor);
 
 			int res = incidencia.executeUpdate();

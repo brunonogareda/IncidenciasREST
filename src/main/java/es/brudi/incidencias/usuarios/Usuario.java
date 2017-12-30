@@ -196,7 +196,12 @@ public class Usuario {
 	
 	public boolean podeCrearIncidencia() {
 		int p = getPermisoByType(Permiso.POS_INCIDENCIA);
-		return (p >= Permiso.CREAR_INCIDENCIA) ? true : false;
+		return (p >= Permiso.CREAR_INCIDENCIA);
+	}
+	
+	public boolean podeMarcarSolPresuposto() {
+		int p = getPermisoByType(Permiso.POS_SOL_PRESUPOSTO);
+		return (p >= Permiso.MARCAR_SOL_PRESUPOSTO);
 	}
 	
 }

@@ -34,6 +34,10 @@ public enum Error {
 	GETINSTALACIONS_SENPERMISOS(163, "Non ten permisos suficientes para consultar as instalacións de este cliente."),
 	CREATEINCIDENCIA_ERRORPARAM(170, "O formato dos parámetros introducidos é incorrecto."),
 	CREATEINCIDENCIA_FALTANPARAM(172, "Faltan parámetros que son obligatorios."),
+	CREATEINCIDENCIA_NONEXISTEINST(173, "Non se encontra a instalación solicitada."),
+	CREATEINCIDENCIA_INSTPERMISOS(174, "Non ten permisos para crear unha incidencia en esta instalación."),
+	CREATEINCIDENCIA_ERRORCREANDO(175, "Problemas ao insertar a incidencia na base de datos."),
+	CREATEINCIDENCIA_COMENTARIO(176, "Erro insertando o comentario de creación de incidencia."),
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;

@@ -70,7 +70,7 @@ public class Incidencia {
 		sol_presuposto = res.getBoolean("Solicitase_presuposto");
 		presuposto = res.getString("Presuposto");
 		factura = res.getString("Factura");
-		data.setTime(res.getDate("Data"));
+		data.setTime(res.getTimestamp("Data"));
 //		grupo_asig = res.getInt("Grupo_asignado");
 //		usuario_asig = res.getString("Usuario_asignado");
 		autor = res.getString("Autor");
@@ -87,7 +87,7 @@ public class Incidencia {
 		ret.put("descripcion_curta", descripcion_curta);
 		ret.put("observacions", observacions);
 		ret.put("sol_presuposto", sol_presuposto);
-		ret.put("Estado", estado);
+		ret.put("estado", estado);
 		ret.put("presuposto", presuposto);
 		ret.put("factura", factura);
 		ret.put("data", data);

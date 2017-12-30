@@ -2,9 +2,8 @@ package es.brudi.incidencias.instalacions;
 
 import java.util.ArrayList;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
+import es.brudi.incidencias.util.JSONArray;
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
@@ -27,10 +26,9 @@ public class XestionInstalacions {
 	 * @param idCliente - identificador do cliente
 	 * @return Obxecto JSON coa resposta.
 	 */
-	@SuppressWarnings("unchecked")
-	public JSONObject getInstalacionsByCliente(Usuario user, int idCliente) {
-		JSONObject ret = new JSONObject();
-		JSONArray jsonInstalacions = new JSONArray();
+	public JSONObject<String, Object> getInstalacionsByCliente(Usuario user, int idCliente) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONArray<Object> jsonInstalacions = new JSONArray<Object>();
 
 		if(user.getCliente().getCod_cliente()!=idCliente && user.getCliente().getCod_cliente()!=0) {
 			return Error.GETINSTALACIONS_SENPERMISOS.toJSONError();

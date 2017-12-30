@@ -194,6 +194,10 @@ public class Usuario {
 		return permisosf;
 	}
 	
+	//***************************************************************
+	// Métodos para comprobar os permisos de un usuario.
+	//***************************************************************
+	
 	public boolean podeCrearIncidencia() {
 		int p = getPermisoByType(Permiso.POS_INCIDENCIA);
 		return (p >= Permiso.CREAR_INCIDENCIA);
@@ -202,6 +206,16 @@ public class Usuario {
 	public boolean podeMarcarSolPresuposto() {
 		int p = getPermisoByType(Permiso.POS_SOL_PRESUPOSTO);
 		return (p >= Permiso.MARCAR_SOL_PRESUPOSTO);
+	}
+	
+	public boolean podeVerIncidencia() {
+		int p = getPermisoByType(Permiso.POS_VER_INCIDENCIA);
+		return (p >= Permiso.VER_INCIDENCIA);
+	}
+	
+	public boolean podeVerIncidenciaPropia() {
+		int p = getPermisoByType(Permiso.POS_VER_INCIDENCIA);
+		return (p >= Permiso.VER_INCIDENCIA_PROPIA);
 	}
 	
 }

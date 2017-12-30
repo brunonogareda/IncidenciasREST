@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
+import es.brudi.incidencias.util.JSONArray;
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.ClienteDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
@@ -32,10 +31,9 @@ public class XestionClientes {
 	 * @param req - RequestHttp do servlet
 	 * @return Obxecto json coa resposta
 	 */
-	@SuppressWarnings("unchecked")
-	public JSONObject getClientes(HttpServletRequest req) {
-		JSONObject ret = new JSONObject();
-		JSONArray jsonClientes = new JSONArray();
+	public JSONObject<String, Object> getClientes(HttpServletRequest req) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONArray<Object> jsonClientes = new JSONArray<Object>();
 		
 		XestionUsuarios xest = new XestionUsuarios();
 		Usuario user = xest.getUsuario(req);

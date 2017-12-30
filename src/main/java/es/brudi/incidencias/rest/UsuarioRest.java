@@ -15,8 +15,8 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.error.Error;
@@ -54,9 +54,9 @@ public class UsuarioRest {
 	@Path("/login")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject login(@QueryParam("username") String username, @QueryParam("password") String password) { 
+    public JSONObject<String, Object> login(@QueryParam("username") String username, @QueryParam("password") String password) { 
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
         logger.debug("Invocouse o método login() de usuario.");
         if(DBConnectionManager.getConnection() != null ) {
@@ -87,9 +87,9 @@ public class UsuarioRest {
 	@Path("/logout")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject logout() { 
+    public JSONObject<String, Object> logout() { 
 				
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
         
         logger.debug("Invocouse o método logout() de usuario.");
         HttpSession session=req.getSession();
@@ -109,10 +109,10 @@ public class UsuarioRest {
 	@Path("/changepassword")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject changepassword(@QueryParam("pass_old") String pass_old, @QueryParam("pass_new1") String pass_new1,
+	public JSONObject<String, Object> changepassword(@QueryParam("pass_old") String pass_old, @QueryParam("pass_new1") String pass_new1,
 			@QueryParam("pass_new2") String pass_new2) {
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
         
         logger.debug("Invocouse o método changepassword() de usuario.");
         if(DBConnectionManager.getConnection() != null ) {	        
@@ -151,9 +151,9 @@ public class UsuarioRest {
 	@Path("/changemail")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject changemail(@QueryParam("mail") String mail) {
+	public JSONObject<String, Object> changemail(@QueryParam("mail") String mail) {
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
         logger.debug("Invocouse o método changemail() de usuario.");
         if(DBConnectionManager.getConnection() != null ) {

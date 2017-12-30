@@ -1,5 +1,6 @@
 package es.brudi.incidencias.usuarios;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.UsuarioDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
@@ -8,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.validator.routines.EmailValidator;
 
-import org.json.simple.JSONObject;
 
 /**
  * 
@@ -31,10 +31,9 @@ public class XestionUsuarios {
 	 * @param password - Contrasinal que introduce o usuario
 	 * @return Obxecto json coa resposta
 	 */
-	@SuppressWarnings("unchecked")
-	public JSONObject login(HttpServletRequest req, String username, String password) {
-		JSONObject ret = new JSONObject();
-		JSONObject usuario = new JSONObject();
+	public JSONObject<String, Object> login(HttpServletRequest req, String username, String password) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> usuario = new JSONObject<String, Object>();
 		
 		Usuario user = UsuarioDAO.comprobar_usuario(username, password);
 		
@@ -62,8 +61,8 @@ public class XestionUsuarios {
 	 * @param email - Email novo que desexa modificar o usuario.
 	 * @return Obxecto json coa resposta
 	 */
-	public JSONObject changemail(HttpServletRequest req, String email) {
-		JSONObject ret = new JSONObject();
+	public JSONObject<String, Object> changemail(HttpServletRequest req, String email) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
 		Usuario user = this.getUsuario(req);
 		
@@ -95,8 +94,8 @@ public class XestionUsuarios {
 	 * @param pass_new2 - Repetición do novo contrasinal.
 	 * @return Obxecto json coa resposta
 	 */
-	public JSONObject changepass(HttpServletRequest req, String pass_old, String pass_new1, String pass_new2) {
-		JSONObject ret = new JSONObject();
+	public JSONObject<String, Object> changepass(HttpServletRequest req, String pass_old, String pass_new1, String pass_new2) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 				
 		Usuario user = this.getUsuario(req);
 		
@@ -132,7 +131,7 @@ public class XestionUsuarios {
 	 * @param req - RequestHttp do servlet
 	 * @return Obxecto json de erro. Devolve nulo en caso de que o login sexa correcto.
 	 */
-	public JSONObject checkLogin(HttpServletRequest req) {
+	public JSONObject<String, Object> checkLogin(HttpServletRequest req) {
 		Usuario user = this.getUsuario(req);
 
 		if(user==null) {

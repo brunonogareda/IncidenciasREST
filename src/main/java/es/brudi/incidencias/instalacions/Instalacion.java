@@ -3,8 +3,7 @@ package es.brudi.incidencias.instalacions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.json.simple.JSONObject;
-
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.clientes.Cliente;
 import es.brudi.incidencias.db.dao.ClienteDAO;
 
@@ -117,9 +116,8 @@ public class Instalacion {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
+	public JSONObject<String, Object> toJson() {
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 		json.put("id", id);
 		json.put("nome", nome);
 		json.put("idcliente", cliente.getNome());

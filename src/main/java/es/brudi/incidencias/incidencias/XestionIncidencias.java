@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.db.dao.ComentarioDAO;
 import es.brudi.incidencias.db.dao.IncidenciaDAO;
@@ -29,10 +29,21 @@ public class XestionIncidencias {
 	
 	private static Logger logger = Logger.getLogger(XestionIncidencias.class);
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject create(Usuario user, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
+	/**
+	 * Crea unha nova incidencia.
+	 * @param user - Usuario que realiza a petición.
+	 * @param cod_parte
+	 * @param ot
+	 * @param id_instalacion
+	 * @param zona_apartamento
+	 * @param descripcion_curta
+	 * @param observacions
+	 * @param sol_presuposto
+	 * @return
+	 */
+	public JSONObject<String, Object> create(Usuario user, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
 			String descripcion_curta, String observacions, boolean sol_presuposto) {
-		JSONObject ret = new JSONObject();
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
 		Calendar agora = Calendar.getInstance();
 		agora.setTimeZone(Util.timeZone);
@@ -46,7 +57,7 @@ public class XestionIncidencias {
 			return Error.CREATEINCIDENCIA_NONEXISTEINST.toJSONError();
 		}
 		if(inst.getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		  user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é Brudi.
+		  user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREATEINCIDENCIA_INSTPERMISOS.toJSONError();
 		}
 		
@@ -82,6 +93,40 @@ public class XestionIncidencias {
 		ret = Mensaxe.DEFAULT.toJSONMensaxe();
 		ret.put("Incidencia", inc.toJson());
 		
+		return ret;
+	}
+
+	/**
+	 * Obten unha incidencia utilizando o identificiador.
+	 * @param user - Usuario que solicita a petición.
+	 * @param id - Identificación da incidencia que se desexa obter.
+	 * @return
+	 */
+	public JSONObject<String, Object> getById(Usuario user, int id) {
+		JSONObject<String,Object> ret = new JSONObject<String,Object>();
+						
+		Incidencia inc = IncidenciaDAO.getIncidenciaById(id);
+		
+		if(inc == null) {
+			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
+		}
+		
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+				  user.getCliente().getCod_cliente() != 0) { //Comprobamos se a incidencia é do usuario ou se o usuario é o cliente 0.
+			return Error.OBTERINCIDENCIA_SENPERMISOS.toJSONError();
+		}
+		
+		if(!user.podeVerIncidencia()) { //Comprobamos se o usuario ten permisos para ver incidencias.
+			if(!(user.podeVerIncidenciaPropia() && inc.getAutor() == user.getNome())) {
+				return Error.USER_NOPERMISOS.toJSONError();
+			}
+		}
+		
+		logger.debug("Obtense a incidencia: "+id);
+		
+		ret = Mensaxe.DEFAULT.toJSONMensaxe();
+		ret.put("Incidencia", inc.toJson());
+
 		return ret;
 	}
 	

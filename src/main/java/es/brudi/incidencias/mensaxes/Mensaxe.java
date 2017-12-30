@@ -1,6 +1,6 @@
 package es.brudi.incidencias.mensaxes;
 
-import org.json.simple.JSONObject;
+import es.brudi.incidencias.util.JSONObject;
 
 
 public enum Mensaxe
@@ -35,9 +35,8 @@ public enum Mensaxe
   }
 
   
-  @SuppressWarnings("unchecked")
-  public JSONObject toJSONMensaxe() {
-	JSONObject ret = new JSONObject();
+  public JSONObject<String, Object> toJSONMensaxe() {
+	JSONObject<String, Object> ret = new JSONObject<String, Object>();
     
     ret.put("  errno", Integer.valueOf(code));
     ret.put(" message", description);

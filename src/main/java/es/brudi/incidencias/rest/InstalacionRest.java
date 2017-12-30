@@ -13,8 +13,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.instalacions.XestionInstalacions;
@@ -49,9 +49,9 @@ public class InstalacionRest {
 	@Path("/getByCliente")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getByCliente(@QueryParam("idCliente") String idClienteS) { 
+	public JSONObject<String, Object> getByCliente(@QueryParam("idCliente") String idClienteS) { 
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 		
 		int idCliente = -1;
 		

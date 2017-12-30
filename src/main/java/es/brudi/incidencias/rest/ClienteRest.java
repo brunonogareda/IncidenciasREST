@@ -12,8 +12,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
@@ -47,9 +47,9 @@ public class ClienteRest {
 	@Path("/get")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject get() { 
+    public JSONObject<String, Object> get() { 
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
         logger.debug("Invocouse o método get() de clientes.");
         if(DBConnectionManager.getConnection() != null ) {

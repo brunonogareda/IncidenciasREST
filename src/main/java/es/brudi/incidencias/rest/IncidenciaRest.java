@@ -12,8 +12,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
+import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.XestionIncidencias;
@@ -57,7 +57,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	@Path("/create")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getByCliente(@QueryParam("cod_parte") String cod_parteS,
+	public JSONObject<String, Object> create(@QueryParam("cod_parte") String cod_parteS,
 								   @QueryParam("ot") String otS,
 								   @QueryParam("id_instalacion") String id_instalacionS,
 								   @QueryParam("zona_apartamento") String zona_apartamento,
@@ -65,7 +65,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 								   @QueryParam("observacions") String observacions,
 								   @QueryParam("sol_presuposto") String sol_presupostoS) { 
 		
-		JSONObject json = new JSONObject();
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
 		
         logger.debug("Invocouse o método create() de Incidencia.");
 		
@@ -89,10 +89,10 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 			
 		}
 		catch(NumberFormatException e) {
-			return Error.CREATEINCIDENCIA_ERRORPARAM.toJSONError();
+			return Error.ERRORPARAM.toJSONError();
 		}
 		catch(EmptyStackException e) {
-			return Error.CREATEINCIDENCIA_FALTANPARAM.toJSONError();
+			return Error.FALTANPARAM.toJSONError();
 		}
 		
 		logger.debug("Parámetros correctos.");
@@ -114,6 +114,53 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
         }
         
         return json;
-    } 
+    }
+	
+	/**
+	 * Obten unha inicidencia según o id.
+	 * 
+	 * @param idS
+	 * @return
+	 */
+	@Path("/getById")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> getById(@QueryParam("id") String idS) {
+
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+		logger.debug("Invocouse o método getById() de Incidencia.");
+
+		int id;
+
+		// Comprobase que os parámetros obligatorios se pasaron e que están no formato
+		// adecuado, convertindo os string en int en caso de ser necesario
+		try {
+			id = Util.stringToInt(false, idS);
+		} catch (NumberFormatException e) {
+			return Error.ERRORPARAM.toJSONError();
+		} catch (EmptyStackException e) {
+			return Error.FALTANPARAM.toJSONError();
+		}
+
+		logger.debug("Parámetros correctos.");
+		if (DBConnectionManager.getConnection() != null) {
+
+			XestionIncidencias xest = new XestionIncidencias();
+			XestionUsuarios xestu = new XestionUsuarios();
+
+			json = xestu.checkLogin(req);
+			if (json == null) {
+				Usuario user = xestu.getUsuario(req);
+				json = xest.getById(user, id);
+			}
+
+		} else {
+			logger.warn("Non existe conexión coa base de datos.");
+			json = Error.DATABASE.toJSONError();
+		}
+
+		return json;
+	}
 	
 }

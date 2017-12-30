@@ -1,6 +1,6 @@
 package es.brudi.incidencias.error;
 
-import org.json.simple.JSONObject;
+import es.brudi.incidencias.util.JSONObject;
 
 /**
  * 
@@ -14,6 +14,8 @@ import org.json.simple.JSONObject;
 public enum Error {
 	
 	DATABASE(1, "Non se puido establecer conexión coa base de datos."),
+	ERRORPARAM(60, "O formato dos parámetros introducidos é incorrecto."),
+	FALTANPARAM(60, "Faltan parámetros que son obligatorios."),
 	LOGIN_SENPARAMETROS(100, "Debe introducir o usuario e o contrasinal para iniciar sesión."),
 	LOGIN_USER(101, "Usuario ou contrasinal erroneos."),
 	USER_NOLOGIN(110, "Para executar esta acción o usuario debe estar logueado."),
@@ -32,12 +34,12 @@ public enum Error {
 	GETINSTALACIONS_ERRORDB(161, "Erro obtendo as instalacións."),
 	GETINSTALACIONS_SENINSTALACIONS(162, "Non se encontraron instalacións de este cliente."),
 	GETINSTALACIONS_SENPERMISOS(163, "Non ten permisos suficientes para consultar as instalacións de este cliente."),
-	CREATEINCIDENCIA_ERRORPARAM(170, "O formato dos parámetros introducidos é incorrecto."),
-	CREATEINCIDENCIA_FALTANPARAM(172, "Faltan parámetros que son obligatorios."),
-	CREATEINCIDENCIA_NONEXISTEINST(173, "Non se encontra a instalación solicitada."),
-	CREATEINCIDENCIA_INSTPERMISOS(174, "Non ten permisos para crear unha incidencia en esta instalación."),
-	CREATEINCIDENCIA_ERRORCREANDO(175, "Problemas ao insertar a incidencia na base de datos."),
-	CREATEINCIDENCIA_COMENTARIO(176, "Erro insertando o comentario de creación de incidencia."),
+	CREATEINCIDENCIA_NONEXISTEINST(170, "Non se encontra a instalación solicitada."),
+	CREATEINCIDENCIA_INSTPERMISOS(171, "Non ten permisos para crear unha incidencia en esta instalación."),
+	CREATEINCIDENCIA_ERRORCREANDO(172, "Problemas ao insertar a incidencia na base de datos"),
+	CREATEINCIDENCIA_COMENTARIO(173, "Erro insertando o comentario de creación de incidencia."),
+	OBTERINCIDENCIA_NONEXISTE(180, "A incidencia solicitada non se encontra."),
+	OBTERINCIDENCIA_SENPERMISOS(181, "Non ten permisos suficientes para ver esta incidencia"),
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;
@@ -61,9 +63,8 @@ public enum Error {
 	  return code + ": " + description;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject toJSONError() {
-		JSONObject ret = new JSONObject();
+	public JSONObject<String, Object> toJSONError() {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
 		ret.put("  errno", this.code);
 		ret.put(" message", description);

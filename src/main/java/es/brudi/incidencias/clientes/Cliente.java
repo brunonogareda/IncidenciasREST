@@ -1,6 +1,6 @@
 package es.brudi.incidencias.clientes;
 
-import org.json.simple.JSONObject;
+import es.brudi.incidencias.util.JSONObject;
 
 /**
  * 
@@ -66,9 +66,8 @@ public class Cliente {
 	/**
 	 * @return Devolve un obxecto json cos parámetros do cliente.Devolve un obxecto json cos parámetros do cliente.
 	 */
-	@SuppressWarnings("unchecked")
-	public JSONObject toJson() {
-		JSONObject ret = new JSONObject();
+	public JSONObject<String, Object> toJson() {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		ret.put("cod_cliente", cod_cliente);
 		ret.put("nome", nome);
 		ret.put("nome_curto", nome_curto);

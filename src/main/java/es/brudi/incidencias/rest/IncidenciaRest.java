@@ -323,4 +323,13 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		return json;
 	}
 	
+	@Path("/proba")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> proba() {
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+		XestionIncidencias xest = new XestionIncidencias();
+		xest.proba();
+		return json;	
+	}
 }

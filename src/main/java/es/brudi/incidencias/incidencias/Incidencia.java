@@ -6,7 +6,7 @@ import java.util.Calendar;
 
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.InstalacionDAO;
-import es.brudi.incidencias.estados.Estado;
+import es.brudi.incidencias.incidencias.estados.Estado;
 import es.brudi.incidencias.instalacions.Instalacion;
 
 /**
@@ -65,7 +65,7 @@ public class Incidencia {
 		zona_apartamento = res.getString("Zona_apartamento");
 		descripcion_curta = res.getString("descripcion_curta");
 		observacions = res.getString("Observacions");
-		//estado = new Estado(res.getString("Estado"));
+		estado = Estado.getByString(res.getString("Estado"));
 		sol_presuposto = res.getBoolean("Solicitase_presuposto");
 		presuposto = res.getString("Presuposto");
 		factura = res.getString("Factura");
@@ -267,7 +267,7 @@ public class Incidencia {
 		ret.put("descripcion_curta", descripcion_curta);
 		ret.put("observacions", observacions);
 		ret.put("sol_presuposto", sol_presuposto);
-		ret.put("estado", estado);
+		ret.put("estado", estado.getEstado());
 		ret.put("presuposto", presuposto);
 		ret.put("factura", factura);
 		ret.put("data", data);

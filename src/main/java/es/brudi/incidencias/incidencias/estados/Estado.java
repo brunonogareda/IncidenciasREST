@@ -1,4 +1,4 @@
-package es.brudi.incidencias.estados;
+package es.brudi.incidencias.incidencias.estados;
 
 /**
  * 
@@ -26,6 +26,19 @@ public enum Estado {
 	
 	public String getEstado() {
 		return estado;
+	}
+	
+	public static Estado getByString(String estado) {
+		
+		Estado[] est = Estado.values();
+		
+		for(Estado e : est) {
+			if(e.getEstado().equals(estado))
+				return e;
+		}
+		
+		return Estado.DEFAULT;
+
 	}
 	
 }

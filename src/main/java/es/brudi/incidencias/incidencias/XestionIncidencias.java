@@ -13,6 +13,7 @@ import es.brudi.incidencias.db.dao.ComentarioDAO;
 import es.brudi.incidencias.db.dao.IncidenciaDAO;
 import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.incidencias.estados.Estado;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.Util;
@@ -50,7 +51,7 @@ public class XestionIncidencias {
 		Calendar agora = Calendar.getInstance();
 		agora.setTimeZone(Util.timeZone);
 		Timestamp data = new Timestamp(agora.getTimeInMillis());
-		String estado = "Pendente";
+		String estado = Estado.PENDENTE_R.getEstado();
 		String autor = user.getNome();
 		
 		Instalacion inst = InstalacionDAO.getInstalacionById(id_instalacion);
@@ -69,6 +70,9 @@ public class XestionIncidencias {
 		if(!user.podeCrearIncidencia()) { //Comprobamos permisos de creación
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
+		
+		if(sol_presuposto) //En caso de que se solicite presuposto, o estado inicial é diferente.
+			estado = Estado.PENDENTE_P.getEstado();
 		
 		int id = IncidenciaDAO.crear(cod_parte, ot, id_instalacion, zona_apartamento,
 				descripcion_curta, observacions, estado, sol_presuposto, data, autor);
@@ -243,6 +247,12 @@ public class XestionIncidencias {
 		ret = Mensaxe.BORRARINCIDENCIA_OK.toJSONMensaxe();
 		
 		return ret;
+	}
+
+	public void proba() {
+		//Estado.valueOf("Pendente");
+		System.out.println("x");
+		System.out.println(Estado.getByString("Pendente de Realizar").getEstado());
 	}
 	
 }

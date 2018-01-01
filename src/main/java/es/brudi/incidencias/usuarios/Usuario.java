@@ -223,4 +223,9 @@ public class Usuario {
 		return (p >= Permiso.BORRAR_INCIDENCIA);
 	}
 	
+	public boolean podeCambiarEstadoIncidencia() {
+		int p = getPermisoByType(Permiso.POS_INCIDENCIA);
+		return (p >= Permiso.MODIFICAR_ESTADO_INCIDENCIA);
+	}
+	
 }

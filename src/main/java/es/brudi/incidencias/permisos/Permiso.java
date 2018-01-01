@@ -32,7 +32,7 @@ public abstract class Permiso {
 	public static final int VER = 1;
 	public static final int COMENTAR = 2;
 	public static final int SUBIR = 3;
-	public static final int MODIFICAR = 2;
+	public static final int MODIFICAR = 4;
 
 	
 	

@@ -244,11 +244,38 @@ public class IncidenciaDAO {
 		return null;
 	}
 	
-	
-	public static boolean delete(int id) {
+	/**
+	 * Modifica varios parámetros da incidencia que corresponda co Id que se lle pasa.
+	 * 
+	 * @param id - Identificador da incidencia que se quere modificar.
+	 * @param cod_parte - valor que se quere dar a cod_parte. 0: non se modifica. -1: ponse a nulo.
+	 * @param ot - valor que se quere dar a Orden de traballo. 0: non se modifica. -1: ponse a nulo.
+	 * @param id_instalacion - instalación a que se lle asigna a incidencia. 0: non se modifica.
+	 * @param zona_apartamento - valor que se lle da a zona_apartamento. NULL: non se modifica.
+	 * @param descripcion_curta - valor que se lle da a descripcion_curta. NULL: non se modifica.
+	 * @param observacions - valor que se lle asigna a observacions. NULL: non se modifica.
+	 * @param estado - valor que se lle asigna a estado. NULL: non se modifica.
+	 * @param sol_presuposto - Ponse a true ou a false. NULL: non se modifica.
+	 * @return - True en caso de que se modifica correctamente. False ocorreu algún erro.
+	 */
+	public static boolean modificarIncidencia(int id, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
+			String descripcion_curta, String observacions, String estado, String sol_presuposto) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "DELETE FROM "+TABLENAME+" WHERE Id = ?;";
+		//Contruese a query segundo os datos proporcionados.
+		String query = "UPDATE "+TABLENAME+" SET";
+		query += (cod_parte > 0) ? " Cod_parte = ?," : "";
+		query += (cod_parte < 0 ) ? " Cod_parte = NULL," : "";
+		query += (ot > 0) ? " Orden_traballo = ?," : "";
+		query += (ot < 0 ) ? " Orden_traballo = NULL," : "";
+		query += (id_instalacion > 0) ? " Instalacion = ?," : "";
+		query += (zona_apartamento != null && !zona_apartamento.equals("")) ? " Zona_apartamento = ?," : "";
+		query += (descripcion_curta != null && !descripcion_curta.equals("")) ? " Descripcion_curta = ?," : "";
+		query += (observacions != null && !observacions.equals("")) ? " Observacions = ?," : "";
+		query += (estado != null && !estado.equals("")) ? " Estado = ?," : "";
+		query += (sol_presuposto != null && (sol_presuposto.equals("true") || sol_presuposto.equals("false"))) ? " Solicitase_presuposto = ?," : "";
+		query += " Autor = autor";
+		query += " WHERE Id = ?;";
 		
 		PreparedStatement incidencia;
 		try
@@ -258,10 +285,73 @@ public class IncidenciaDAO {
 			
 			incidencia = conn.prepareStatement(query);	
 			
-			incidencia.setInt(1, id);
+			//Engádense os parámetros pasados a query.
+			int i = 1;
+			if(cod_parte > 0) incidencia.setInt(i++, cod_parte);
+			if(ot > 0) incidencia.setInt(i++, ot);
+			if(id_instalacion > 0)  incidencia.setInt(i++, id_instalacion);
+			if(zona_apartamento != null && !zona_apartamento.equals("")) incidencia.setString(i++, "%"+zona_apartamento+"%");
+			if(descripcion_curta != null && !descripcion_curta.equals("")) incidencia.setString(i++, "%"+descripcion_curta+"%");
+			if(observacions != null && !observacions.equals("")) incidencia.setString(i++, "%"+observacions+"%");
+			if(estado != null && !estado.equals("")) incidencia.setString(i++, estado);
+			if(sol_presuposto != null && sol_presuposto.equals("true")) incidencia.setBoolean(i++, true);
+			if(sol_presuposto != null && sol_presuposto.equals("false")) incidencia.setBoolean(i++, false);
+			incidencia.setInt(i++, id);
 	
 			int res = incidencia.executeUpdate();
 			
+			incidencia.close();
+			
+			if(res == 1) {
+				return true;
+			}
+			return false;
+					
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: "+e);
+		 }
+		
+		return false;
+	}
+	
+
+	/**
+	 * Modifica o estado da incidencia
+	 * @param id
+	 * @param estado
+	 * @return
+	 */
+	public static boolean modificarEstado(int id, String estado) {
+		return IncidenciaDAO.modificarIncidencia(id, 0, 0, 0, null, null, null, estado, null);
+	}
+	
+	/**
+	 * Elimina unha incidencia
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public static boolean delete(int id) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		String query = "DELETE FROM "+TABLENAME+" WHERE Id = ?;";
+		
+		PreparedStatement incidencia;
+		try
+		 {
+			logger.debug("Realizase a consulta: "+query);
+			
+			incidencia = conn.prepareStatement(query);	
+			incidencia.setInt(1, id);
+			int res = incidencia.executeUpdate();
 			incidencia.close();
 			
 			if(res == 1) {

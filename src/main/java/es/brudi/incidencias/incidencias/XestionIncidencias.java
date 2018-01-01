@@ -206,6 +206,54 @@ public class XestionIncidencias {
 	}
 	
 	/**
+	 * Cambia o estado de unha incidencia.
+	 * 
+	 * @param user
+	 * @param id
+	 * @param estadoS
+	 * @return
+	 */
+	public JSONObject<String, Object> cambiarEstado(Usuario user, int id, String estadoS) {
+		JSONObject<String,Object> ret = new JSONObject<String,Object>();
+		
+		if(!user.podeCambiarEstadoIncidencia()) {
+			return Error.MODIFESTADOINCIDENCIA_SENPERMISOS1.toJSONError();
+		}
+		
+		Incidencia inc = IncidenciaDAO.getIncidenciaById(id);
+		
+		if(inc == null) {
+			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
+		}
+		
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+				  user.getCliente().getCod_cliente() != 0) { //Comprobamos se a incidencia é do usuario ou se o usuario é o cliente 0.
+			return Error.MODIFESTADOINCIDENCIA_SENPERMISOS2.toJSONError();
+		}
+		
+		if(!user.podeVerIncidencia()) { //Comprobamos se o usuario ten permisos para ver incidencias.
+			if(!(user.podeVerIncidenciaPropia() && inc.getAutor() == user.getNome())) {
+				return Error.MODIFESTADOINCIDENCIA_SENPERMISOS2.toJSONError();
+			}
+		}
+
+		Estado estado = Estado.getByString(estadoS);
+		
+		boolean modif = IncidenciaDAO.modificarEstado(id, estado.getEstado());
+		
+		if(!modif) {
+			return Error.MODIFESTADOINCIDENCIA_ERRORDB.toJSONError();
+		}
+		
+		logger.debug("Cambiouse o estado da incidencia corectamente: "+inc.getId());
+		inc.setEstado(estado);
+		ret = Mensaxe.MODIFESTADOINCIDENCIA_OK.toJSONMensaxe();
+		ret.put("Incidencia", inc.toJson());
+		
+		return ret;
+	}
+	
+	/**
 	 * Borra a incidencia que corresponda co Id que se lle proporciona.
 	 * 
 	 * @param user
@@ -248,11 +296,4 @@ public class XestionIncidencias {
 		
 		return ret;
 	}
-
-	public void proba() {
-		//Estado.valueOf("Pendente");
-		System.out.println("x");
-		System.out.println(Estado.getByString("Pendente de Realizar").getEstado());
-	}
-	
 }

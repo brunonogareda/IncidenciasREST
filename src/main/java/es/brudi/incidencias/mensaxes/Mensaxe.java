@@ -15,6 +15,7 @@ public enum Mensaxe
   GETINCIDENCIA_ID_OK(0, "Obtivose a incidencia correctamente."),
   GETINCIDENCIAS_OK(0, "As incidencias obtiveronse correctamente."),
   BORRARINCIDENCIA_OK(0, "A incidencia eliminouse correctamente"),
+  MODIFESTADOINCIDENCIA_OK(0, "O estado da incidencia modificouse correctamente."),
   DEFAULT(0, "Ok.");
   
   private final int code;

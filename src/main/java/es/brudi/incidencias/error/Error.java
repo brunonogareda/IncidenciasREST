@@ -46,6 +46,9 @@ public enum Error {
 	BORRARINCIDENCIA_SENPERMISOS1(200, "Non ten privilexios suficientes para eliminar esta incidencia."),
 	BORRARINCIDENCIA_SENPERMISOS2(201, "Non ten privilexios para eliminar incidencias."),
 	BORRARINCIDENCIA_ERRORDB(202, "Error eliminando a incidencia da base de datos."),
+	MODIFESTADOINCIDENCIA_SENPERMISOS1(210, "Non ten privilexios para cambiar o estado das incidencias."),
+	MODIFESTADOINCIDENCIA_SENPERMISOS2(212, "Non ten privilexios para cambiar o estado de esta incidencia."),
+	MODIFESTADOINCIDENCIA_ERRORDB(212, "Error modificando o estado da incidencia na base de datos."),
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;

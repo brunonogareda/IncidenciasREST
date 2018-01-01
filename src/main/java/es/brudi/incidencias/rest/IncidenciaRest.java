@@ -275,6 +275,58 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 
 		return json;
 	}
+
+	/**
+	 * Modifica o estado de unha incidencia.
+	 * 
+	 * @param idS
+	 * @param estado
+	 * @return
+	 */
+	@Path("/cambiarEstado")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> cambiarEstado(@QueryParam("id") String idS, @QueryParam("estado") String estado) {
+
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+		logger.debug("Invocouse o método cambiarEstado() de Incidencia.");
+
+		int id;
+
+		// Comprobase que os parámetros obligatorios se pasaron e que están no formato
+		// adecuado, convertindo os string en int en caso de ser necesario
+		try {
+			id = Util.stringToInt(false, idS);
+			
+			if(estado == null || estado.equals(""))
+				throw new EmptyStackException();
+			
+		} catch (NumberFormatException e) {
+			return Error.ERRORPARAM.toJSONError();
+		} catch (EmptyStackException e) {
+			return Error.FALTANPARAM.toJSONError();
+		}
+
+		logger.debug("Parámetros correctos.");
+		if (DBConnectionManager.getConnection() != null) {
+
+			XestionIncidencias xest = new XestionIncidencias();
+			XestionUsuarios xestu = new XestionUsuarios();
+
+			json = xestu.checkLogin(req);
+			if (json == null) {
+				Usuario user = xestu.getUsuario(req);
+				json = xest.cambiarEstado(user, id, estado);
+			}
+
+		} else {
+			logger.warn("Non existe conexión coa base de datos.");
+			json = Error.DATABASE.toJSONError();
+		}
+
+		return json;
+	}
 	
 	/**
 	 * Borra a incidencia que corresponda co Id que se lle proporciona.
@@ -323,13 +375,4 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		return json;
 	}
 	
-	@Path("/proba")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> proba() {
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
-		XestionIncidencias xest = new XestionIncidencias();
-		xest.proba();
-		return json;	
-	}
 }

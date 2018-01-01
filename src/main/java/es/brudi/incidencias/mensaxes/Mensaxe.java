@@ -11,7 +11,10 @@ public enum Mensaxe
   CHANGEPASS_OK(0, "O contrasinal do usuario modificouse correctamente."), 
   GETCLIENTES_OK(0, "Os clientes obtiveronse correctamente."), 
   GETINSTALACIONS_OK(0, "As instalacións obtiveronse correctamente."), 
-  CREATEINCIDENCIA_OK(0, "Creouse correctamente a incidencia."), 
+  CREATEINCIDENCIA_OK(0, "Creouse correctamente a incidencia."),
+  GETINCIDENCIA_ID_OK(0, "Obtivose a incidencia correctamente."),
+  GETINCIDENCIAS_OK(0, "As incidencias obtiveronse correctamente."),
+  BORRARINCIDENCIA_OK(0, "A incidencia eliminouse correctamente"),
   DEFAULT(0, "Ok.");
   
   private final int code;

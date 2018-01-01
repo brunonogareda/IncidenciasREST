@@ -40,6 +40,12 @@ public enum Error {
 	CREATEINCIDENCIA_COMENTARIO(173, "Erro insertando o comentario de creación de incidencia."),
 	OBTERINCIDENCIA_NONEXISTE(180, "A incidencia solicitada non se encontra."),
 	OBTERINCIDENCIA_SENPERMISOS(181, "Non ten permisos suficientes para ver esta incidencia"),
+	OBTERINCIDENCIAS_NONEXISTEN(190, "Non existe ningunha incidencia cos parámetros indicados"),
+	OBTERINCIDENCIAS_ERRORDB(191, "Erro obtendo as incidencias na base de datos."),
+	OBTERINCIDENCIAS_PARAMETRODATAERROR(192, "A data introducida non está no formato adecuado"),
+	BORRARINCIDENCIA_SENPERMISOS1(200, "Non ten privilexios suficientes para eliminar esta incidencia."),
+	BORRARINCIDENCIA_SENPERMISOS2(201, "Non ten privilexios para eliminar incidencias."),
+	BORRARINCIDENCIA_ERRORDB(202, "Error eliminando a incidencia da base de datos."),
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;

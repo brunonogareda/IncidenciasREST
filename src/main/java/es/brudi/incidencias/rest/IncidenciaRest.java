@@ -1,5 +1,8 @@
 package es.brudi.incidencias.rest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.EmptyStackException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +41,8 @@ public class IncidenciaRest {
 	
 private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	
+	public final static SimpleDateFormat FORMATO_DATA = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
+
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
 
@@ -78,6 +83,9 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 			ot = Util.stringToInt(true, otS);
 			id_instalacion = Util.stringToInt(false, id_instalacionS);
 			
+			if(cod_parte < 0 || ot < 0 || id_instalacion < 0) //Estes parámetros non poden ser negativos. Se son -1 serán nulos.
+				throw new NumberFormatException();
+			
 			//Se o parametro sol_presuposto ven en true deixase en true, en outro caso ponse a false.
 			if(sol_presupostoS != null && sol_presupostoS.equals("true")) {
 				sol_presuposto = true;
@@ -104,7 +112,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.create(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, sol_presuposto);
+	        	json = xest.crear(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, sol_presuposto);
 	        }
 	     
         }
@@ -153,6 +161,158 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 			if (json == null) {
 				Usuario user = xestu.getUsuario(req);
 				json = xest.getById(user, id);
+			}
+
+		} else {
+			logger.warn("Non existe conexión coa base de datos.");
+			json = Error.DATABASE.toJSONError();
+		}
+
+		return json;
+	}
+	
+
+	/**
+	 * Obten incidencias según os parámetros que se lle pasan.
+	 * 
+	 * @param cod_parteS
+	 * @param otS
+	 * @param id_instalacionS
+	 * @param zona_apartamento
+	 * @param descripcion_curta
+	 * @param observacions
+	 * @param estado
+	 * @param sol_presuposto
+	 * @param factura
+	 * @param presuposto
+	 * @param data_menorS
+	 * @param data_maiorS
+	 * @param autor
+	 * @param cod_clienteS
+	 * @param verS
+	 * @return
+	 */
+	@Path("/get")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> get(@QueryParam("cod_parte") String cod_parteS,
+								   		  @QueryParam("ot") String otS,
+								   		  @QueryParam("id_instalacion") String id_instalacionS,
+								   		  @QueryParam("zona_apartamento") String zona_apartamento,
+								   		  @QueryParam("descripcion_curta") String descripcion_curta,
+								   		  @QueryParam("observacions") String observacions,
+										  @QueryParam("estado") String estado,								   
+								   		  @QueryParam("sol_presuposto") String sol_presuposto,
+								   		  @QueryParam("factura") String factura,
+										  @QueryParam("presuposto") String presuposto,
+										  @QueryParam("data_menor") String data_menorS,
+										  @QueryParam("data_maior") String data_maiorS,
+										  @QueryParam("autor") String autor,
+										  @QueryParam("cod_cliente") String cod_clienteS,
+										  @QueryParam("ver") String verS) {
+
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+		logger.debug("Invocouse o método get() de Incidencia.");
+
+		int cod_parte=-1, ot=-1, id_instalacion=-1, cod_cliente=-1, ver=-1;
+
+		Calendar data_menor = null;
+		Calendar data_maior = null;
+		
+		//Comprobase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
+		try {
+			cod_parte = Util.stringToInt(true, cod_parteS);
+			ot = Util.stringToInt(true, otS);
+			id_instalacion = Util.stringToInt(true, id_instalacionS);
+			cod_cliente = Util.stringToInt(true, cod_clienteS);
+			ver = Util.stringToInt(true, verS);
+			
+			if(ver < 0) //Se é menor que -1, error de parámetro.
+				throw new NumberFormatException();
+						
+			if(sol_presuposto != null) { // Se sol_presuposto non é nulo, true ou false, devolvemos un erro.
+				if(!sol_presuposto.equals("true") && !sol_presuposto.equals("false"))
+					throw new NumberFormatException();
+			}
+			
+			if(data_menorS != null && !data_menorS.equals("")) {
+				data_menor = Calendar.getInstance();
+				data_menor.setTime(FORMATO_DATA.parse(data_menorS));
+			}
+			if(data_maiorS != null && !data_maiorS.equals("")) {
+				data_maior = Calendar.getInstance();
+				data_maior.setTime(FORMATO_DATA.parse(data_maiorS));
+			}
+			
+		}
+		catch(NumberFormatException e) {
+			return Error.ERRORPARAM.toJSONError();
+		}
+		catch(EmptyStackException e) {
+			return Error.FALTANPARAM.toJSONError();
+		}
+		catch(ParseException e) {
+			return Error.OBTERINCIDENCIAS_PARAMETRODATAERROR.toJSONError();
+		}
+		
+		logger.debug("Parámetros correctos.");
+		if (DBConnectionManager.getConnection() != null) {
+
+			XestionIncidencias xest = new XestionIncidencias();
+			XestionUsuarios xestu = new XestionUsuarios();
+
+			json = xestu.checkLogin(req);
+			if (json == null) {
+				Usuario user = xestu.getUsuario(req);
+				json = xest.get(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estado, sol_presuposto, factura, presuposto, data_menor, data_maior, autor, cod_cliente, ver);
+			}
+
+		} else {
+			logger.warn("Non existe conexión coa base de datos.");
+			json = Error.DATABASE.toJSONError();
+		}
+
+		return json;
+	}
+	
+	/**
+	 * Borra a incidencia que corresponda co Id que se lle proporciona.
+	 * 
+	 * @param idS
+	 * @return
+	 */
+	@Path("/borrar")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> borrar(@QueryParam("id") String idS) {
+
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+		logger.debug("Invocouse o método borrar() de Incidencia.");
+
+		int id;
+
+		// Comprobase que os parámetros obligatorios se pasaron e que están no formato
+		// adecuado, convertindo os string en int en caso de ser necesario
+		try {
+			id = Util.stringToInt(false, idS);
+		} catch (NumberFormatException e) {
+			return Error.ERRORPARAM.toJSONError();
+		} catch (EmptyStackException e) {
+			return Error.FALTANPARAM.toJSONError();
+		}
+
+		logger.debug("Parámetros correctos.");
+		if (DBConnectionManager.getConnection() != null) {
+
+			XestionIncidencias xest = new XestionIncidencias();
+			XestionUsuarios xestu = new XestionUsuarios();
+
+			json = xestu.checkLogin(req);
+			if (json == null) {
+				Usuario user = xestu.getUsuario(req);
+				json = xest.borrar(user, id);
 			}
 
 		} else {

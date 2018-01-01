@@ -218,4 +218,9 @@ public class Usuario {
 		return (p >= Permiso.VER_INCIDENCIA_PROPIA);
 	}
 	
+	public boolean podeBorrarIncidencia() {
+		int p = getPermisoByType(Permiso.POS_INCIDENCIA);
+		return (p >= Permiso.BORRAR_INCIDENCIA);
+	}
+	
 }

@@ -31,7 +31,7 @@ public class Util {
 	}
 	
 	/**
-	 * Converte un int a un String. Se o parámetro nulo é true e o string e un nulo, devolve un -1. Se o formato do string é incorrecto devolve unha excepcion de NumberFormatException.
+	 * Converte un int a un String. Se o parámetro nulo é true e o string e un nulo, devolve un 0. Se o formato do string é incorrecto devolve unha excepcion de NumberFormatException.
 	 * Se o parámetro nulo é un false e o string é nulo, devolve unha excepción EmptyStackException.
 	 * @param nulo
 	 * @param text
@@ -41,7 +41,7 @@ public class Util {
 	 */
 	public static int stringToInt(boolean nulo, String text) throws EmptyStackException, NumberFormatException {
 		if(nulo && text == null) {
-			return -1;
+			return 0;
 		}
 		else if(text != null) {
 			return Integer.parseInt(text);

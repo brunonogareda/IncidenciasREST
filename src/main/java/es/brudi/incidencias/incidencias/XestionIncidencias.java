@@ -1,10 +1,12 @@
 package es.brudi.incidencias.incidencias;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.apache.log4j.Logger;
 
+import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.db.dao.ComentarioDAO;
@@ -41,7 +43,7 @@ public class XestionIncidencias {
 	 * @param sol_presuposto
 	 * @return
 	 */
-	public JSONObject<String, Object> create(Usuario user, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
+	public JSONObject<String, Object> crear(Usuario user, int cod_parte, int ot, int id_instalacion, String zona_apartamento,
 			String descripcion_curta, String observacions, boolean sol_presuposto) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
@@ -61,7 +63,7 @@ public class XestionIncidencias {
 			return Error.CREATEINCIDENCIA_INSTPERMISOS.toJSONError();
 		}
 		
-		if(!user.podeMarcarSolPresuposto()) { //Comprobamos permisos de solicitar presuposto.
+		if(!user.podeMarcarSolPresuposto() && sol_presuposto) { //Comprobamos permisos de solicitar presuposto.
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
 		if(!user.podeCrearIncidencia()) { //Comprobamos permisos de creación
@@ -124,9 +126,122 @@ public class XestionIncidencias {
 		
 		logger.debug("Obtense a incidencia: "+id);
 		
-		ret = Mensaxe.DEFAULT.toJSONMensaxe();
+		ret = Mensaxe.GETINCIDENCIA_ID_OK.toJSONMensaxe();
 		ret.put("Incidencia", inc.toJson());
 
+		return ret;
+	}
+
+	/**
+	 * Obten as incidencia que coincidan cos parámetros indicados.
+	 * 
+	 * @param user
+	 * @param cod_parte
+	 * @param ot
+	 * @param id_instalacion
+	 * @param zona_apartamento
+	 * @param descripcion_curta
+	 * @param observacions
+	 * @param estado
+	 * @param sol_presuposto
+	 * @param factura
+	 * @param presuposto
+	 * @param data_menorC
+	 * @param data_maiorC
+	 * @param autor
+	 * @param cod_cliente
+	 * @param ver
+	 * @return
+	 */
+	public JSONObject<String, Object> get(Usuario user, int cod_parte, int ot, int id_instalacion,
+			String zona_apartamento, String descripcion_curta, String observacions, String estado, String sol_presuposto,
+			String factura, String presuposto, Calendar data_menorC, Calendar data_maiorC, String autor, int cod_cliente, int ver) {
+		JSONObject<String,Object> ret = new JSONObject<String,Object>();
+		JSONArray<Object> jsonIncidencias = new JSONArray<Object>();
+				
+		//En caso de existir, os parámetros de datas, convértense a un Timestamp para comprobalo na base de datos.
+		Timestamp data_menor = null;
+		Timestamp data_maior = null;
+		if(data_menorC != null)
+			data_menor = new Timestamp(data_menorC.getTimeInMillis());
+		if(data_maiorC != null)
+			data_maior = new Timestamp(data_maiorC.getTimeInMillis());
+		
+		if(user.getCliente().getCod_cliente() != 0) { //En caso de que o usuario non sexa o cliente 0, ponse o cod_cliente o mesmo que o usuario.
+			cod_cliente = user.getCliente().getCod_cliente();
+		}
+		if(!user.podeVerIncidencia()) {
+			if(!user.podeVerIncidenciaPropia()) { //Se non pode ver incidencias propias devolvemos error de permisos
+				return Error.USER_NOPERMISOS.toJSONError();
+			}
+			else { //En caso de que só poida ver as incidencias propias, poñemolo como autor na búsqueda
+				autor = user.getNome();
+			}
+		}
+				
+		ArrayList<Incidencia> Incidencias = IncidenciaDAO.get(cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estado, sol_presuposto, presuposto, factura, data_menor, data_maior, autor, cod_cliente, ver);
+				
+		if(Incidencias != null) {
+			if(Incidencias.size()>0) {
+				for(Incidencia inc : Incidencias) {
+					jsonIncidencias.add(inc.toJson());
+				}
+				logger.debug("Obtivérons "+Incidencias.size()+" incidencias.");
+				ret = Mensaxe.GETINCIDENCIAS_OK.toJSONMensaxe();
+				ret.put("incidencias", jsonIncidencias);
+			}
+			else {
+				ret = Error.OBTERINCIDENCIAS_NONEXISTEN.toJSONError();
+			}
+		}
+		else {
+			ret = Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * Borra a incidencia que corresponda co Id que se lle proporciona.
+	 * 
+	 * @param user
+	 * @param id
+	 * @return
+	 */
+	public JSONObject<String, Object> borrar (Usuario user, int id) {
+		JSONObject<String,Object> ret = new JSONObject<String,Object>();
+		
+		if(!user.podeBorrarIncidencia()) {
+			return Error.BORRARINCIDENCIA_SENPERMISOS2.toJSONError();
+		}
+				
+		Incidencia inc = IncidenciaDAO.getIncidenciaById(id);
+		
+		if(inc == null) {
+			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
+		}
+		
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+				  user.getCliente().getCod_cliente() != 0) { //Comprobamos se a incidencia é do usuario ou se o usuario é o cliente 0.
+			return Error.BORRARINCIDENCIA_SENPERMISOS1.toJSONError();
+		}
+		
+		if(!user.podeVerIncidencia()) { //Comprobamos se o usuario ten permisos para ver incidencias.
+			if(!(user.podeVerIncidenciaPropia() && inc.getAutor() == user.getNome())) {
+				return Error.BORRARINCIDENCIA_SENPERMISOS1.toJSONError();
+			}
+		}
+
+		boolean borrado = IncidenciaDAO.delete(id);
+		
+		if(!borrado) {
+			return Error.BORRARINCIDENCIA_ERRORDB.toJSONError();
+		}
+	
+		logger.debug("Borrouse a incidencia: "+inc.getId());
+		
+		ret = Mensaxe.BORRARINCIDENCIA_OK.toJSONMensaxe();
+		
 		return ret;
 	}
 	

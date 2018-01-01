@@ -42,6 +42,8 @@ public class UsuarioDAO {
 		PreparedStatement counter;
 		try
 		{
+			logger.debug("Realizase a consulta: "+query);
+			
 		    counter = conn.prepareStatement(query);
 		    ResultSet res = counter.executeQuery();
 		    res.next();
@@ -138,6 +140,8 @@ public class UsuarioDAO {
 		try
 		 {
 			
+			logger.debug("Realizase a consulta: "+query);
+			
 			update = conn.prepareStatement(query);
 			update.setString(1, new_mail);
 			update.setInt(2, id);
@@ -179,6 +183,8 @@ public class UsuarioDAO {
 		PreparedStatement update;
 		try
 		 {
+			
+			logger.debug("Realizase a consulta: "+query);
 			
 			//Encriptamos o controsinal recibido con SHA-256.
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");

@@ -75,8 +75,6 @@ public class Incidencia {
 		autor = res.getString("Autor");
 	}
 	
-	
-	
 	/**
 	 * @return the id
 	 */

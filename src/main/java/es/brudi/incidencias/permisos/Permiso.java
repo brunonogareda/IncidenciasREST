@@ -26,6 +26,7 @@ public abstract class Permiso {
 	public static final int CREAR_INCIDENCIA = 1;
 	public static final int MODIFICAR_ESTADO_INCIDENCIA = 2;
 	public static final int MODIFICAR_INCIDENCIA = 3;
+	public static final int BORRAR_INCIDENCIA = 4;
 	public static final int MARCAR_SOL_PRESUPOSTO = 1;
 	public static final int MARCAR_PRESUPOSTO_ACEPTADO = 1;
 	public static final int VER = 1;

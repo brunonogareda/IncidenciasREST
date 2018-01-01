@@ -49,6 +49,7 @@ public enum Error {
 	MODIFESTADOINCIDENCIA_SENPERMISOS1(210, "Non ten privilexios para cambiar o estado das incidencias."),
 	MODIFESTADOINCIDENCIA_SENPERMISOS2(212, "Non ten privilexios para cambiar o estado de esta incidencia."),
 	MODIFESTADOINCIDENCIA_ERRORDB(212, "Error modificando o estado da incidencia na base de datos."),
+	INSERTARCOMENTARIO_ERROR(220, "Error insertando un comentario."),
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;

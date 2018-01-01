@@ -48,9 +48,7 @@ public class XestionIncidencias {
 			String descripcion_curta, String observacions, boolean sol_presuposto) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
-		Calendar agora = Calendar.getInstance();
-		agora.setTimeZone(Util.timeZone);
-		Timestamp data = new Timestamp(agora.getTimeInMillis());
+		Timestamp data = Util.obterTimestampActual();
 		String estado = Estado.PENDENTE_R.getEstado();
 		String autor = user.getNome();
 		
@@ -93,7 +91,7 @@ public class XestionIncidencias {
 		int id_c = ComentarioDAO.crear(id, autor, Comentario.ACCION_CREAR, Comentario.COMENTARIO_PUBLICO, "", data);
 		
 		if(id_c < 0) {
-			return Error.DEFAULT.toJSONError();
+			return Error.INSERTARCOMENTARIO_ERROR.toJSONError();
 		}
 			
 		ret = Mensaxe.DEFAULT.toJSONMensaxe();
@@ -243,6 +241,14 @@ public class XestionIncidencias {
 		
 		if(!modif) {
 			return Error.MODIFESTADOINCIDENCIA_ERRORDB.toJSONError();
+		}
+		
+		Timestamp data = Util.obterTimestampActual();
+		
+		int id_c = ComentarioDAO.crear(id, user.getNome(), Comentario.ACCION_CAMBIOESTADO, Comentario.COMENTARIO_PUBLICO, "", data);
+
+		if(id_c < 0) {
+			return Error.INSERTARCOMENTARIO_ERROR.toJSONError();
 		}
 		
 		logger.debug("Cambiouse o estado da incidencia corectamente: "+inc.getId());

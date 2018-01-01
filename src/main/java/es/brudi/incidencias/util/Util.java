@@ -1,5 +1,7 @@
 package es.brudi.incidencias.util;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.EmptyStackException;
 import java.util.TimeZone;
 
@@ -49,6 +51,12 @@ public class Util {
 		else {
 			throw new EmptyStackException();
 		}
+	}
+	
+	public static Timestamp obterTimestampActual() {
+		Calendar agora = Calendar.getInstance();
+		agora.setTimeZone(Util.timeZone);
+		return new Timestamp(agora.getTimeInMillis());
 	}
 
 }

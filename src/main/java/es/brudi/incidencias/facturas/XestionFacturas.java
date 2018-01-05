@@ -41,6 +41,7 @@ public class XestionFacturas {
 		String nome_ficheiro = null;
 		String tipo_ficheiro = null;
 		String dir_ficheiro = null;
+		String ruta_ficheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEngadirFactura()) {
@@ -59,6 +60,7 @@ public class XestionFacturas {
 			nome_ficheiro = fileDetail.getFileName();
 			tipo_ficheiro = FilenameUtils.getExtension(nome_ficheiro);
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
+			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
 		}
 		
 		if(!inc.getEstado().equals(Estado.PENDENTE_F)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
@@ -73,7 +75,7 @@ public class XestionFacturas {
 			return Error.CREARFACTURA_DUPLICADA.toJSONError();
 		}	
 		
-		boolean fret = FacturaDAO.crear(id_factura, dir_ficheiro+'/'+nome_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
+		boolean fret = FacturaDAO.crear(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
 		if(!fret) {
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
@@ -90,10 +92,8 @@ public class XestionFacturas {
 		if(factura == null) {
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
-		if(!IncidenciaDAO.modifcarFactura(id_incidencia, id_factura)) { //Engadese o id de factura na incidencia correspondente.
-			return Error.CREARFACTURA_ERRORDB.toJSONError();
-		}
-		if(!IncidenciaDAO.modificarEstado(id_incidencia, Estado.FACTURADO.getEstado())) { //Cambiamos o estado da incidencia.
+		//Engadese o id de factura na incidencia correspondente e cambiase o estado
+		if(!IncidenciaDAO.modifcarFacturaEstado(id_incidencia, id_factura, Estado.FACTURADO.getEstado())) { 
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
 		
@@ -118,6 +118,7 @@ public class XestionFacturas {
 		String nome_ficheiro = null;
 		String tipo_ficheiro = null;
 		String dir_ficheiro = null;
+		String ruta_ficheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEditarFactura()) {
@@ -138,13 +139,14 @@ public class XestionFacturas {
 			nome_ficheiro = fileDetail.getFileName();
 			tipo_ficheiro = FilenameUtils.getExtension(nome_ficheiro);
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
+			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
 		}
 		Factura fact = FacturaDAO.getById(id_factura);
 		if(fact == null) {
 			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
 		}
 				
-		boolean fret = FacturaDAO.modificar(id_factura, dir_ficheiro+'/'+nome_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
+		boolean fret = FacturaDAO.modificar(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
 		if(!fret) {
 			return Error.MODIFICARFACTURA_ERRORDB.toJSONError();
 		}

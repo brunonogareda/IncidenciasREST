@@ -334,15 +334,15 @@ public class IncidenciaDAO {
 	}
 	
 	/**
-	 * Modifica a factura en unha incidencia
+	 * Modifica a factura en unha incidencia e cambia o estado da incidencia
 	 * @param id_incidencia
 	 * @param id_factura
 	 */
-	public static boolean modifcarFactura(int id_incidencia, String id_factura) {
+	public static boolean modifcarFacturaEstado(int id_incidencia, String id_factura, String estado) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		//Contruese a query segundo os datos proporcionados.
-		String query = "UPDATE "+TABLENAME+" SET Factura = ? WHERE Id = ?;";
+		String query = "UPDATE "+TABLENAME+" SET Factura = ?, Estado = ? WHERE Id = ?;";
 		
 		PreparedStatement incidencia;
 		try
@@ -355,6 +355,7 @@ public class IncidenciaDAO {
 			//Engádense os parámetros pasados a query.
 			int i = 1;
 			incidencia.setString(i++, id_factura);
+			incidencia.setString(i++, estado);
 			incidencia.setInt(i++, id_incidencia);
 	
 			int res = incidencia.executeUpdate();

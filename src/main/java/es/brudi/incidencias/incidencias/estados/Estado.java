@@ -13,9 +13,10 @@ public enum Estado {
 
 	PENDENTE_R("Pendente de Realizar"),
 	PENDENTE_P("Pendente de Presupostar"),
-	PENDENTE_F("Pendente de Faturar"),
+	PENDENTE_F("Pendente de Facturar"),
 	REALIZADO("Realizado"),
 	PECHADO("Pechado"),
+	FACTURADO("Facturado"),
 	DEFAULT("Outro");
 	
 	private final String estado;

@@ -228,4 +228,14 @@ public class Usuario {
 		return (p >= Permiso.MODIFICAR_ESTADO_INCIDENCIA);
 	}
 	
+	public boolean podeEngadirFactura() {
+		int p = getPermisoByType(Permiso.POS_FACTURA);
+		return (p >= Permiso.SUBIR);
+	}
+	
+	public boolean podeEditarFactura() {
+		int p = getPermisoByType(Permiso.POS_FACTURA);
+		return (p >= Permiso.MODIFICAR);
+	}
+	
 }

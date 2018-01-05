@@ -13,6 +13,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.documentos.XestionFicheiros;
 
 /**
  * 
@@ -50,6 +51,13 @@ public class AppContextListener implements ServletContextListener {
 				BasicConfigurator.configure();
 			}
 		}
+    	
+    	
+    	String pathFacturas = ctx.getInitParameter("pathFacturas");
+    	String pathPresupostos = ctx.getInitParameter("pathPresupostos");
+    	String pathImaxes = ctx.getInitParameter("pathImaxes");
+    	String pathAlbarans = ctx.getInitParameter("pathAlbarans");
+    	XestionFicheiros.updateParams(pathFacturas, pathPresupostos, pathImaxes, pathAlbarans);
     	
     	//Iniciase a conexión coa base de datos según os parámetros do web.xml
     	@SuppressWarnings("unused")

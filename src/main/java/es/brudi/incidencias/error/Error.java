@@ -49,7 +49,18 @@ public enum Error {
 	MODIFESTADOINCIDENCIA_SENPERMISOS1(210, "Non ten privilexios para cambiar o estado das incidencias."),
 	MODIFESTADOINCIDENCIA_SENPERMISOS2(212, "Non ten privilexios para cambiar o estado de esta incidencia."),
 	MODIFESTADOINCIDENCIA_ERRORDB(212, "Error modificando o estado da incidencia na base de datos."),
-	INSERTARCOMENTARIO_ERROR(220, "Error insertando un comentario."),
+	CREARFACTURA_SENPERMISOS(220, "Non ten privilexios suficientes para engadir unha factura a esta incidencia."),
+	CREARFACTURA_ERRORESTADO(221, "O estado da incidencia debe ser Pentende de Facturar para poden engadir factura."),
+	CREARFACTURA_DUPLICADA(222, "Non se puido crear a factura. Xa existe unha factura con ese identificador."),
+	CREARFACTURA_ERRORDB(223, "Erro insertando a nova factura na base de datos."),
+	CREARFACTURA_EXISTE(224, "A incidencia indicada xa ten unha factura asociada, non se pode asociar outra."),
+	CREARFACTURA_FICHEIRO(225 , "Erro subindo o ficheiro factura. Insertase na base de datos correctamente."),
+	OBTERFACTURA_NONEXISTE(230, "A Factura solicitada non existe."),
+	MODIFICARFACTURA_SENPERMISOS1(240, "Non ten privilexios suficientes para editar esta factura."),
+	MODIFICARFACTURA_SENPERMISOS2(241, "Non ten privilexios suficientes para editar facturas."),
+	MODIFICARFACTURA_ERRORDB(242, "Erro modificando a factura na base de datos."),
+	INSERTARCOMENTARIO_ERROR(300, "Error insertando un comentario."),
+	
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;
@@ -76,8 +87,8 @@ public enum Error {
 	public JSONObject<String, Object> toJSONError() {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
-		ret.put("  errno", this.code);
-		ret.put(" message", description);
+		ret.put("errno", this.code);
+		ret.put("message", description);
 		
 		return ret;
 	}

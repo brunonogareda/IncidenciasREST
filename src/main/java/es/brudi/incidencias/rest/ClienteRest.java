@@ -41,8 +41,6 @@ public class ClienteRest {
 	
 	/**
 	 * Devolve un listado dos clientes da base de datos.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/get")
 	@GET

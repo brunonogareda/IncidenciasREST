@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.EmptyStackException;
 import java.util.TimeZone;
 
+//import org.apache.log4j.Logger;
+
 /**
  * Clase que conten diferentes métodos con utilidades para o sistema.
  * 
@@ -14,6 +16,8 @@ import java.util.TimeZone;
  * 
  */
 public class Util {
+	
+//	private static Logger logger = Logger.getLogger(Util.class);
 	
 	public static final TimeZone timeZone = TimeZone.getTimeZone("Europe/Madrid");
 	
@@ -58,5 +62,5 @@ public class Util {
 		agora.setTimeZone(Util.timeZone);
 		return new Timestamp(agora.getTimeInMillis());
 	}
-
+	
 }

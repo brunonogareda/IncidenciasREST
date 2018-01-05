@@ -290,9 +290,9 @@ public class IncidenciaDAO {
 			if(cod_parte > 0) incidencia.setInt(i++, cod_parte);
 			if(ot > 0) incidencia.setInt(i++, ot);
 			if(id_instalacion > 0)  incidencia.setInt(i++, id_instalacion);
-			if(zona_apartamento != null && !zona_apartamento.equals("")) incidencia.setString(i++, "%"+zona_apartamento+"%");
-			if(descripcion_curta != null && !descripcion_curta.equals("")) incidencia.setString(i++, "%"+descripcion_curta+"%");
-			if(observacions != null && !observacions.equals("")) incidencia.setString(i++, "%"+observacions+"%");
+			if(zona_apartamento != null && !zona_apartamento.equals("")) incidencia.setString(i++, zona_apartamento);
+			if(descripcion_curta != null && !descripcion_curta.equals("")) incidencia.setString(i++, descripcion_curta);
+			if(observacions != null && !observacions.equals("")) incidencia.setString(i++, observacions);
 			if(estado != null && !estado.equals("")) incidencia.setString(i++, estado);
 			if(sol_presuposto != null && sol_presuposto.equals("true")) incidencia.setBoolean(i++, true);
 			if(sol_presuposto != null && sol_presuposto.equals("false")) incidencia.setBoolean(i++, false);
@@ -331,6 +331,55 @@ public class IncidenciaDAO {
 	 */
 	public static boolean modificarEstado(int id, String estado) {
 		return IncidenciaDAO.modificarIncidencia(id, 0, 0, 0, null, null, null, estado, null);
+	}
+	
+	/**
+	 * Modifica a factura en unha incidencia
+	 * @param id_incidencia
+	 * @param id_factura
+	 */
+	public static boolean modifcarFactura(int id_incidencia, String id_factura) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		//Contruese a query segundo os datos proporcionados.
+		String query = "UPDATE "+TABLENAME+" SET Factura = ? WHERE Id = ?;";
+		
+		PreparedStatement incidencia;
+		try
+		 {
+			
+			logger.debug("Realizase a consulta: "+query);
+			
+			incidencia = conn.prepareStatement(query);	
+			
+			//Engádense os parámetros pasados a query.
+			int i = 1;
+			incidencia.setString(i++, id_factura);
+			incidencia.setInt(i++, id_incidencia);
+	
+			int res = incidencia.executeUpdate();
+			
+			incidencia.close();
+			
+			if(res == 1) {
+				return true;
+			}
+			return false;
+					
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: "+e);
+		 }
+		
+		return false;
+		
 	}
 	
 	/**
@@ -373,5 +422,5 @@ public class IncidenciaDAO {
 		
 		return false;
 	}
-	
+
 }

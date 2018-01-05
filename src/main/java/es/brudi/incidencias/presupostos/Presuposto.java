@@ -1,7 +1,5 @@
 package es.brudi.incidencias.presupostos;
 
-import java.net.URL;
-
 import org.json.simple.JSONObject;
 
 /**
@@ -17,16 +15,18 @@ public class Presuposto {
 
 	private String id;
 	private boolean aceptado;
-	private URL url;
+	private String ruta_ficheiro;
+	private String tipo_ficheiro;
 	private String comentarios;
 	
 	public Presuposto() {}
 	
-	public Presuposto(String id, boolean aceptado, URL url, String comentarios) {
+	public Presuposto(String id, boolean aceptado, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
 		super();
 		this.id = id;
 		this.aceptado = aceptado;
-		this.url = url;
+		this.ruta_ficheiro = ruta_ficheiro;
+		this.tipo_ficheiro = tipo_ficheiro;
 		this.comentarios = comentarios;
 	}
 	
@@ -55,37 +55,44 @@ public class Presuposto {
 		this.aceptado = aceptado;
 	}
 	/**
-	 * @return the url
-	 */
-	public URL getUrl() {
-		return url;
-	}
-	/**
-	 * @param url the url to set
-	 */
-	public void setUrl(URL url) {
-		this.url = url;
-	}
-	/**
 	 * @return the comentarios
 	 */
 	public String getComentarios() {
 		return comentarios;
 	}
 	/**
+	 * @return the ruta_ficheiro
+	 */
+	public String getRuta_ficheiro() {
+		return ruta_ficheiro;
+	}
+
+	/**
+	 * @param ruta_ficheiro the ruta_ficheiro to set
+	 */
+	public void setRuta_ficheiro(String ruta_ficheiro) {
+		this.ruta_ficheiro = ruta_ficheiro;
+	}
+
+	/**
+	 * @return the tipo_ficheiro
+	 */
+	public String getTipo_ficheiro() {
+		return tipo_ficheiro;
+	}
+
+	/**
+	 * @param tipo_ficheiro the tipo_ficheiro to set
+	 */
+	public void setTipo_ficheiro(String tipo_ficheiro) {
+		this.tipo_ficheiro = tipo_ficheiro;
+	}
+
+	/**
 	 * @param comentarios the comentarios to set
 	 */
 	public void setComentarios(String comentarios) {
 		this.comentarios = comentarios;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "Presuposto [id=" + id + ", aceptado=" + aceptado + ", url=" + url + ", comentarios=" + comentarios
-				+ "]";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -93,7 +100,7 @@ public class Presuposto {
 		JSONObject ret = new JSONObject();
 		ret.put("id", id);
 		ret.put("aceptado", aceptado);
-		ret.put("url", url);
+		ret.put("tipo_ficheiro", tipo_ficheiro);
 		ret.put("comentarios", comentarios);
 		return ret;
 		

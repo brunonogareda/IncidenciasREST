@@ -23,6 +23,8 @@ public class Comentario {
 	public final static String ACCION_CREAR = "creou";
 	public final static String ACCION_CAMBIOESTADO = "modificou";
 	public final static String ACCION_COMENTAR = "comentou";
+	public final static String ACCION_INSERTAR_FACTURA = "engadiu a factura";
+	public final static String ACCION_MODIFICAR_FACTURA = "modificou a factura";
 	public final static String ACCION_BORRAR = "eliminiou";
 	
 	private int Id;

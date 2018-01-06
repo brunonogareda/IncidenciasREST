@@ -122,7 +122,7 @@ public class FacturaDAO {
 		query += (ruta_ficheiro != null && !ruta_ficheiro.equals("")) ? " Ruta_ficheiro = ?," : "";
 		query += (tipo_ficheiro != null && !tipo_ficheiro.equals("")) ? " Tipo_ficheiro = ?," : "";
 		query += (comentarios != null && !comentarios.equals("")) ? " Comentarios = ?," : "";
-		query += "id = id";
+		query += " Id = Id";
 		query += " WHERE Id = ?;";
 		
 		PreparedStatement incidencia;

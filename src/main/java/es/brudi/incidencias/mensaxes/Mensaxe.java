@@ -17,6 +17,7 @@ public enum Mensaxe
   BORRARINCIDENCIA_OK(0, "A incidencia eliminouse correctamente"),
   MODIFESTADOINCIDENCIA_OK(0, "O estado da incidencia modificouse correctamente."),
   CREARFACTURA_OK(0, "A factura engadiuse correctamente."),
+  OBTERFACTURA_OK(0, "Obtivose a factura correctamente."),
   MODIFICARFACTURA_OK(0, "A factura foi modificada correctamente."),
   DEFAULT(0, "Ok.");
   

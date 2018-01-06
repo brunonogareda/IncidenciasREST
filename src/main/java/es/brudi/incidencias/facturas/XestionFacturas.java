@@ -1,8 +1,13 @@
 package es.brudi.incidencias.facturas;
 
+import java.io.File;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -35,6 +40,16 @@ public class XestionFacturas {
 	
 	private static Logger logger = Logger.getLogger(XestionFacturas.class);
 	
+	/**
+	 * Crea unha nova factura na base de datos. E garda o ficheiro en local se existe.
+	 * @param user
+	 * @param id_incidencia
+	 * @param id_factura
+	 * @param comentarios
+	 * @param uploadedInputStream
+	 * @param fileDetail
+	 * @return
+	 */
 	public JSONObject<String, Object> crear(Usuario user, int id_incidencia, String id_factura, String comentarios, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 
@@ -105,11 +120,20 @@ public class XestionFacturas {
 		if(!errFile)
 			ret = Mensaxe.CREARFACTURA_OK.toJSONMensaxe();
 		
-		ret.put("Factura", factura);
+		ret.put("Factura", factura.toJson());
 		
 		return ret;
 	}
 
+	/**
+	 * Modifica unha factura existente.
+	 * @param user
+	 * @param id_factura
+	 * @param comentarios
+	 * @param uploadedInputStream
+	 * @param fileDetail
+	 * @return
+	 */
 	public JSONObject<String, Object> modificar(Usuario user, String id_factura, String comentarios,
 			InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
@@ -131,7 +155,7 @@ public class XestionFacturas {
 		Incidencia inc = incL.get(0);
 		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
 		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.MODIFESTADOINCIDENCIA_SENPERMISOS1.toJSONError();
+				return Error.MODIFICARFACTURA_SENPERMISOS1.toJSONError();
 		}
 		Factura fact = FacturaDAO.getById(id_factura);
 		if(fact == null) {
@@ -178,10 +202,84 @@ public class XestionFacturas {
 		if(!errFile)
 			ret = Mensaxe.MODIFICARFACTURA_OK.toJSONMensaxe();
 		
-		ret.put("Factura", factura);
+		ret.put("Factura", factura.toJson());
 		
 		return ret;
 	}
 	
+	/**
+	 * Obten os datos de unha factura.
+	 * @param user
+	 * @param id_factura
+	 * @return
+	 */
+	public JSONObject<String, Object> obter(Usuario user, String id_factura) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		
+		if(!user.podeVerFactura()) {
+			return Error.OBTERFACTURA_SENPERMISOS2.toJSONError();
+		}
+		
+		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, null, id_factura, null, null, null, 0, 0);
+		if(incL.size()!=1) {
+			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
+		}
+		Incidencia inc = incL.get(0);
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+				return Error.MODIFICARFACTURA_SENPERMISOS1.toJSONError();
+		}
+		Factura factura = FacturaDAO.getById(id_factura);
+		if(factura == null) {
+			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
+		}
+				
+		logger.debug("Obtivose a factura correctamente: "+id_factura);
 
+		ret = Mensaxe.OBTERFACTURA_OK.toJSONMensaxe();
+		ret.put("Factura", factura.toJson());
+		
+		return ret;
+	}
+
+	/**
+	 * Obten o ficheiro local.
+	 * @param user
+	 * @param id_factura
+	 * @return
+	 */
+	public Response obterFicheiro(Usuario user, String id_factura) {
+
+		if(!user.podeVerFactura()) {
+			return Response.status(Status.FORBIDDEN).build();
+		}
+		
+		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, null, id_factura, null, null, null, 0, 0);
+		if(incL.size()!=1) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		Incidencia inc = incL.get(0);
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+			return Response.status(Status.FORBIDDEN).build();
+		}
+		Factura factura = FacturaDAO.getById(id_factura);
+		if(factura == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		
+		File file = XestionFicheiros.obterFicheiro(factura.getRuta_ficheiro());
+		if(file == null) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		
+		logger.debug("Obtivose a factura correctamente: "+id_factura);
+
+		ResponseBuilder response = Response.ok((Object) file);
+	    response.header("Content-Disposition", "attachment; filename="+file.getName());
+	    
+		return response.build();
+	}
+	
 }

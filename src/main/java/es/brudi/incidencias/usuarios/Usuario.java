@@ -238,4 +238,9 @@ public class Usuario {
 		return (p >= Permiso.MODIFICAR);
 	}
 	
+	public boolean podeVerFactura() {
+		int p = getPermisoByType(Permiso.POS_FACTURA);
+		return (p >= Permiso.VER);
+	}
+	
 }

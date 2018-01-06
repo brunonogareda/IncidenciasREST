@@ -129,6 +129,12 @@ public class XestionFicheiros {
 		return true;
 	}
 
+	/**
+	 * Borra o ficheiro que se lle pasa na ruta.
+	 * 
+	 * @param ruta_ficheiro
+	 * @return
+	 */
 	public static boolean borrar(String ruta_ficheiro) {
 		try {
 			File file = new File(ruta_ficheiro);
@@ -146,6 +152,23 @@ public class XestionFicheiros {
 		}
 		return true;
 		
+	}
+	
+	/**
+	 * Obten o ficheiro.
+	 * 
+	 * @param ruta_ficheiro
+	 * @return
+	 */
+	public static File obterFicheiro(String ruta_ficheiro) {
+		File file = null;
+		try {
+			file = new File(ruta_ficheiro);
+		}
+		catch(Exception e) {
+			logger.error("Erro obtendo o ficheiro: "+ruta_ficheiro);
+		}
+		return file;
 	}
 	
 }

@@ -68,7 +68,7 @@ public class PresupostoDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception in DAO: ", e);
 		 }
 		
 		return false;
@@ -111,7 +111,7 @@ public class PresupostoDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception in DAO: ", e);
 		 }
 		
 		return ret;
@@ -148,8 +148,8 @@ public class PresupostoDAO {
 			
 			//Engádense os parámetros pasados a query.
 			int i = 1;
-			if(presuposto != null && !ruta_ficheiro.equals("")) presuposto.setString(i++, ruta_ficheiro);
-			if(presuposto != null && !tipo_ficheiro.equals("")) presuposto.setString(i++, tipo_ficheiro);
+			if(ruta_ficheiro != null && !ruta_ficheiro.equals("")) presuposto.setString(i++, ruta_ficheiro);
+			if(tipo_ficheiro != null && !tipo_ficheiro.equals("")) presuposto.setString(i++, tipo_ficheiro);
 			if(comentarios != null && !comentarios.equals("")) presuposto.setString(i++, comentarios);
 			if(aceptado != null && aceptado.equals("true")) presuposto.setBoolean(i++, true);
 			if(aceptado != null && aceptado.equals("false")) presuposto.setBoolean(i++, false);
@@ -173,7 +173,7 @@ public class PresupostoDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception in DAO: ", e);
 		 }
 		
 		return false;

@@ -48,8 +48,6 @@ public class UsuarioRest {
 	/**
 	 * 
 	 * Inicia a sesión do usuario. Devolve un mensaxe de estado e datos do usuario.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/login")
 	@GET
@@ -81,8 +79,6 @@ public class UsuarioRest {
 	/**
 	 * 
 	 * Pecha a sesión do usuario. Devolve un mensaxe de estado.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/logout")
 	@GET
@@ -103,8 +99,6 @@ public class UsuarioRest {
 	/**
 	 * 
 	 * Cambia o contrasinal do usuario que se encontra logueado. Devolve un mensaxe de estado.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/changepassword")
 	@GET
@@ -145,8 +139,6 @@ public class UsuarioRest {
 	/**
 	 * 
 	 * Cambia o email do usuario logueado. Devolve un mensaxe de estado.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/changemail")
 	@GET

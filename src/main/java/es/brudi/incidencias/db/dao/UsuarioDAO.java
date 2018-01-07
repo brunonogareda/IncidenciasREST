@@ -119,7 +119,7 @@ public class UsuarioDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return null;
@@ -163,7 +163,7 @@ public class UsuarioDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return ret;
@@ -213,7 +213,7 @@ public class UsuarioDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return ret;

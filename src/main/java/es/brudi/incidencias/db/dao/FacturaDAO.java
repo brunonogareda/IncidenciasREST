@@ -66,7 +66,7 @@ public class FacturaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;
@@ -109,7 +109,7 @@ public class FacturaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return ret;
@@ -167,7 +167,7 @@ public class FacturaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;

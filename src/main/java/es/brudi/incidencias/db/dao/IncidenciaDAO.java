@@ -63,7 +63,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 
 		return ret;
@@ -131,7 +131,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return -1;
@@ -238,7 +238,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return null;
@@ -316,7 +316,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;
@@ -376,7 +376,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;
@@ -392,7 +392,7 @@ public class IncidenciaDAO {
 		Connection conn = DBConnectionManager.getConnection();
 
 		//Contruese a query segundo os datos proporcionados.
-		String query = "UPDATE "+TABLENAME+" SET Presposto = ?, Estado = ? WHERE Id = ?;";
+		String query = "UPDATE "+TABLENAME+" SET Presuposto = ?, Estado = ? WHERE Id = ?;";
 		
 		PreparedStatement incidencia;
 		try
@@ -426,7 +426,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;
@@ -469,7 +469,7 @@ public class IncidenciaDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return false;

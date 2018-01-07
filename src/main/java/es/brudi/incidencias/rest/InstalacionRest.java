@@ -43,8 +43,6 @@ public class InstalacionRest {
 	
 	/**
 	 * Devolve un listado das instalacións da base de datos según o id de cliente que se lle pase.
-	 * @throws ServletException
-	 * @throws IOException
 	 */
 	@Path("/getByCliente")
 	@GET

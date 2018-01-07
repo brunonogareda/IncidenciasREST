@@ -24,7 +24,7 @@ public class XestionFicheiros {
 	private static Logger logger = Logger.getLogger(XestionFicheiros.class);
 
 	public static String RUTA_FACTURAS = "/home/bruno/incidencias/ficheiros/facturas";
-	public static String RUTA_PRESUPOSTOS = "/home/incidencias/ficheiros/presupostos";
+	public static String RUTA_PRESUPOSTOS = "/home/bruno/incidencias/ficheiros/presupostos";
 	public static String RUTA_IMAXES = "/home/bruno/incidencias/ficheiros/imaxes";
 	public static String RUTA_ALBARANS = "/home/bruno/incidencias/ficheiros/albarans";
 	
@@ -94,7 +94,7 @@ public class XestionFicheiros {
 		}
 		catch(IOException ioe) {
 			logger.error("Erro gardando o ficheiro en: "+target);
-			logger.error(ioe);
+			logger.error("Exception saving file: ", ioe);
 			return false;
 		}
 		finally {
@@ -102,7 +102,7 @@ public class XestionFicheiros {
 				out.flush();
 				out.close();
 			} catch (IOException e) {
-				logger.error(e);
+				logger.error("Exception saving file: ", e);
 			}
 		}
 		return true;
@@ -123,7 +123,7 @@ public class XestionFicheiros {
 			}
 		}
 		catch(Exception e) {
-			logger.error(e);
+			logger.error("Exception creating folder: ", e);
 			return false;
 		}
 		return true;
@@ -147,7 +147,7 @@ public class XestionFicheiros {
 			}
 		}
 		catch(Exception e) {
-			logger.error(e);
+			logger.error("Exception delete file: ", e);
 			return false;
 		}
 		return true;
@@ -167,6 +167,7 @@ public class XestionFicheiros {
 		}
 		catch(Exception e) {
 			logger.error("Erro obtendo o ficheiro: "+ruta_ficheiro);
+			logger.error("Exception: ", e);
 		}
 		return file;
 	}

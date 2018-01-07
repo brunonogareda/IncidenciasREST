@@ -68,7 +68,7 @@ public class ComentarioDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return -1;

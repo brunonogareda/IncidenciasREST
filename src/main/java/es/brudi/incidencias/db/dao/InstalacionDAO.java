@@ -63,7 +63,7 @@ public class InstalacionDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return null;
@@ -113,7 +113,7 @@ public class InstalacionDAO {
 		 }
 		catch(Exception e)
 		 {
-			logger.error("Exception: "+e);
+			logger.error("Exception: ", e);
 		 }
 		
 		return null;

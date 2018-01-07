@@ -74,9 +74,6 @@ public class XestionPresupostos {
 		if(aceptado && !user.podeAceptarPresuposto()) {
 			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
 		}
-		if(!inc.getEstado().equals(Estado.PENDENTE_P)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
-			return Error.CREARPRESUPOSTO_ERRORESTADO.toJSONError();
-		}
 		if(inc.getPresuposto() != null) {//A incidencia xa ten presuposto
 			return Error.CREARPRESUPOSTO_EXISTE.toJSONError();
 		}
@@ -84,7 +81,10 @@ public class XestionPresupostos {
 		Presuposto presu = PresupostoDAO.getById(id_presuposto);
 		if(presu != null) {
 			return Error.CREARPRESUPOSTO_DUPLICADO.toJSONError();
-		}	
+		}
+		if(!inc.getEstado().equals(Estado.PENDENTE_P)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
+			return Error.CREARPRESUPOSTO_ERRORESTADO.toJSONError();
+		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
@@ -234,7 +234,7 @@ public class XestionPresupostos {
 		Incidencia inc = incL.get(0);
 		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
 		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.MODIFICARPRESUPOSTO_SENPERMISOS1.toJSONError();
+				return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
 		Presuposto presuposto = PresupostoDAO.getById(id_presuposto);
 		if(presuposto == null) {

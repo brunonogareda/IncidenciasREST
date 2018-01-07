@@ -70,9 +70,6 @@ public class XestionFacturas {
 		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREARFACTURA_SENPERMISOS.toJSONError();
 		}
-		if(!inc.getEstado().equals(Estado.PENDENTE_F)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
-			return Error.CREARFACTURA_ERRORESTADO.toJSONError();
-		}
 		if(inc.getFactura() != null) {//A incidencia xa ten factura.
 			return Error.CREARFACTURA_EXISTE.toJSONError();
 		}
@@ -80,7 +77,10 @@ public class XestionFacturas {
 		Factura fact = FacturaDAO.getById(id_factura);
 		if(fact != null) {
 			return Error.CREARFACTURA_DUPLICADA.toJSONError();
-		}	
+		}
+		if(!inc.getEstado().equals(Estado.PENDENTE_F)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
+			return Error.CREARFACTURA_ERRORESTADO.toJSONError();
+		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());

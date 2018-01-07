@@ -57,7 +57,7 @@ public class DBConnectionManager {
 		 }
 		catch(Exception e)
 		 {
-			logger.error(e);
+			logger.error("Exception: ", e);
 		 }
 		
 		if (connection == null)

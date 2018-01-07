@@ -175,7 +175,7 @@ public class Usuario {
 		}
 		catch(Exception e) {
 			logger.error("Error obtendo os permisos do usuario.");
-			logger.error("Exception "+ e);
+			logger.error("Exception ", e);
 		}
 		
 		return Math.max(permisoU, permisoG);

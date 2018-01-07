@@ -96,7 +96,7 @@ public class PresupostoRest {
       	catch(EmptyStackException e) {
       		return Error.FALTANPARAM.toJSONError();
       	}
-      	if(aceptadoS.equals("true"))
+      	if(aceptadoS != null && aceptadoS.equals("true"))
       		aceptado = true;
       	
       	logger.debug("Parámetros correctos.");

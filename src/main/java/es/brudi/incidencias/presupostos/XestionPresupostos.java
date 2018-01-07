@@ -149,7 +149,7 @@ public class XestionPresupostos {
 		String ruta_ficheiro = null;
 		boolean errFile = false;
 		
-		if(!user.podeEditarPresuposto()) {
+		if(!user.podeEditarPresuposto() && (comentarios != null || uploadedInputStream != null) ) {
 			return Error.MODIFICARPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
 		if(aceptado!=null && !user.podeAceptarPresuposto()) {

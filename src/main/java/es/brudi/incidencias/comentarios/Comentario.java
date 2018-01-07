@@ -25,6 +25,8 @@ public class Comentario {
 	public final static String ACCION_COMENTAR = "comentou";
 	public final static String ACCION_INSERTAR_FACTURA = "engadiu a factura";
 	public final static String ACCION_MODIFICAR_FACTURA = "modificou a factura";
+	public final static String ACCION_INSERTAR_PRESUPOSTO = "engadiu o presuposto";
+	public final static String ACCION_MODIFICAR_PRESUPOSTO = "modificou o presuposto";
 	public final static String ACCION_BORRAR = "eliminiou";
 	
 	private int Id;

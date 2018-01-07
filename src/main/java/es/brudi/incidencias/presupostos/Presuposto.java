@@ -1,5 +1,8 @@
 package es.brudi.incidencias.presupostos;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.json.simple.JSONObject;
 
 /**
@@ -28,6 +31,14 @@ public class Presuposto {
 		this.ruta_ficheiro = ruta_ficheiro;
 		this.tipo_ficheiro = tipo_ficheiro;
 		this.comentarios = comentarios;
+	}
+	
+	public Presuposto(ResultSet res) throws SQLException {
+		this.id = res.getString("Id");
+		this.ruta_ficheiro = res.getString("Ruta_ficheiro");
+		this.tipo_ficheiro = res.getString("Tipo_ficheiro");
+		this.comentarios = res.getString("Comentarios");
+		this.aceptado = res.getBoolean("Aceptado");
 	}
 	
 	/**

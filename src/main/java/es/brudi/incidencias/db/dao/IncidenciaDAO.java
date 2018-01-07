@@ -384,6 +384,57 @@ public class IncidenciaDAO {
 	}
 	
 	/**
+	 * Modifica o presuposto en unha incidencia e cambia o estado da incidencia
+	 * @param id_incidencia
+	 * @param id_presuposto
+	 */
+	public static boolean modifcarPresupostoEstado(int id_incidencia, String id_presuposto, String estado) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		//Contruese a query segundo os datos proporcionados.
+		String query = "UPDATE "+TABLENAME+" SET Presposto = ?, Estado = ? WHERE Id = ?;";
+		
+		PreparedStatement incidencia;
+		try
+		 {
+			
+			logger.debug("Realizase a consulta: "+query);
+			
+			incidencia = conn.prepareStatement(query);	
+			
+			//Engádense os parámetros pasados a query.
+			int i = 1;
+			incidencia.setString(i++, id_presuposto);
+			incidencia.setString(i++, estado);
+			incidencia.setInt(i++, id_incidencia);
+	
+			int res = incidencia.executeUpdate();
+			
+			incidencia.close();
+			
+			if(res == 1) {
+				return true;
+			}
+			return false;
+					
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: "+e);
+		 }
+		
+		return false;
+		
+	}
+
+	
+	/**
 	 * Elimina unha incidencia
 	 * 
 	 * @param id

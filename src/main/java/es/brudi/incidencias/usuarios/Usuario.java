@@ -243,4 +243,19 @@ public class Usuario {
 		return (p >= Permiso.VER);
 	}
 	
+	public boolean podeEngadirPresuposto() {
+		int p = getPermisoByType(Permiso.POS_PRESUPOSTO);
+		return (p >= Permiso.SUBIR);
+	}
+	
+	public boolean podeEditarPresuposto() {
+		int p = getPermisoByType(Permiso.POS_PRESUPOSTO);
+		return (p >= Permiso.MODIFICAR);
+	}
+	
+	public boolean podeVerPresuposto() {
+		int p = getPermisoByType(Permiso.POS_PRESUPOSTO);
+		return (p >= Permiso.VER);
+	}
+	
 }

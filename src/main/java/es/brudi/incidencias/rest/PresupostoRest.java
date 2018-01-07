@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
-import es.brudi.incidencias.facturas.XestionFacturas;
+import es.brudi.incidencias.presupostos.XestionPresupostos;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.util.JSONObject;
@@ -32,33 +32,34 @@ import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
- * Servlet coas diferentes accións relacionadas con facturas, que pode realizar o usuario mediante REST.
+ * Servlet coas diferentes accións relacionadas con presupostos, que pode realizar o usuario mediante REST.
  * 
  * Todos estes métodos comproban en primeiro lugar que a conexión coa base de datos é correcta,
  * e que o usuario que fai a petición teña a sesión aberta. E que os parámetros necesarios estean na petición.
  * Todos devolven un Http response con un json.
- * Excepto o método de obterFicheiro
+ * Excepto  o método de obterFicheiro.
  * 
  * @author Bruno Nogareda Da Cruz <brunonogareda@gmail.com>
  * @version 0.1
  * @year Xaneiro - 2018
  * 
  */
-@Path("/factura")
-public class FacturaRest {
+@Path("/presuposto")
+public class PresupostoRest {
 	
-	private Logger logger = Logger.getLogger(FacturaRest.class);
+	private Logger logger = Logger.getLogger(PresupostoRest.class);
 	
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
 
 	/**
-	 * Crea unha nova factura na base de datos. En caso de recibir un ficheiro gardao en local.
-	 * Devolve a factura creada
+	 * Crea un novo presuposto na base de datos. En caso de recibir un ficheiro gardao en local.
+	 * Devolve o presuposto creado
 	 * 
 	 * @param id_incidenciaS - Identificador da incidencia a que corresponde a factura. OBLIGATORIO
-	 * @param id_factura - Identificador da factura. OBLIGATORIO
+	 * @param id_presuposto - Identificador do presuposto. OBLIGATORIO
 	 * @param comentarios
+	 * @param aceptado Se o presuposto está aceptado ou non ("true" -> true / En outro caso false)
 	 * @param uploadedInputStream (file)
 	 * @param fileDetail (file)
 	 * @return
@@ -68,23 +69,25 @@ public class FacturaRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
     public JSONObject<String, Object> insertar(@FormDataParam("id_incidencia") String id_incidenciaS,
- 								    		   @FormDataParam("id_factura") String id_factura,
+ 								    		   @FormDataParam("id_presuposto") String id_presuposto,
 								    		   @FormDataParam("comentarios") String comentarios,
+								    		   @FormDataParam("aceptado") String aceptadoS,
 								    		   @FormDataParam("file") InputStream uploadedInputStream,
 								   			   @FormDataParam("file") FormDataContentDisposition fileDetail) { 
 		
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método insertar() de factura.");
+        logger.debug("Invocouse o método insertar() de presuposto.");
         
         int id_incidencia = -1;
+        boolean aceptado = false;
         
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
       	try {
       		id_incidencia = Util.stringToInt(false, id_incidenciaS);
-      		if(id_factura == null || id_factura.equals(""))
+      		if(id_presuposto == null || id_presuposto.equals(""))
       			throw new EmptyStackException();
-      		if(id_factura.equals("-1"))
+      		if(id_presuposto.equals("-1"))
       			throw new NumberFormatException();
       	}
       	catch(NumberFormatException e) {
@@ -93,16 +96,19 @@ public class FacturaRest {
       	catch(EmptyStackException e) {
       		return Error.FALTANPARAM.toJSONError();
       	}
+      	if(aceptadoS.equals("true"))
+      		aceptado = true;
+      	
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionFacturas xest = new XestionFacturas();
+        	XestionPresupostos xest = new XestionPresupostos();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.crear(user, id_incidencia, id_factura, comentarios, uploadedInputStream, fileDetail);
+	        	json = xest.crear(user, id_incidencia, id_presuposto, comentarios, aceptado, uploadedInputStream, fileDetail);
 	        }
         }
         else {
@@ -114,10 +120,11 @@ public class FacturaRest {
     } 
 
 	/**
-	 * Modifica os parámetros de unha factura existente. Devolve a factura modificada
+	 * Modifica os parámetros de un presuposto existente. Devolve o presuposto modificada
 	 * 
-	 * @param id_factura - OBLIGATORIO
+	 * @param id_preusposto - OBLIGATORIO
 	 * @param comentarios
+	 * @param aceptado
 	 * @param uploadedInputStream (file)
 	 * @param fileDetail (file)
 	 * @return
@@ -126,21 +133,26 @@ public class FacturaRest {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-    public JSONObject<String, Object> modificar(@FormDataParam("id_factura") String id_factura,
+    public JSONObject<String, Object> modificar(@FormDataParam("id_presuposto") String id_presuposto,
 								    		    @FormDataParam("comentarios") String comentarios,
+									    		@FormDataParam("aceptado") String aceptado,
 								    		    @FormDataParam("file") InputStream uploadedInputStream,
 								   			    @FormDataParam("file") FormDataContentDisposition fileDetail) { 
 		
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método modificar() de factura.");
+        logger.debug("Invocouse o método modificar() de presuposto.");
                 
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
       	try {
-      		if(id_factura == null || id_factura.equals(""))
+      		if(id_presuposto == null || id_presuposto.equals(""))
       			throw new EmptyStackException();
-      		if(id_factura.equals("-1"))
+      		if(id_presuposto.equals("-1"))
       			throw new NumberFormatException();
+      		if(aceptado != null) { // Se aceptado non é nulo, true ou false, devolvemos un erro.
+				if(!aceptado.equals("true") && !aceptado.equals("false"))
+					throw new NumberFormatException();
+			}
       	}
       	catch(NumberFormatException e) {
       		return Error.ERRORPARAM.toJSONError();
@@ -151,13 +163,13 @@ public class FacturaRest {
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionFacturas xest = new XestionFacturas();
+        	XestionPresupostos xest = new XestionPresupostos();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.modificar(user, id_factura, comentarios, uploadedInputStream, fileDetail);
+	        	json = xest.modificar(user, id_presuposto, comentarios, aceptado, uploadedInputStream, fileDetail);
 	        }
         }
         else {
@@ -169,24 +181,24 @@ public class FacturaRest {
     } 
 	
 	/**
-	 * Obten unha factura
+	 * Obten un presuposto
 	 * 
-	 * @param id_factura
+	 * @param id_presuposto
 	 * @return
 	 */
 	@Path("/obter")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> obter(@QueryParam("id_factura") String id_factura) { 
+    public JSONObject<String, Object> obter(@QueryParam("id_presuposto") String id_presuposto) { 
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método obter() de factura.");
+        logger.debug("Invocouse o método obter() de presuposto.");
                 
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
       	try {
-      		if(id_factura == null || id_factura.equals(""))
+      		if(id_presuposto == null || id_presuposto.equals(""))
       			throw new EmptyStackException();
-      		if(id_factura.equals("-1"))
+      		if(id_presuposto.equals("-1"))
       			throw new NumberFormatException();
       	}
       	catch(NumberFormatException e) {
@@ -198,13 +210,13 @@ public class FacturaRest {
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionFacturas xest = new XestionFacturas();
+        	XestionPresupostos xest = new XestionPresupostos();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.obter(user, id_factura);
+	        	json = xest.obter(user, id_presuposto);
 	        }
         }
         else {
@@ -216,24 +228,24 @@ public class FacturaRest {
     } 
 	
 	/**
-	 * Descarga o ficheiro da factura. Non devolve un JSON, so o estado da resposta e o ficheiro
-	 * @param id_factura
+	 * Descarga o ficheiro do presuposto. Non devolve un JSON, so o estado da resposta e o ficheiro
+	 * @param id_presuposto
 	 * @return
 	 */
 	@GET
 	@Path("/obterFicheiro")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response obterFicheiro(@QueryParam("id_factura") String id_factura) {
+	public Response obterFicheiro(@QueryParam("id_presuposto") String id_presuposto) {
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 		Response res = null;
 		
-		logger.debug("Invocouse o método obterFicheiro() de factura.");
+		logger.debug("Invocouse o método obterFicheiro() de presuposto.");
                 
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
       	try {
-      		if(id_factura == null || id_factura.equals(""))
+      		if(id_presuposto == null || id_presuposto.equals(""))
       			throw new EmptyStackException();
-      		if(id_factura.equals("-1"))
+      		if(id_presuposto.equals("-1"))
       			throw new NumberFormatException();
       	}
       	catch(NumberFormatException e) {
@@ -245,13 +257,13 @@ public class FacturaRest {
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionFacturas xest = new XestionFacturas();
+        	XestionPresupostos xest = new XestionPresupostos();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	res = xest.obterFicheiro(user, id_factura);
+	        	res = xest.obterFicheiro(user, id_presuposto);
 	        }
 	        else {
 	        	return Response.status(Status.FORBIDDEN).build();

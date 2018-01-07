@@ -8,52 +8,54 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
-import es.brudi.incidencias.facturas.Factura;
+import es.brudi.incidencias.presupostos.Presuposto;
 
 /**
  * 
- * Clase que xestiona as operación coa base de datos relacionados coa táboa de Facturas.
+ * Clase que xestiona as operación coa base de datos relacionados coa táboa de Presupostos.
  * 
  * @author Bruno Nogareda Da Cruz <brunonogareda@gmail.com>
  * @version 0.1
  * @year Xaneiro - 2018
  * 
  */
-public class FacturaDAO {
+public class PresupostoDAO {
 
-	private final static String TABLENAME = "Facturas";
+	private final static String TABLENAME = "Presupostos";
 	   
-	private static Logger logger = Logger.getLogger(FacturaDAO.class);
+	private static Logger logger = Logger.getLogger(PresupostoDAO.class);
 	
 	/**
-	 * Inserta unha nova factura na base de datos.
+	 * Inserta un novo presuposto na base de datos.
 	 * @param id
 	 * @param ruta_ficheiro
 	 * @param tipo_ficheiro
+	 * @param aceptado
 	 * @param comentarios
 	 * @return
 	 */
-	public static boolean crear(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	public static boolean crear(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios, boolean aceptado) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "INSERT INTO "+TABLENAME+" (id, Ruta_ficheiro, Tipo_ficheiro, Comentarios) VALUES (?, ?, ?, ?);";
+		String query = "INSERT INTO "+TABLENAME+" (id, Ruta_ficheiro, Tipo_ficheiro, aceptado, Comentarios) VALUES (?, ?, ?, ?, ?);";
 		
-		PreparedStatement factura;
+		PreparedStatement presuposto;
 		try
 		 {
 			logger.debug("Realizase a consulta: "+query);
 			
-			factura = conn.prepareStatement(query);
+			presuposto = conn.prepareStatement(query);
 			
 			int i = 1;
-			factura.setString(i++, id);
-			factura.setString(i++, ruta_ficheiro);
-			factura.setString(i++, tipo_ficheiro);
-			factura.setString(i++, comentarios);
+			presuposto.setString(i++, id);
+			presuposto.setString(i++, ruta_ficheiro);
+			presuposto.setString(i++, tipo_ficheiro);
+			presuposto.setBoolean(i++, aceptado);
+			presuposto.setString(i++, comentarios);
 						
-			int res = factura.executeUpdate();
-			
-			factura.close();
+			int res = presuposto.executeUpdate();
+					
+			presuposto.close();
 			if(res==1) {
 				return true;
 			}		
@@ -73,33 +75,33 @@ public class FacturaDAO {
 	}
 	
 	/**
-	 * Obten unha factura mediante o id.
+	 * Obten un presuposto mediante o id.
 	 * @param id
 	 * @return
 	 */
-	public static Factura getById(String id) {
+	public static Presuposto getById(String id) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "SELECT * FROM "+TABLENAME+" WHERE id = ?;";
 		
-		PreparedStatement factura;
-		Factura ret = null;
+		PreparedStatement presuposto;
+		Presuposto ret = null;
 		ResultSet res;
 		try
 		 {
 			logger.debug("Realizase a consulta: "+query);
 			
-			factura = conn.prepareStatement(query);
-			factura.setString(1, id);
+			presuposto = conn.prepareStatement(query);
+			presuposto.setString(1, id);
 						
-			res = factura.executeQuery();
+			res = presuposto.executeQuery();
 			
 			if(res.next()) {
-				ret = new Factura(res);
+				ret = new Presuposto(res);
 			}
 			
 			res.close();
-			factura.close();
+			presuposto.close();
 		 }
 		catch(SQLException se)
 		 {
@@ -116,14 +118,15 @@ public class FacturaDAO {
 	}
 
 	/**
-	 * Modifica os parámetros da factura na base de datos
+	 * Modifica os parámetros do presuposto na base de datos
 	 * @param id
 	 * @param ruta_ficheiro - Ruta completa do ficheiro. NULL non o modifica.
 	 * @param tipo_ficheiro - Extensión do ficheiro. NULL non o modifica.
-	 * @param comentarios - Comentarios da factura. NULL non o modifica.
+	 * @param comentarios - Comentarios do presuposto. NULL non o modifica.
+	 * @param aceptado - Presuposto aceptado. NULL non o modifica
 	 * @return
 	 */
-	public static boolean modificar(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	public static boolean modificar(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios, String aceptado) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		//Contruese a query segundo os datos proporcionados.
@@ -131,27 +134,30 @@ public class FacturaDAO {
 		query += (ruta_ficheiro != null && !ruta_ficheiro.equals("")) ? " Ruta_ficheiro = ?," : "";
 		query += (tipo_ficheiro != null && !tipo_ficheiro.equals("")) ? " Tipo_ficheiro = ?," : "";
 		query += (comentarios != null && !comentarios.equals("")) ? " Comentarios = ?," : "";
+		query += (aceptado != null && (aceptado.equals("true") || aceptado.equals("false"))) ? " Aceptado = ?," : "";
 		query += " Id = Id";
 		query += " WHERE Id = ?;";
 		
-		PreparedStatement factura;
+		PreparedStatement presuposto;
 		try
 		 {
 			
 			logger.debug("Realizase a consulta: "+query);
 			
-			factura = conn.prepareStatement(query);	
+			presuposto = conn.prepareStatement(query);	
 			
 			//Engádense os parámetros pasados a query.
 			int i = 1;
-			if(ruta_ficheiro != null && !ruta_ficheiro.equals("")) factura.setString(i++, ruta_ficheiro);
-			if(tipo_ficheiro != null && !tipo_ficheiro.equals("")) factura.setString(i++, tipo_ficheiro);
-			if(comentarios != null && !comentarios.equals("")) factura.setString(i++, comentarios);
-			factura.setString(i++, id);
+			if(presuposto != null && !ruta_ficheiro.equals("")) presuposto.setString(i++, ruta_ficheiro);
+			if(presuposto != null && !tipo_ficheiro.equals("")) presuposto.setString(i++, tipo_ficheiro);
+			if(comentarios != null && !comentarios.equals("")) presuposto.setString(i++, comentarios);
+			if(aceptado != null && aceptado.equals("true")) presuposto.setBoolean(i++, true);
+			if(aceptado != null && aceptado.equals("false")) presuposto.setBoolean(i++, false);
+			presuposto.setString(i++, id);
 	
-			int res = factura.executeUpdate();
+			int res = presuposto.executeUpdate();
 			
-			factura.close();
+			presuposto.close();
 			
 			if(res == 1) {
 				return true;

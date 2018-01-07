@@ -19,6 +19,9 @@ public enum Mensaxe
   CREARFACTURA_OK(0, "A factura engadiuse correctamente."),
   OBTERFACTURA_OK(0, "Obtivose a factura correctamente."),
   MODIFICARFACTURA_OK(0, "A factura foi modificada correctamente."),
+  CREARPRESUPOSTO_OK(0, "O presuposto engadiuse correctamente."),
+  OBTERPRESUPOSTO_OK(0, "Obtivose o presuposto correctamente."),
+  MODIFICARPRESUPOSTO_OK(0, "O presuposto foi modificada correctamente."),
   DEFAULT(0, "Ok.");
   
   private final int code;

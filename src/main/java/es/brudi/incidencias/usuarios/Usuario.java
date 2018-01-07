@@ -258,4 +258,9 @@ public class Usuario {
 		return (p >= Permiso.VER);
 	}
 	
+	public boolean podeAceptarPresuposto() {
+		int p = getPermisoByType(Permiso.POS_PRESUPOSTO_ACEPTADO);
+		return (p >= Permiso.MARCAR_PRESUPOSTO_ACEPTADO);
+	}
+	
 }

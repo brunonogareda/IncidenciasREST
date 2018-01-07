@@ -71,6 +71,9 @@ public class XestionPresupostos {
 		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREARPRESUPOSTO_SENPERMISOS.toJSONError();
 		}
+		if(aceptado && !user.podeAceptarPresuposto()) {
+			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
+		}
 		if(!inc.getEstado().equals(Estado.PENDENTE_P)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
 			return Error.CREARPRESUPOSTO_ERRORESTADO.toJSONError();
 		}
@@ -149,7 +152,9 @@ public class XestionPresupostos {
 		if(!user.podeEditarPresuposto()) {
 			return Error.MODIFICARPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
-		
+		if(aceptado!=null && !user.podeAceptarPresuposto()) {
+			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
+		}
 		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, id_presuposto, null, null, null, null, 0, 0);
 		if(incL.size()!=1) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();

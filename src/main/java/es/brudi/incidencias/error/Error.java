@@ -75,6 +75,7 @@ public enum Error {
 	MODIFICARPRESUPOSTO_SENPERMISOS1(270, "Non ten privilexios suficientes para editar este presuposto."),
 	MODIFICARPRESUPOSTO_SENPERMISOS2(271, "Non ten privilexios suficientes para editar presupostos."),
 	MODIFICARPRESUPOSTO_ERRORDB(272, "Erro modificando o presuposto na base de datos."),
+	ACEPTARPRESUPOSTO_SENPERMISOS(270, "Non ten privilexios suficientes para marcar un presuposto como aceptado."),
 	INSERTARCOMENTARIO_ERROR(300, "Error insertando un comentario."),
 	
 	DEFAULT(-1, "Erro descoñecido.");

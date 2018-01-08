@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
-import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.ClienteDAO;
 import es.brudi.incidencias.error.Error;
@@ -33,7 +32,6 @@ public class XestionClientes {
 	 */
 	public JSONObject<String, Object> getClientes(HttpServletRequest req) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		JSONArray<Object> jsonClientes = new JSONArray<Object>();
 		
 		XestionUsuarios xest = new XestionUsuarios();
 		Usuario user = xest.getUsuario(req);
@@ -47,11 +45,8 @@ public class XestionClientes {
 		
 		if(Clientes != null) {
 			if(Clientes.size()>0) {
-				for(Cliente cli : Clientes) {
-					jsonClientes.add(cli.toJson());
-				}
 				ret = Mensaxe.GETCLIENTES_OK.toJSONMensaxe();
-				ret.put("clientes", jsonClientes);
+				ret.put("clientes", Clientes);
 			}
 			else {
 				ret = Error.GETCLIENTES_SENCLIENTES.toJSONError();

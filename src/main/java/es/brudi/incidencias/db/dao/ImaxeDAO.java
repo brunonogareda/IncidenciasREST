@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
@@ -162,6 +163,54 @@ public class ImaxeDAO {
 		return ret;
 	}
 
+	/**
+	 * Obten unha Listaxe de Imaxe que teñan a Id_incidencia que se lle pase.
+	 * 
+	 * @param id_incidencia
+	 * @return
+	 */
+	public static ArrayList<Imaxe> getByIdIncidencia(int id_incidencia) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		String query = "SELECT * FROM "+TABLENAME+" WHERE Id_incidencia = ?";
+		
+		PreparedStatement imaxe;
+		try
+		 {
+			
+			logger.debug("Realizase a consulta: "+query);
+			
+			imaxe = conn.prepareStatement(query);
+			
+			imaxe.setInt(1, id_incidencia);
+						
+			ResultSet res = imaxe.executeQuery();
+			
+			ArrayList<Imaxe> ret = new ArrayList<Imaxe>();
+					
+			while(res.next()) {			
+				ret.add(new Imaxe(res));
+			}
+			
+			res.close();
+			imaxe.close();
+			return ret;
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: ", e);
+		 }
+		
+		return null;
+	}
+	
+	
 	/**
 	 * Modifica os parámetros da imaxe na base de datos
 	 * @param id

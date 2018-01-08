@@ -236,6 +236,53 @@ public class ImaxeRest {
         
         return json;
     } 
+
+	/**
+	 * Obtén imaxes mediante o id da incidencia
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Path("/obterXIncidencia")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+    public JSONObject<String, Object> obterXIncidencia(@QueryParam("id_incidencia") String id_incidenciaS) { 
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+        logger.debug("Invocouse o método obterXIncidencia() de imaxe.");
+                
+        int id_incidencia = -1;
+        
+        //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
+      	try {
+      		id_incidencia = Util.stringToInt(false, id_incidenciaS);
+      	}
+      	catch(NumberFormatException e) {
+      		return Error.ERRORPARAM.toJSONError();
+      	}
+      	catch(EmptyStackException e) {
+      		return Error.FALTANPARAM.toJSONError();
+      	}
+      	logger.debug("Parámetros correctos.");
+        if(DBConnectionManager.getConnection() != null ) {
+         
+        	XestionImaxes xest = new XestionImaxes();
+        	XestionUsuarios xestu = new XestionUsuarios();
+        	
+        	json = xestu.checkLogin(req);
+	        if (json == null) {
+	        	Usuario user = xestu.getUsuario(req);
+	        	json = xest.obterXIncidencia(user, id_incidencia);
+	        }
+        }
+        else {
+        	logger.warn("Non existe conexión coa base de datos.");
+        	json = Error.DATABASE.toJSONError();
+        }
+        
+        return json;
+    } 
+	
 	
 	/**
 	 * Descarga o ficheiro da imaxe. Non devolve un JSON, so o estado da resposta e o ficheiro

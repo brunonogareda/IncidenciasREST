@@ -24,6 +24,7 @@ public enum Mensaxe
   MODIFICARPRESUPOSTO_OK(0, "O presuposto foi modificado correctamente."),
   CREARIMAXE_OK(0, "Insertouse a imaxe correctamente."),
   OBTERIMAXE_OK(0, "Obtivose a imaxe correctamente."),
+  OBTERIMAXESINC_OK(0, "Obtiveronse as imaxes da incidencia correctamente"),
   MODIFICARIMAXE_OK(0, "A imaxe foi modificada correctamente."),
   DEFAULT(0, "Ok.");
   

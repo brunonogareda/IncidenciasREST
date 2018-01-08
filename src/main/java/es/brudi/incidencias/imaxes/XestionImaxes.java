@@ -3,6 +3,7 @@ package es.brudi.incidencias.imaxes;
 import java.io.File;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -20,6 +21,7 @@ import es.brudi.incidencias.db.dao.IncidenciaDAO;
 import es.brudi.incidencias.documentos.XestionFicheiros;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
+import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
@@ -225,6 +227,49 @@ public class XestionImaxes {
 
 		ret = Mensaxe.OBTERIMAXE_OK.toJSONMensaxe();
 		ret.put("Imaxe", imaxe.toJson());
+		
+		return ret;
+	}
+	
+	/**
+	 * Obten os datos das imaxes mediante o id da incidencia
+	 * @param user
+	 * @param id_incidencia
+	 * @return
+	 */
+	public JSONObject<String, Object> obterXIncidencia(Usuario user, int id_incidencia) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONArray<Object> jsonImaxes = new JSONArray<Object>();
+
+		
+		if(!user.podeVerImaxe()) {
+			return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
+		}
+		
+		Incidencia inc = IncidenciaDAO.getIncidenciaById(id_incidencia);
+		if(inc == null) {
+			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
+		}
+		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
+		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+				return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
+		}
+		
+		ArrayList<Imaxe> Imaxes = ImaxeDAO.getByIdIncidencia(id_incidencia);
+		if(Imaxes == null) {
+			return Error.OBTERIMAXE_ERRORDB.toJSONError();
+		}
+		if(Imaxes.size() <= 0) {
+			return Error.OBTERIMAXE_NONEXISTENAINC.toJSONError();
+		}
+				
+		logger.debug("Obtiveronse "+Imaxes.size()+" imaxes na incidencia: "+id_incidencia);
+
+		for(Imaxe i : Imaxes)
+			jsonImaxes.add(i.toJson());
+		
+		ret = Mensaxe.OBTERIMAXESINC_OK.toJSONMensaxe();
+		ret.put("Imaxes", jsonImaxes);
 		
 		return ret;
 	}

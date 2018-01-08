@@ -83,6 +83,7 @@ public enum Error {
 	OBTERIMAXE_SERPERMISOS1(301, "Non ten privilexios suficientes para ver esta imaxe."),
 	OBTERIMAXE_SENPERMISOS2(302, "Non ten privilexios suficientes para ver imaxes."),
 	OBTERIMAXE_ERRORDB(303, "Erro obtendo a imaxe da base de datos."),
+	OBTERIMAXE_NONEXISTENAINC(304, "Esta incidencia non ten imaxes asociadas."),
 	MODIFICARIMAXE_SENPERMISOS1(310, "Non ten privilexios suficientes para editar esta imaxe."),
 	MODIFICARIMAXE_SENPERMISOS2(311, "Non ten privilexios suficientes para editar imaxes."),
 	MODIFICARIMAXE_ERRORDB(312, "Erro modificando a imaxe na base de datos."),

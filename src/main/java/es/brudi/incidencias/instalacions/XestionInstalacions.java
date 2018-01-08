@@ -2,7 +2,6 @@ package es.brudi.incidencias.instalacions;
 
 import java.util.ArrayList;
 
-import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.error.Error;
@@ -28,7 +27,6 @@ public class XestionInstalacions {
 	 */
 	public JSONObject<String, Object> getInstalacionsByCliente(Usuario user, int idCliente) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		JSONArray<Object> jsonInstalacions = new JSONArray<Object>();
 
 		if(user.getCliente().getCod_cliente()!=idCliente && user.getCliente().getCod_cliente()!=0) {
 			return Error.GETINSTALACIONS_SENPERMISOS.toJSONError();
@@ -38,11 +36,8 @@ public class XestionInstalacions {
 		
 		if(Instalacions != null) {
 			if(Instalacions.size()>0) {
-				for(Instalacion inst : Instalacions) {
-					jsonInstalacions.add(inst.toJson());
-				}
 				ret = Mensaxe.GETINSTALACIONS_OK.toJSONMensaxe();
-				ret.put("instalacions", jsonInstalacions);
+				ret.put("instalacions", Instalacions);
 			}
 			else {
 				ret = Error.GETINSTALACIONS_SENINSTALACIONS.toJSONError();

@@ -2,6 +2,7 @@ package es.brudi.incidencias.db.dao;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,6 +10,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
+import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.db.DBConnectionManager;
 
 /**
@@ -73,5 +75,54 @@ public class ComentarioDAO {
 		
 		return -1;
 	}
+	
+
+	/**
+	 * Obten unha Listaxe de Comentarios que teñan a Id_incidencia que se lle pase.
+	 * 
+	 * @param id_incidencia
+	 * @return
+	 */
+	public static ArrayList<Comentario> getByIdIncidencia(int id_incidencia) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		String query = "SELECT * FROM "+TABLENAME+" WHERE Id_incidencia = ?";
+		
+		PreparedStatement comentario;
+		try
+		 {
+			
+			logger.debug("Realizase a consulta: "+query);
+			
+			comentario = conn.prepareStatement(query);
+			
+			comentario.setInt(1, id_incidencia);
+						
+			ResultSet res = comentario.executeQuery();
+			
+			ArrayList<Comentario> ret = new ArrayList<Comentario>();
+					
+			while(res.next()) {			
+				ret.add(new Comentario(res));
+			}
+			
+			res.close();
+			comentario.close();
+			return ret;
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: ", e);
+		 }
+		
+		return null;
+	}
+	
 	
 }

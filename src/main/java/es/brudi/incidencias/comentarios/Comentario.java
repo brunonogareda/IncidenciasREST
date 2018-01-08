@@ -1,5 +1,8 @@
 package es.brudi.incidencias.comentarios;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -31,65 +34,148 @@ public class Comentario {
 	public final static String ACCION_MODIFICAR_IMAXE = "modificou a imaxe";
 	public final static String ACCION_BORRAR = "eliminiou";
 	
-	private int Id;
-	private String Autor;
-	private String Accion;
-	private int Tipo;
-	private String Texto;
-	private Date Data;
+	private int id;
+	private int id_incidencia;
+	private String autor;
+	private String accion;
+	private int tipo;
+	private String texto;
+	private Calendar data = Calendar.getInstance();
 	
 	public Comentario() {
 	}
 
-	public Comentario(int id, String autor, String accion, int tipo, String texto, Date data) {
+	public Comentario(int id, int id_incidencia, String autor, String accion, int tipo, String texto, Calendar data) {
 		super();
-		Id = id;
-		Autor = autor;
-		Accion = accion;
-		Tipo = tipo;
-		Texto = texto;
-		Data = data;
+		this.id = id;
+		this.id_incidencia = id_incidencia;
+		this.autor = autor;
+		this.accion = accion;
+		this.tipo = tipo;
+		this.texto = texto;
+		this.data = data;
+	}
+	
+	public Comentario(int id, int id_incidencia, String autor, String accion, int tipo, String texto, Date data) {
+		super();
+		this.id = id;
+		this.id_incidencia = id_incidencia;
+		this.autor = autor;
+		this.accion = accion;
+		this.tipo = tipo;
+		this.texto = texto;
+		this.data.setTime(data);
+	}
+
+	
+	public Comentario(ResultSet res) throws SQLException {
+		this.id = res.getInt("Id");
+		this.id_incidencia = res.getInt("Id_incidencia");
+		this.autor = res.getString("Autor");
+		this.accion = res.getString("Accion");
+		this.tipo = res.getInt("Tipo");
+		this.texto = res.getString("Texto");
+		this.data.setTime(res.getTimestamp("Data"));
 	}
 
 	/**
 	 * @return the id
 	 */
 	public int getId() {
-		return Id;
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the id_incidencia
+	 */
+	public int getId_incidencia() {
+		return id_incidencia;
+	}
+
+	/**
+	 * @param id_incidencia the id_incidencia to set
+	 */
+	public void setId_incidencia(int id_incidencia) {
+		this.id_incidencia = id_incidencia;
 	}
 
 	/**
 	 * @return the autor
 	 */
 	public String getAutor() {
-		return Autor;
+		return autor;
+	}
+
+	/**
+	 * @param autor the autor to set
+	 */
+	public void setAutor(String autor) {
+		this.autor = autor;
 	}
 
 	/**
 	 * @return the accion
 	 */
 	public String getAccion() {
-		return Accion;
+		return accion;
+	}
+
+	/**
+	 * @param accion the accion to set
+	 */
+	public void setAccion(String accion) {
+		this.accion = accion;
 	}
 
 	/**
 	 * @return the tipo
 	 */
 	public int getTipo() {
-		return Tipo;
+		return tipo;
+	}
+
+	/**
+	 * @param tipo the tipo to set
+	 */
+	public void setTipo(int tipo) {
+		this.tipo = tipo;
 	}
 
 	/**
 	 * @return the texto
 	 */
 	public String getTexto() {
-		return Texto;
+		return texto;
+	}
+
+	/**
+	 * @param texto the texto to set
+	 */
+	public void setTexto(String texto) {
+		this.texto = texto;
 	}
 
 	/**
 	 * @return the data
 	 */
-	public Date getData() {
-		return Data;
+	public Calendar getData() {
+		return data;
 	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(Calendar data) {
+		this.data = data;
+	}
+
+	
+	
 }

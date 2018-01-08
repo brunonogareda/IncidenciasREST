@@ -26,6 +26,8 @@ public enum Mensaxe
   OBTERIMAXE_OK(0, "Obtivose a imaxe correctamente."),
   OBTERIMAXESINC_OK(0, "Obtiveronse as imaxes da incidencia correctamente"),
   MODIFICARIMAXE_OK(0, "A imaxe foi modificada correctamente."),
+  INSERTARCOMENTARIO_OK(0, "O comentario engadiuse correctamente."),
+  OBTERCOMENTARIOSNC_OK(0, "Obtiveronse os comentarios da incidencia correctamente"),
   DEFAULT(0, "Ok.");
   
   private final int code;

@@ -41,7 +41,7 @@ public class XestionImaxes {
 	private static Logger logger = Logger.getLogger(XestionImaxes.class);
 	
 	/**
-	 * Crea unha novo presuposto na base de datos. E garda o ficheiro en local se existe.
+	 * Crea unha nova imaxe na base de datos. E garda o ficheiro en local se existe.
 	 * @param user
 	 * @param id_incidencia
 	 * @param nome

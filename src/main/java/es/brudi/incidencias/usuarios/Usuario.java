@@ -278,4 +278,14 @@ public class Usuario {
 		return (p >= Permiso.VER);
 	}
 	
+	public boolean podeEngadirComentario() {
+		int p = getPermisoByType(Permiso.POS_COMENTARIOS);
+		return (p >= Permiso.COMENTAR);
+	}
+	
+	public boolean podeVerComentario() {
+		int p = getPermisoByType(Permiso.POS_COMENTARIOS);
+		return (p >= Permiso.VER);
+	}
+	
 }

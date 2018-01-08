@@ -87,8 +87,15 @@ public enum Error {
 	MODIFICARIMAXE_SENPERMISOS1(310, "Non ten privilexios suficientes para editar esta imaxe."),
 	MODIFICARIMAXE_SENPERMISOS2(311, "Non ten privilexios suficientes para editar imaxes."),
 	MODIFICARIMAXE_ERRORDB(312, "Erro modificando a imaxe na base de datos."),
-	INSERTARCOMENTARIO_ERROR(400, "Error insertando un comentario."),
-	
+	INSERTARCOMENTARIO_ERROR(320, "Error insertando un comentario."),
+	INSERTARCOMENTARIO_SENPERMISOS1(321, "Non ten privilexios suficientes para insertar un comentario en esta incidencia."),
+	INSERTARCOMENTARIO_SENPERMISOS2(322, "Non ten privilexios suficientes para insertar comentarios."),
+	INSERTARCOMENTARIO_ERRORDB(323, "Erro insertando o comentario na base de datos."),
+	OBTERCOMENTARIO_SENPERMISOS1(330, "Non ten privilexios suficientes para ver os comentarios de esta incidencia."),
+	OBTERCOMENTARIO_SENPERMISOS2(331, "Non ten privilexios suficientes para ver comentarios."),
+	OBTERCOMENTARIO_ERRORDB(332, "Erro obtendo os comentarios da base de datos."),
+	OBTERCOMENTARIO_NONEXISTENAINC(333, "Esta incidencia non ten comentarios asociados."),
+
 	DEFAULT(-1, "Erro descoñecido.");
 	
 	private final int code;

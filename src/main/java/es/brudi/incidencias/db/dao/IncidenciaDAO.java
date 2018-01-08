@@ -114,7 +114,7 @@ public class IncidenciaDAO {
 			incidencia.setString(i++, autor);
 
 			int res = incidencia.executeUpdate();
-						
+									
 			if(res==1) {
 				ResultSet id = incidencia.getGeneratedKeys();
 				if(id.next()) {

@@ -37,7 +37,7 @@ public class PresupostoDAO {
 	public static boolean crear(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios, boolean aceptado) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "INSERT INTO "+TABLENAME+" (id, Ruta_ficheiro, Tipo_ficheiro, aceptado, Comentarios) VALUES (?, ?, ?, ?, ?);";
+		String query = "INSERT INTO "+TABLENAME+" (Id, Ruta_ficheiro, Tipo_ficheiro, aceptado, Comentarios) VALUES (?, ?, ?, ?, ?);";
 		
 		PreparedStatement presuposto;
 		try

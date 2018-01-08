@@ -21,7 +21,10 @@ public enum Mensaxe
   MODIFICARFACTURA_OK(0, "A factura foi modificada correctamente."),
   CREARPRESUPOSTO_OK(0, "O presuposto engadiuse correctamente."),
   OBTERPRESUPOSTO_OK(0, "Obtivose o presuposto correctamente."),
-  MODIFICARPRESUPOSTO_OK(0, "O presuposto foi modificada correctamente."),
+  MODIFICARPRESUPOSTO_OK(0, "O presuposto foi modificado correctamente."),
+  CREARIMAXE_OK(0, "Insertouse a imaxe correctamente."),
+  OBTERIMAXE_OK(0, "Obtivose a imaxe correctamente."),
+  MODIFICARIMAXE_OK(0, "A imaxe foi modificada correctamente."),
   DEFAULT(0, "Ok.");
   
   private final int code;

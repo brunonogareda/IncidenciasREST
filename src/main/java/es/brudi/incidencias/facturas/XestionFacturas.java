@@ -84,9 +84,9 @@ public class XestionFacturas {
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_factura.replaceAll("/", "-")+'.'+tipo_ficheiro;
+			nome_ficheiro = id_factura.replaceAll("/", "-")+"."+tipo_ficheiro;
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
+			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
 		}
 		
 		boolean fret = FacturaDAO.crear(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
@@ -164,9 +164,9 @@ public class XestionFacturas {
 			
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_factura.replaceAll("/", "-")+'.'+tipo_ficheiro;
+			nome_ficheiro = id_factura.replaceAll("/", "-")+"."+tipo_ficheiro;
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
+			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
 		}
 		
 		boolean fret = FacturaDAO.modificar(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.

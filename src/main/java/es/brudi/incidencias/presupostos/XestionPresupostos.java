@@ -29,7 +29,7 @@ import es.brudi.incidencias.util.Util;
 
 /**
  * 
- * Clase que xestiona as funcións relacionados coas facturas.
+ * Clase que xestiona as funcións relacionados cos presupostos.
  * 
  * @author Bruno Nogareda Da Cruz <brunonogareda@gmail.com>
  * @version 0.1
@@ -88,16 +88,17 @@ public class XestionPresupostos {
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_presuposto.replaceAll("/", "-")+'.'+tipo_ficheiro;
+			nome_ficheiro = id_presuposto.replaceAll("/", "-")+"."+tipo_ficheiro;
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_PRESUPOSTOS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
+			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
 		}
 		
 		boolean Pret = PresupostoDAO.crear(id_presuposto, ruta_ficheiro, tipo_ficheiro, comentarios, aceptado); //Creamos o presuposto na táboa.
 		if(!Pret) {
 			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 		}
-		
+		Presuposto presuposto = new Presuposto(id_presuposto, aceptado, ruta_ficheiro, tipo_ficheiro, comentarios);
+
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
 			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
 			if(path == null ) {
@@ -105,11 +106,7 @@ public class XestionPresupostos {
 				errFile = true;
 			}
 		}
-		
-		Presuposto presuposto = PresupostoDAO.getById(id_presuposto); //Buscamos o presuposto que acabamos de insertar
-		if(presuposto == null) {
-			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
-		}
+
 		//Engadese o id de presuposto na incidencia correspondente e cambiase o estado
 		if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_R.getEstado())) { 
 			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
@@ -171,9 +168,9 @@ public class XestionPresupostos {
 			
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_presuposto.replaceAll("/", "-")+'.'+tipo_ficheiro;
+			nome_ficheiro = id_presuposto.replaceAll("/", "-")+"."+tipo_ficheiro;
 			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_PRESUPOSTOS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+'/'+nome_ficheiro;
+			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
 		}
 		
 		boolean pret = PresupostoDAO.modificar(id_presuposto, ruta_ficheiro, tipo_ficheiro, comentarios, aceptado); //modificamos o presuposto na bd.

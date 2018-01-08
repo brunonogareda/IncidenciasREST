@@ -263,4 +263,19 @@ public class Usuario {
 		return (p >= Permiso.MARCAR_PRESUPOSTO_ACEPTADO);
 	}
 	
+	public boolean podeEngadirImaxe() {
+		int p = getPermisoByType(Permiso.POS_IMAXES);
+		return (p >= Permiso.SUBIR);
+	}
+	
+	public boolean podeEditarImaxe() {
+		int p = getPermisoByType(Permiso.POS_IMAXES);
+		return (p >= Permiso.MODIFICAR);
+	}
+	
+	public boolean podeVerImaxe() {
+		int p = getPermisoByType(Permiso.POS_IMAXES);
+		return (p >= Permiso.VER);
+	}
+	
 }

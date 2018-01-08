@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
-import es.brudi.incidencias.presupostos.XestionPresupostos;
+import es.brudi.incidencias.imaxes.XestionImaxes;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.util.JSONObject;
@@ -32,34 +32,43 @@ import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
- * Servlet coas diferentes accións relacionadas con presupostos, que pode realizar o usuario mediante REST.
+ * Servlet coas diferentes accións relacionadas con imaxes, que pode realizar o usuario mediante REST.
  * 
  * Todos estes métodos comproban en primeiro lugar que a conexión coa base de datos é correcta,
  * e que o usuario que fai a petición teña a sesión aberta. E que os parámetros necesarios estean na petición.
  * Todos devolven un Http response con un json.
- * Excepto  o método de obterFicheiro.
+ * Excepto  o método de obterImaxe.
  * 
  * @author Bruno Nogareda Da Cruz <brunonogareda@gmail.com>
  * @version 0.1
  * @year Xaneiro - 2018
  * 
  */
-@Path("/presuposto")
-public class PresupostoRest {
+@Path("/imaxe")
+public class ImaxeRest {
 	
-	private Logger logger = Logger.getLogger(PresupostoRest.class);
+	private Logger logger = Logger.getLogger(ImaxeRest.class);
 	
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
+//	@Consumes({"image/png", "image/jpg", "image/gif"})
+	
+//	@FormDataParam("id_incidencia") String id_incidenciaS,
+//	   @FormDataParam("nome") String nome,
+//	   @FormDataParam("comentarios") String comentarios,
+//	   
+//	   @FormDataParam("file") InputStream uploadedInputStream,
+//	   @FormDataParam("file") FormDataContentDisposition fileDetail
+	
 
 	/**
-	 * Crea un novo presuposto na base de datos. En caso de recibir un ficheiro gardao en local.
-	 * Devolve o presuposto creado
+	 * Crea unha nova imaxe na base de datos. En caso de recibir un ficheiro gardao en local.
+	 * Devolve os parámetros da imaxe creada
 	 * 
-	 * @param id_incidenciaS - Identificador da incidencia a que corresponde o presuposto. OBLIGATORIO
-	 * @param id_presuposto - Identificador do presuposto. OBLIGATORIO
+	 * @param id_incidenciaS - Identificador da incidencia a que corresponde a imaxe. OBLIGATORIO
+	 * @param nome - Nome que se lle quere dar a imaxe
 	 * @param comentarios
-	 * @param aceptado Se o presuposto está aceptado ou non ("true" -> true / En outro caso false)
+	 * @param antes_despois - Antes/Despois Indica se a imaxe corresponde a antes ou a despois de resolver a incidencia. Por defecto Antes
 	 * @param uploadedInputStream (file)
 	 * @param fileDetail (file)
 	 * @return
@@ -69,26 +78,25 @@ public class PresupostoRest {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
     public JSONObject<String, Object> insertar(@FormDataParam("id_incidencia") String id_incidenciaS,
- 								    		   @FormDataParam("id_presuposto") String id_presuposto,
-								    		   @FormDataParam("comentarios") String comentarios,
-								    		   @FormDataParam("aceptado") String aceptadoS,
-								    		   @FormDataParam("file") InputStream uploadedInputStream,
-								   			   @FormDataParam("file") FormDataContentDisposition fileDetail) { 
+    										   @FormDataParam("nome") String nome,
+    										   @FormDataParam("comentarios") String comentarios,
+    										   @FormDataParam("antes_despois") String antes_despoisS,
+    										   @FormDataParam("file") InputStream uploadedInputStream,
+    										   @FormDataParam("file") FormDataContentDisposition fileDetail) {	
 		
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método insertar() de presuposto.");
+        logger.debug("Invocouse o método insertar() de imaxe.");
         
         int id_incidencia = -1;
-        boolean aceptado = false;
+        boolean antes_despois = false;
         
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
       	try {
       		id_incidencia = Util.stringToInt(false, id_incidenciaS);
-      		if(id_presuposto == null || id_presuposto.equals(""))
+      		if(uploadedInputStream == null || fileDetail == null) {
       			throw new EmptyStackException();
-      		if(id_presuposto.equals("-1"))
-      			throw new NumberFormatException();
+      		}
       	}
       	catch(NumberFormatException e) {
       		return Error.ERRORPARAM.toJSONError();
@@ -96,19 +104,20 @@ public class PresupostoRest {
       	catch(EmptyStackException e) {
       		return Error.FALTANPARAM.toJSONError();
       	}
-      	if(aceptadoS != null && aceptadoS.equals("true"))
-      		aceptado = true;
-      	
+      	if(antes_despoisS != null && (antes_despoisS.equalsIgnoreCase("despois") || antes_despoisS.equalsIgnoreCase("después") || antes_despoisS.equalsIgnoreCase("despues"))) {
+      		antes_despois = true;
+      	}
+      		
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionPresupostos xest = new XestionPresupostos();
+        	XestionImaxes xest = new XestionImaxes();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.crear(user, id_incidencia, id_presuposto, comentarios, aceptado, uploadedInputStream, fileDetail);
+	        	json = xest.crear(user, id_incidencia, nome, comentarios, antes_despois, uploadedInputStream, fileDetail);
 	        }
         }
         else {
@@ -120,11 +129,12 @@ public class PresupostoRest {
     } 
 
 	/**
-	 * Modifica os parámetros de un presuposto existente. Devolve o presuposto modificada
+	 * Modifica os parámetros de unha iimaxe existente. Devolve o imaxe modificada
 	 * 
-	 * @param id_preusposto - OBLIGATORIO
+	 * @param id - OBLIGATORIO
+	 * @param nome
 	 * @param comentarios
-	 * @param aceptado
+	 * @param antes_despois
 	 * @param uploadedInputStream (file)
 	 * @param fileDetail (file)
 	 * @return
@@ -133,24 +143,24 @@ public class PresupostoRest {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-    public JSONObject<String, Object> modificar(@FormDataParam("id_presuposto") String id_presuposto,
+    public JSONObject<String, Object> modificar(@FormDataParam("id") String idS,
+    										    @FormDataParam("nome") String nome,
 								    		    @FormDataParam("comentarios") String comentarios,
-									    		@FormDataParam("aceptado") String aceptado,
+									    		@FormDataParam("antes_despois") String antes_despois,
 								    		    @FormDataParam("file") InputStream uploadedInputStream,
 								   			    @FormDataParam("file") FormDataContentDisposition fileDetail) { 
 		
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método modificar() de presuposto.");
-                
+        logger.debug("Invocouse o método modificar() de imaxe.");
+        
+        int id = -1;
+        
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
       	try {
-      		if(id_presuposto == null || id_presuposto.equals(""))
-      			throw new EmptyStackException();
-      		if(id_presuposto.equals("-1"))
-      			throw new NumberFormatException();
-      		if(aceptado != null) { // Se aceptado non é nulo, true ou false, devolvemos un erro.
-				if(!aceptado.equals("true") && !aceptado.equals("false"))
+      		id = Util.stringToInt(false, idS);
+      		if(antes_despois != null) { // Se aceptado non é nulo, true ou false, devolvemos un erro.
+				if(!antes_despois.equalsIgnoreCase("antes") && !antes_despois.equalsIgnoreCase("despois"))
 					throw new NumberFormatException();
 			}
       	}
@@ -160,16 +170,17 @@ public class PresupostoRest {
       	catch(EmptyStackException e) {
       		return Error.FALTANPARAM.toJSONError();
       	}
+      	
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionPresupostos xest = new XestionPresupostos();
+        	XestionImaxes xest = new XestionImaxes();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.modificar(user, id_presuposto, comentarios, aceptado, uploadedInputStream, fileDetail);
+	        	json = xest.modificar(user, id, nome, comentarios, antes_despois, uploadedInputStream, fileDetail);
 	        }
         }
         else {
@@ -181,25 +192,24 @@ public class PresupostoRest {
     } 
 	
 	/**
-	 * Obten un presuposto
+	 * Obten unha imaxe
 	 * 
-	 * @param id_presuposto
+	 * @param id
 	 * @return
 	 */
 	@Path("/obter")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> obter(@QueryParam("id_presuposto") String id_presuposto) { 
+    public JSONObject<String, Object> obter(@QueryParam("id") String idS) { 
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
-        logger.debug("Invocouse o método obter() de presuposto.");
+        logger.debug("Invocouse o método obter() de imaxe.");
                 
+        int id = -1;
+        
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
       	try {
-      		if(id_presuposto == null || id_presuposto.equals(""))
-      			throw new EmptyStackException();
-      		if(id_presuposto.equals("-1"))
-      			throw new NumberFormatException();
+      		id = Util.stringToInt(false, idS);
       	}
       	catch(NumberFormatException e) {
       		return Error.ERRORPARAM.toJSONError();
@@ -210,13 +220,13 @@ public class PresupostoRest {
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionPresupostos xest = new XestionPresupostos();
+        	XestionImaxes xest = new XestionImaxes();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.obter(user, id_presuposto);
+	        	json = xest.obter(user, id);
 	        }
         }
         else {
@@ -228,25 +238,24 @@ public class PresupostoRest {
     } 
 	
 	/**
-	 * Descarga o ficheiro do presuposto. Non devolve un JSON, so o estado da resposta e o ficheiro
-	 * @param id_presuposto
+	 * Descarga o ficheiro da imaxe. Non devolve un JSON, so o estado da resposta e o ficheiro
+	 * @param id
 	 * @return
 	 */
 	@GET
 	@Path("/obterFicheiro")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response obterFicheiro(@QueryParam("id_presuposto") String id_presuposto) {
+	public Response obterFicheiro(@QueryParam("id") String idS) {
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
 		Response res = null;
 		
 		logger.debug("Invocouse o método obterFicheiro() de presuposto.");
                 
+		int id = -1;
+		
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
       	try {
-      		if(id_presuposto == null || id_presuposto.equals(""))
-      			throw new EmptyStackException();
-      		if(id_presuposto.equals("-1"))
-      			throw new NumberFormatException();
+      		id = Util.stringToInt(false, idS);
       	}
       	catch(NumberFormatException e) {
       		return Response.status(Status.BAD_REQUEST).entity("").build();
@@ -257,13 +266,13 @@ public class PresupostoRest {
       	logger.debug("Parámetros correctos.");
         if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionPresupostos xest = new XestionPresupostos();
+        	XestionImaxes xest = new XestionImaxes();
         	XestionUsuarios xestu = new XestionUsuarios();
         	
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	res = xest.obterFicheiro(user, id_presuposto);
+	        	res = xest.obterFicheiro(user, id);
 	        }
 	        else {
 	        	return Response.status(Status.FORBIDDEN).build();

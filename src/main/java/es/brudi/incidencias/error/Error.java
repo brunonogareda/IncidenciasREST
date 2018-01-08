@@ -75,8 +75,18 @@ public enum Error {
 	MODIFICARPRESUPOSTO_SENPERMISOS1(270, "Non ten privilexios suficientes para editar este presuposto."),
 	MODIFICARPRESUPOSTO_SENPERMISOS2(271, "Non ten privilexios suficientes para editar presupostos."),
 	MODIFICARPRESUPOSTO_ERRORDB(272, "Erro modificando o presuposto na base de datos."),
-	ACEPTARPRESUPOSTO_SENPERMISOS(270, "Non ten privilexios suficientes para marcar un presuposto como aceptado."),
-	INSERTARCOMENTARIO_ERROR(300, "Error insertando un comentario."),
+	ACEPTARPRESUPOSTO_SENPERMISOS(280, "Non ten privilexios suficientes para marcar un presuposto como aceptado."),
+	CREARIMAXE_SENPERMISOS(290, "Non ten privilexios suficientes para engadir imaxes."),
+	CREARIMAXE_ERRODB(291, "Erro insertando a imaxe na base de datos."),
+	CREARIMAXE_FICHEIRO(292, "Erro subindo o ficheiro imaxe. Insertouse a imaxe correctamente na base de datos."),
+	OBTERIMAXE_NONEXISTE(300, "A imaxe solicitada non existe."),
+	OBTERIMAXE_SERPERMISOS1(301, "Non ten privilexios suficientes para ver esta imaxe."),
+	OBTERIMAXE_SENPERMISOS2(302, "Non ten privilexios suficientes para ver imaxes."),
+	OBTERIMAXE_ERRORDB(303, "Erro obtendo a imaxe da base de datos."),
+	MODIFICARIMAXE_SENPERMISOS1(310, "Non ten privilexios suficientes para editar esta imaxe."),
+	MODIFICARIMAXE_SENPERMISOS2(311, "Non ten privilexios suficientes para editar imaxes."),
+	MODIFICARIMAXE_ERRORDB(312, "Erro modificando a imaxe na base de datos."),
+	INSERTARCOMENTARIO_ERROR(400, "Error insertando un comentario."),
 	
 	DEFAULT(-1, "Erro descoñecido.");
 	

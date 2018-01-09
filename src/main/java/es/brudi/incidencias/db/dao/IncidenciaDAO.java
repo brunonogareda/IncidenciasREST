@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -158,7 +159,7 @@ public class IncidenciaDAO {
 	 * @return
 	 */
 	public static ArrayList<Incidencia> get(int cod_parte, int ot, int id_instalacion,
-			String zona_apartamento, String descripcion_curta, String observacions, String estado,
+			String zona_apartamento, String descripcion_curta, String observacions, List<String> estados,
 			String sol_presuposto, String presuposto, String factura, Timestamp data_menor, Timestamp data_maior,
 			String autor, int cod_cliente, int ver) {
 		Connection conn = DBConnectionManager.getConnection();
@@ -174,7 +175,14 @@ public class IncidenciaDAO {
 		query += (zona_apartamento != null && !zona_apartamento.equals("")) ? " AND Zona_apartamento LIKE ?" : "";
 		query += (descripcion_curta != null && !descripcion_curta.equals("")) ? " AND Descripcion_curta LIKE ?" : "";
 		query += (observacions != null && !observacions.equals("")) ? " AND Observacions LIKE ?" : "";
-		query += (estado != null && !estado.equals("")) ? " AND Estado = ?" : "";
+		if(estados != null && estados.size()>0) { //Recorremos o listado de estados e engaimos según o número.
+			query += " AND (";
+			for(int j=0; j<estados.size(); j++) {
+				query += " Estado = ?";
+				if(j<estados.size()-1) query += " OR";
+				else query += " )";
+			}
+		}
 		query += (sol_presuposto != null && (sol_presuposto.equals("true") || sol_presuposto.equals("false"))) ? " AND Solicitase_presuposto = ?" : "";
 		if(presuposto != null && !presuposto.equals("")) {
 			query += (presuposto.equals("-1")) ? " AND Presuposto IS NULL" : " AND Presuposto = ?";
@@ -208,7 +216,10 @@ public class IncidenciaDAO {
 			if(zona_apartamento != null && !zona_apartamento.equals("")) incidencia.setString(i++, "%"+zona_apartamento+"%");
 			if(descripcion_curta != null && !descripcion_curta.equals("")) incidencia.setString(i++, "%"+descripcion_curta+"%");
 			if(observacions != null && !observacions.equals("")) incidencia.setString(i++, "%"+observacions+"%");
-			if(estado != null && !estado.equals("")) incidencia.setString(i++, estado);
+			if(estados != null && estados.size()>0) {
+				for(String estado : estados)
+					incidencia.setString(i++, estado);
+			}
 			if(sol_presuposto != null && sol_presuposto.equals("true")) incidencia.setBoolean(i++, true);
 			if(sol_presuposto != null && sol_presuposto.equals("false")) incidencia.setBoolean(i++, false);
 			if(presuposto != null && !presuposto.equals("") && !presuposto.equals("-1")) incidencia.setString(i++, presuposto);

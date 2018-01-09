@@ -3,9 +3,11 @@ package es.brudi.incidencias.incidencias;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.db.dao.ComentarioDAO;
@@ -155,9 +157,10 @@ public class XestionIncidencias {
 	 * @return
 	 */
 	public JSONObject<String, Object> get(Usuario user, int cod_parte, int ot, int id_instalacion,
-			String zona_apartamento, String descripcion_curta, String observacions, String estado, String sol_presuposto,
+			String zona_apartamento, String descripcion_curta, String observacions, List<String> estados, String sol_presuposto,
 			String factura, String presuposto, Calendar data_menorC, Calendar data_maiorC, String autor, int cod_cliente, int ver) {
 		JSONObject<String,Object> ret = new JSONObject<String,Object>();
+		JSONArray<Object> jsonIncidencias = new JSONArray<Object>();
 				
 		//En caso de existir, os parámetros de datas, convértense a un Timestamp para comprobalo na base de datos.
 		Timestamp data_menor = null;
@@ -179,13 +182,16 @@ public class XestionIncidencias {
 			}
 		}
 				
-		ArrayList<Incidencia> Incidencias = IncidenciaDAO.get(cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estado, sol_presuposto, presuposto, factura, data_menor, data_maior, autor, cod_cliente, ver);
+		ArrayList<Incidencia> Incidencias = IncidenciaDAO.get(cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estados, sol_presuposto, presuposto, factura, data_menor, data_maior, autor, cod_cliente, ver);
 				
 		if(Incidencias != null) {
 			if(Incidencias.size()>0) {
 				logger.debug("Obtivérons "+Incidencias.size()+" incidencias.");
 				ret = Mensaxe.GETINCIDENCIAS_OK.toJSONMensaxe();
-				ret.put("incidencias", Incidencias);
+				for(Incidencia inc : Incidencias) {
+					jsonIncidencias.add(inc.toJson());
+				}
+				ret.put("incidencias", jsonIncidencias);
 			}
 			else {
 				ret = Error.OBTERINCIDENCIAS_NONEXISTEN.toJSONError();

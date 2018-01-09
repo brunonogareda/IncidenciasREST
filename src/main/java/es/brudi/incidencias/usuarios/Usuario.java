@@ -1,11 +1,11 @@
 package es.brudi.incidencias.usuarios;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
 
 import es.brudi.incidencias.clientes.Cliente;
 import es.brudi.incidencias.grupos.Grupo;
 import es.brudi.incidencias.permisos.Permiso;
+import es.brudi.incidencias.util.JSONObject;
 
 /**
  * 
@@ -51,9 +51,8 @@ public class Usuario {
 	 * @return Devolve un obxecto json con datos básicos do usuario
 	 */
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject toJSON() {
-		JSONObject ret = new JSONObject();
+	public JSONObject<String, Object> toJSON() {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
 		
 		ret.put("id", id);
         ret.put("nome", nome);
@@ -180,6 +179,38 @@ public class Usuario {
 		
 		return Math.max(permisoU, permisoG);
 	}
+	
+
+	/**
+	 * Retorna un Obxecto JSON, con varios boolean cos diferentes permisos posibles.
+	 * @return
+	 */
+	public Object getPermisosFinalesJSON() {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		ret.put("CrearIncidencia", podeCrearIncidencia());
+		ret.put("MarcarSolPresuposto", podeMarcarSolPresuposto());
+		ret.put("VerIncidencia", podeVerIncidencia());
+		ret.put("VerIncidenciaPropia", podeVerIncidenciaPropia());
+		ret.put("BorrarIncidencia", podeBorrarIncidencia());
+		ret.put("CambiarEstadoIncidencia", podeCambiarEstadoIncidencia());
+		ret.put("EngadirFactura", podeEngadirFactura());
+		ret.put("EditarFactura", podeEditarFactura());
+		ret.put("EngadirFactura", podeEngadirFactura());
+		ret.put("VerFactura", podeVerFactura());
+		ret.put("EngadirPresuposto", podeEngadirPresuposto());
+		ret.put("EditarPresuposto", podeEditarPresuposto());
+		ret.put("VerPresuposto", podeVerPresuposto());
+		ret.put("AceptarPresuposto", podeAceptarPresuposto());
+		ret.put("EngadirImaxe", podeEngadirImaxe());
+		ret.put("EditarImaxe", podeEditarImaxe());
+		ret.put("VerImaxe", podeVerImaxe());
+		ret.put("EngadirComentario", podeEngadirComentario());
+		ret.put("VerComentario", podeVerComentario());
+
+		return ret;
+	}
+	
+	
 	
 	/**
 	 * @return String de permisos finais do usuario, máximo entre os permisos do usuario e do grupo.

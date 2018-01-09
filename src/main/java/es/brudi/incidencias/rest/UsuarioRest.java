@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
@@ -158,6 +159,36 @@ public class UsuarioRest {
 	        else {
 	        	json = Error.CHANGEMAIL_SENPARAMETROS.toJSONError();
 	        }
+        }
+        else {
+        	logger.warn("Non existe conexión coa base de datos.");
+        	json = Error.DATABASE.toJSONError();
+        }
+
+        return json;
+	}
+	
+	/**
+	 * 
+	 * Obten os permisos do usuario
+	 */
+	@Path("/obterPermisos")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject<String, Object> obterPermisos() {
+		
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+
+        logger.debug("Invocouse o método obterPermisos() de usuario.");
+        if(DBConnectionManager.getConnection() != null ) {
+        	
+		    XestionUsuarios xest = new XestionUsuarios();
+		    json = xest.checkLogin(req);
+		    if (json == null) {
+		    	Usuario user = xest.getUsuario(req);
+		      	json = xest.obterPermisos(user);
+		    }
+
         }
         else {
         	logger.warn("Non existe conexión coa base de datos.");

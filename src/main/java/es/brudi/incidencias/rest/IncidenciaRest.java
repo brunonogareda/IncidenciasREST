@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.EmptyStackException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -201,7 +202,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 								   		  @QueryParam("zona_apartamento") String zona_apartamento,
 								   		  @QueryParam("descripcion_curta") String descripcion_curta,
 								   		  @QueryParam("observacions") String observacions,
-										  @QueryParam("estado") String estado,								   
+										  @QueryParam("estado") List<String> estados,								   
 								   		  @QueryParam("sol_presuposto") String sol_presuposto,
 								   		  @QueryParam("factura") String factura,
 										  @QueryParam("presuposto") String presuposto,
@@ -265,7 +266,7 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 			json = xestu.checkLogin(req);
 			if (json == null) {
 				Usuario user = xestu.getUsuario(req);
-				json = xest.get(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estado, sol_presuposto, factura, presuposto, data_menor, data_maior, autor, cod_cliente, ver);
+				json = xest.get(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estados, sol_presuposto, factura, presuposto, data_menor, data_maior, autor, cod_cliente, ver);
 			}
 
 		} else {

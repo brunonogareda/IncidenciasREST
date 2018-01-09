@@ -126,6 +126,21 @@ public class XestionUsuarios {
 	}
 	
 	/**
+	 * Método que devolve os permisos do usuario rexistrador
+	 * @param req
+	 * @return
+	 */
+	public JSONObject<String, Object> obterPermisos(Usuario user) {
+		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+
+		ret = Mensaxe.OBTERPERMISOS_OK.toJSONMensaxe();
+		ret.put("Permisos", user.getPermisosFinalesJSON());
+		
+		return ret;
+	}
+	
+	
+	/**
 	 * Método que comproba que exista un no request da petición un atributo usuario, é dicir, que o usuario que solicita a petición teña a sesión iniciada
 	 * 
 	 * @param req - RequestHttp do servlet

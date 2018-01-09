@@ -28,6 +28,7 @@ public enum Mensaxe
   MODIFICARIMAXE_OK(0, "A imaxe foi modificada correctamente."),
   INSERTARCOMENTARIO_OK(0, "O comentario engadiuse correctamente."),
   OBTERCOMENTARIOSNC_OK(0, "Obtiveronse os comentarios da incidencia correctamente"),
+  OBTERPERMISOS_OK(0, "Obtiveronse os permisos correctamente"),
   DEFAULT(0, "Ok.");
   
   private final int code;

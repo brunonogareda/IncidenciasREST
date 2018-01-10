@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.util.Util;
 
 /**
  * 
@@ -38,7 +39,9 @@ public class ComentarioDAO {
 	 * @param data - Data do comentario.
 	 * @return - Id do novo comentario. -1 existiuu algún error ao insertar.
 	 */
-	public static int crear(int id_incidencia, String autor, String accion, int tipo, String texto, Timestamp data) {
+	public static int crear(int id_incidencia, String autor, String accion, int tipo, String texto) {
+		
+		Timestamp data = Util.obterTimestampActual();
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "INSERT INTO "+TABLENAME+" (Id_incidencia, Autor, Accion, Tipo, Texto, Data) VALUES (?, ?, ?, ?, ?, ?);";

@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
+import es.brudi.incidencias.util.JSONObject;
+
 /**
  * 
  * Clase do obxecto comentario
@@ -16,23 +18,28 @@ import java.util.Date;
  */
 public class Comentario {
 	
-	public final static int CREACION = 1;
+	public final static int CREACION_INCIDENCIA = 1;
 	public final static int MODIFICACION_PUBLICA = 2;
-	public final static int MODIFICACION_ADMINISTRACION = 3;
-	public final static int COMENTARIO_PUBLICO = 4;
-	public final static int COMENTARIO_TECNICOS = 5;
-	public final static int COMENTARIO_ADMINISTRACION = 6;
+	public final static int MODIFICACION_TECNICOS = 3;
+	public final static int MODIFICACION_ADMINISTRACION = 4;
+	public final static int MODIFICACION_ADMINISTRACION_BRUDI = 5;
+	public final static int TIPO_COMENTARIOS_MIN = 10;
+	public final static int COMENTARIO_PUBLICO = 10;
+	public final static int COMENTARIO_TECNICOS = 11;
+	public final static int COMENTARIO_ADMINISTRACION = 12;
+	public final static int COMENTARIO_ADMINISTRACION_BRUDI = 13;
+	public final static int TIPO_COMENTARIO_MAX = 13;
 	
-	public final static String ACCION_CREAR = "creou";
-	public final static String ACCION_CAMBIOESTADO = "modificou";
-	public final static String ACCION_COMENTAR = "comentou";
+	public final static String ACCION_CREAR_INCIDENCIA = "creou a incidencia.";
+	public final static String ACCION_CAMBIOESTADO = "cambiou o estado da incidencia a";
+	public final static String ACCION_BORRAR_INCIDENCIA = "eliminiou a incidencia.";
+	public final static String ACCION_COMENTAR = "comentou a incidencia";
 	public final static String ACCION_INSERTAR_FACTURA = "engadiu a factura";
 	public final static String ACCION_MODIFICAR_FACTURA = "modificou a factura";
 	public final static String ACCION_INSERTAR_PRESUPOSTO = "engadiu o presuposto";
 	public final static String ACCION_MODIFICAR_PRESUPOSTO = "modificou o presuposto";
 	public final static String ACCION_INSERTAR_IMAXE = "engadiu a imaxe";
 	public final static String ACCION_MODIFICAR_IMAXE = "modificou a imaxe";
-	public final static String ACCION_BORRAR = "eliminiou";
 	
 	private int id;
 	private int id_incidencia;
@@ -76,6 +83,41 @@ public class Comentario {
 		this.tipo = res.getInt("Tipo");
 		this.texto = res.getString("Texto");
 		this.data.setTime(res.getTimestamp("Data"));
+	}
+	
+	public JSONObject<String, Object> toJson() {
+		JSONObject<String, Object> json = new JSONObject<String, Object>();
+		json.put("id_incidencia", id_incidencia);
+		json.put("autor", autor);
+		json.put("titulo", obterTitulo());
+		json.put("texto", obterTexto());
+		json.put("data", data.getTimeInMillis());
+		return json;
+	}
+	
+	/**
+	 * Devolve un titulo para poñer na cabeceira da incidencia.
+	 * En caso de ser un comentario de modificación, engadese o texto no título.
+	 * @return
+	 */
+	public String obterTitulo() {
+		String titulo = "";
+		titulo += accion;
+		if(tipo < Comentario.TIPO_COMENTARIOS_MIN)
+			titulo += " "+texto;
+		return titulo;
+	}
+	
+	/**
+	 * En caso de que no sea un comentario de usuario, si no que un comentario generado por algún cambio en la incidencia,
+	 * se devuelve el texto nulo.
+	 * @return
+	 */
+	public String obterTexto() {
+		if(tipo < Comentario.TIPO_COMENTARIOS_MIN)
+			return null;
+		else
+			return texto;
 	}
 
 	/**

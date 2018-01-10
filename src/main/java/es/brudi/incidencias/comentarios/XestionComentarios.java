@@ -11,6 +11,7 @@ import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
+import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.util.Util;
 
@@ -34,8 +35,11 @@ public class XestionComentarios {
 	 * @param texto
 	 * @return
 	 */
-	public JSONObject<String, Object> insertar(Usuario user, int id_incidencia, String texto) {
+	public JSONObject<String, Object> insertar(Usuario user, int id_incidencia, String texto, int tipo) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		
+		if(tipo < Comentario.TIPO_COMENTARIOS_MIN || tipo > Comentario.TIPO_COMENTARIO_MAX)
+			tipo = Comentario.TIPO_COMENTARIOS_MIN;
 		
 		if(!user.podeEngadirComentario()) {
 			return Error.INSERTARCOMENTARIO_SENPERMISOS2.toJSONError();
@@ -49,12 +53,12 @@ public class XestionComentarios {
 			return Error.INSERTARCOMENTARIO_SENPERMISOS1.toJSONError();
 		}
 		
-		Timestamp data = Util.obterTimestampActual();
-		int idC = ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_COMENTAR, Comentario.COMENTARIO_PUBLICO, texto, data);
+		int idC = ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_COMENTAR, tipo, texto);
 		if(idC <= 0) {
 			return Error.INSERTARCOMENTARIO_ERRORDB.toJSONError();
 		}
 		
+		Timestamp data = Util.obterTimestampActual();
 		Comentario comentario = new Comentario(idC, id_incidencia, user.getNome(), Comentario.ACCION_COMENTAR, Comentario.COMENTARIO_PUBLICO, texto, data);
 				
 		logger.debug("Creouse o comentario "+idC+" correctamente na incidencia: "+id_incidencia);
@@ -73,6 +77,7 @@ public class XestionComentarios {
 	 */
 	public JSONObject<String, Object> obterXIncidencia(Usuario user, int id_incidencia) {
 		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONArray<Object> jsonComentarios = new JSONArray<Object>();
 		
 		if(!user.podeVerComentario()) {
 			return Error.OBTERCOMENTARIO_SENPERMISOS2.toJSONError();
@@ -91,6 +96,7 @@ public class XestionComentarios {
 		if(Comentarios == null) {
 			return Error.OBTERCOMENTARIO_ERRORDB.toJSONError();
 		}
+				
 		if(Comentarios.size() <= 0) {
 			return Error.OBTERCOMENTARIO_NONEXISTENAINC.toJSONError();
 		}
@@ -98,7 +104,12 @@ public class XestionComentarios {
 		logger.debug("Obtiveronse "+Comentarios.size()+" comentarios na incidencia: "+id_incidencia);
 		
 		ret = Mensaxe.OBTERCOMENTARIOSNC_OK.toJSONMensaxe();
-		ret.put("Comentarios", Comentarios);
+		for(Comentario Comentario : Comentarios) {
+			if(user.podeVerComentarioTipo(Comentario.getTipo()))
+				jsonComentarios.add(Comentario.toJson());
+		}
+			
+		ret.put("Comentarios", jsonComentarios);
 		
 		return ret;
 	}

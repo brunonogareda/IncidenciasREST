@@ -2,7 +2,6 @@ package es.brudi.incidencias.presupostos;
 
 import java.io.File;
 import java.io.InputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
@@ -25,7 +24,6 @@ import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
 import es.brudi.incidencias.incidencias.estados.Estado;
-import es.brudi.incidencias.util.Util;
 
 /**
  * 
@@ -114,9 +112,8 @@ public class XestionPresupostos {
 		
 		logger.debug("Creouse o presuposto correctamente: "+id_presuposto);
 
-		Timestamp data = Util.obterTimestampActual();
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.COMENTARIO_ADMINISTRACION, id_presuposto, data);
+		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, id_presuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARPRESUPOSTO_OK.toJSONMensaxe();
@@ -199,9 +196,8 @@ public class XestionPresupostos {
 		
 		logger.debug("Modificado o presuposto correctamente: "+id_presuposto);
 
-		Timestamp data = Util.obterTimestampActual();
 		//Engadimos o comentario de que se modificou o presuposto
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.COMENTARIO_ADMINISTRACION, id_presuposto, data);
+		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, id_presuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARPRESUPOSTO_OK.toJSONMensaxe();

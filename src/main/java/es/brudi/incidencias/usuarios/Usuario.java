@@ -3,6 +3,7 @@ package es.brudi.incidencias.usuarios;
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.clientes.Cliente;
+import es.brudi.incidencias.comentarios.Comentario;
 import es.brudi.incidencias.grupos.Grupo;
 import es.brudi.incidencias.permisos.Permiso;
 import es.brudi.incidencias.util.JSONObject;
@@ -317,6 +318,36 @@ public class Usuario {
 	public boolean podeVerComentario() {
 		int p = getPermisoByType(Permiso.POS_COMENTARIOS);
 		return (p >= Permiso.VER);
+	}
+
+	/**
+	 * Comproba se o usuario pode ver un tipo de comentario en concreto
+	 * Sería conveniente no futuro mellorar este sistema.
+	 * @param tipo
+	 * @return
+	 */
+	public boolean podeVerComentarioTipo(int tipo) {
+		//Se o usuario e un administrador de brudi pode ver este tipo de comentarios
+		if((( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_ADMINISTRACION_BRUDI )
+				|| tipo <= Comentario.MODIFICACION_ADMINISTRACION_BRUDI) && this.cliente.getCod_cliente() == 0 && this.grupo.getNome().equals("Administrador"))
+			return true;
+		
+		//Se o usuario e un cliente de facturación de calquera cliente pode ver este tipo de comentarios.
+		if((( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_ADMINISTRACION )
+				|| tipo <= Comentario.MODIFICACION_ADMINISTRACION)	&& this.grupo.getNome().equals("Cliente_facturación"))
+			return true;
+		
+		//Se o usuario e un técnico de Brudi pode ver este tipo de comentarios.
+		if((( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_TECNICOS )
+				|| tipo <= Comentario.MODIFICACION_TECNICOS) && this.cliente.getCod_cliente() == 0 && this.grupo.getNome().equals("Técnico"))
+			return true;
+		
+		//Calquera usuario pode ver os comentarios públicos.
+		if(( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_PUBLICO ) || tipo <= Comentario.MODIFICACION_PUBLICA)
+			return true;
+		
+		
+		return false;
 	}
 	
 }

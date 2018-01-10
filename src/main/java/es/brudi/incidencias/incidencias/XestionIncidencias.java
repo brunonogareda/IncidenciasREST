@@ -89,7 +89,7 @@ public class XestionIncidencias {
 		
 		logger.debug("Creouse a incidencia correctamente: "+id);
 		
-		int id_c = ComentarioDAO.crear(id, autor, Comentario.ACCION_CREAR, Comentario.COMENTARIO_PUBLICO, "", data);
+		int id_c = ComentarioDAO.crear(id, autor, Comentario.ACCION_CREAR_INCIDENCIA, Comentario.MODIFICACION_PUBLICA, "");
 		
 		if(id_c < 0) {
 			return Error.INSERTARCOMENTARIO_ERROR.toJSONError();
@@ -243,10 +243,8 @@ public class XestionIncidencias {
 		if(!modif) {
 			return Error.MODIFESTADOINCIDENCIA_ERRORDB.toJSONError();
 		}
-		
-		Timestamp data = Util.obterTimestampActual();
-		
-		int id_c = ComentarioDAO.crear(id, user.getNome(), Comentario.ACCION_CAMBIOESTADO, Comentario.COMENTARIO_PUBLICO, "", data);
+				
+		int id_c = ComentarioDAO.crear(id, user.getNome(), Comentario.ACCION_CAMBIOESTADO, Comentario.MODIFICACION_PUBLICA, estado.getEstado());
 
 		if(id_c < 0) {
 			return Error.INSERTARCOMENTARIO_ERROR.toJSONError();

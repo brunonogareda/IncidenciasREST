@@ -48,14 +48,16 @@ private Logger logger = Logger.getLogger(ComentarioRest.class);
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
     public JSONObject<String, Object> insertar(@QueryParam("id_incidencia") String id_incidenciaS,
-    										   @QueryParam("texto") String texto) { 
+    										   @QueryParam("texto") String texto,
+    										   @QueryParam("tipo") String tipoS) { 
 		
 		JSONObject<String, Object> json = new JSONObject<String, Object>();
         logger.debug("Invocouse o método insertar() de comentario.");
         
-        int id_incidencia = -1;
+        int id_incidencia = -1, tipo = -1;
         try {
       		id_incidencia = Util.stringToInt(false, id_incidenciaS);
+      		tipo = Util.stringToInt(true, tipoS);
       	}
       	catch(NumberFormatException e) {
       		return Error.ERRORPARAM.toJSONError();
@@ -72,7 +74,7 @@ private Logger logger = Logger.getLogger(ComentarioRest.class);
         	json = xestu.checkLogin(req);
 	        if (json == null) {
 	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.insertar(user, id_incidencia, texto);
+	        	json = xest.insertar(user, id_incidencia, texto, tipo);
 	        }
 	     
         }

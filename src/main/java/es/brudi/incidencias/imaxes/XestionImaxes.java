@@ -2,7 +2,6 @@ package es.brudi.incidencias.imaxes;
 
 import java.io.File;
 import java.io.InputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
@@ -25,7 +24,6 @@ import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
-import es.brudi.incidencias.util.Util;
 
 /**
  * 
@@ -97,9 +95,8 @@ public class XestionImaxes {
 				
 		logger.debug("Creouse a imaxe correctamente: "+idI);
 
-		Timestamp data = Util.obterTimestampActual();
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.COMENTARIO_PUBLICO, String.valueOf(idI), data);
+		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(idI));
 		
 		if(!errFile)
 			ret = Mensaxe.CREARIMAXE_OK.toJSONMensaxe();
@@ -185,9 +182,8 @@ public class XestionImaxes {
 		
 		logger.debug("Modificada a imaxe correctamente: "+id);
 
-		Timestamp data = Util.obterTimestampActual();
-		//Engadimos o comentario de que se modificou o presuposto
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.COMENTARIO_PUBLICO, String.valueOf(id), data);
+		//Engadimos o comentario de que se engadiu a imaxe
+		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARIMAXE_OK.toJSONMensaxe();

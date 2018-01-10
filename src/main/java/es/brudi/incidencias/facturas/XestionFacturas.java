@@ -2,7 +2,6 @@ package es.brudi.incidencias.facturas;
 
 import java.io.File;
 import java.io.InputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
@@ -25,7 +24,6 @@ import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
 import es.brudi.incidencias.incidencias.estados.Estado;
-import es.brudi.incidencias.util.Util;
 
 /**
  * 
@@ -113,9 +111,8 @@ public class XestionFacturas {
 		
 		logger.debug("Creouse a factura correctamente: "+id_factura);
 
-		Timestamp data = Util.obterTimestampActual();
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.COMENTARIO_ADMINISTRACION, id_factura, data);
+		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, id_factura);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARFACTURA_OK.toJSONMensaxe();
@@ -195,9 +192,8 @@ public class XestionFacturas {
 		
 		logger.debug("Modificada a factura correctamente: "+id_factura);
 
-		Timestamp data = Util.obterTimestampActual();
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.COMENTARIO_ADMINISTRACION, id_factura, data);
+		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, id_factura);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARFACTURA_OK.toJSONMensaxe();

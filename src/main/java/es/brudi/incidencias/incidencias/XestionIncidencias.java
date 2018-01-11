@@ -237,6 +237,14 @@ public class XestionIncidencias {
 		}
 
 		Estado estado = Estado.getByString(estadoS);
+
+		if(!inc.getEstado().estadoSegPosible(estado)) {
+			return Error.MODIFESTADOINCIDENCIA_ESTADOFAIL.toJSONError();
+		}
+		
+		if(estado.equals(Estado.FACTURADO) || estado.equals(Estado.PENDENTE_A) || estado.equals(Estado.PENDENTE_P) || estado.equals(Estado.PENDENTE_P)) {
+			return Error.MODIFESTADOINCIDENCIA_ESTADOFAIL.toJSONError();
+		}
 		
 		boolean modif = IncidenciaDAO.modificarEstado(id, estado.getEstado());
 		

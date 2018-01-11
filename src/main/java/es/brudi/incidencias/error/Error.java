@@ -49,6 +49,7 @@ public enum Error {
 	MODIFESTADOINCIDENCIA_SENPERMISOS1(210, "Non ten privilexios para cambiar o estado das incidencias."),
 	MODIFESTADOINCIDENCIA_SENPERMISOS2(212, "Non ten privilexios para cambiar o estado de esta incidencia."),
 	MODIFESTADOINCIDENCIA_ERRORDB(212, "Error modificando o estado da incidencia na base de datos."),
+	MODIFESTADOINCIDENCIA_ESTADOFAIL(213, "Non é posible establecer este estado."),
 	CREARFACTURA_SENPERMISOS(220, "Non ten privilexios suficientes para engadir unha factura a esta incidencia."),
 	CREARFACTURA_ERRORESTADO(221, "O estado da incidencia debe ser Pentende de Facturar para poden engadir factura."),
 	CREARFACTURA_DUPLICADA(222, "Non se puido crear a factura. Xa existe unha factura con ese identificador."),

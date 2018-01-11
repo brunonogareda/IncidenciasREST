@@ -95,6 +95,19 @@ public class XestionPresupostos {
 		if(!Pret) {
 			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 		}
+		
+		//Engadese o id de presuposto na incidencia correspondente e cambiase o estado
+		if(aceptado) {
+			if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_R.getEstado())) { 
+				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+			}
+		}
+		else {
+			if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_A.getEstado())) { 
+				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+			}
+		}
+		
 		Presuposto presuposto = new Presuposto(id_presuposto, aceptado, ruta_ficheiro, tipo_ficheiro, comentarios);
 
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
@@ -105,11 +118,6 @@ public class XestionPresupostos {
 			}
 		}
 
-		//Engadese o id de presuposto na incidencia correspondente e cambiase o estado
-		if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_R.getEstado())) { 
-			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
-		}
-		
 		logger.debug("Creouse o presuposto correctamente: "+id_presuposto);
 
 		//Engadimos o comentario de que se engadiu un presuposto
@@ -173,6 +181,17 @@ public class XestionPresupostos {
 		boolean pret = PresupostoDAO.modificar(id_presuposto, ruta_ficheiro, tipo_ficheiro, comentarios, aceptado); //modificamos o presuposto na bd.
 		if(!pret) {
 			return Error.MODIFICARPRESUPOSTO_ERRORDB.toJSONError();
+		}
+		
+		if(aceptado != null && aceptado.equals("true") && !presu.isAceptado())  {
+			if(!IncidenciaDAO.modifcarPresupostoEstado(inc.getId(), id_presuposto, Estado.PENDENTE_R.getEstado())) { 
+				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+			}
+		}
+		else if(aceptado != null && aceptado.equals("false") && presu.isAceptado()) {
+			if(!IncidenciaDAO.modifcarPresupostoEstado(inc.getId(), id_presuposto, Estado.PENDENTE_A.getEstado())) { 
+				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+			}
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.

@@ -40,6 +40,8 @@ public class Comentario {
 	public final static String ACCION_MODIFICAR_PRESUPOSTO = "modificou o presuposto";
 	public final static String ACCION_INSERTAR_IMAXE = "engadiu a imaxe";
 	public final static String ACCION_MODIFICAR_IMAXE = "modificou a imaxe";
+	public final static String ACCION_INSERTAR_ALBARAN = "engadiu o albarán";
+	public final static String ACCION_MODIFICAR_ALBARAN = "modificou o albarán";
 	
 	private int id;
 	private int id_incidencia;

@@ -29,6 +29,10 @@ public enum Mensaxe
   INSERTARCOMENTARIO_OK(0, "O comentario engadiuse correctamente."),
   OBTERCOMENTARIOSNC_OK(0, "Obtiveronse os comentarios da incidencia correctamente"),
   OBTERPERMISOS_OK(0, "Obtiveronse os permisos correctamente"),
+  CREARALBARAN_OK(0, "Insertouse o albarán correctamente."),
+  OBTERALBARAN_OK(0, "Obtivose o albarán correctamente."),
+  MODIFICARALBARAN_OK(0, "O albarán foi modificado correctamente."),
+  OBTERALBARANSINC_OK(0, "Obtiveronse os albaráns da incidencia correctamente"),
   DEFAULT(0, "Ok.");
   
   private final int code;

@@ -310,6 +310,21 @@ public class Usuario {
 		return (p >= Permiso.VER);
 	}
 	
+	public boolean podeEngadirAlbaran() {
+		int p = getPermisoByType(Permiso.POS_ALBARANS);
+		return (p >= Permiso.SUBIR);
+	}
+	
+	public boolean podeEditarAlbaran() {
+		int p = getPermisoByType(Permiso.POS_ALBARANS);
+		return (p >= Permiso.MODIFICAR);
+	}
+	
+	public boolean podeVerAlbaran() {
+		int p = getPermisoByType(Permiso.POS_ALBARANS);
+		return (p >= Permiso.VER);
+	}
+	
 	public boolean podeEngadirComentario() {
 		int p = getPermisoByType(Permiso.POS_COMENTARIOS);
 		return (p >= Permiso.COMENTAR);

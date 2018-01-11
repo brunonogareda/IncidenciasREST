@@ -95,6 +95,17 @@ public enum Error {
 	OBTERCOMENTARIO_SENPERMISOS2(331, "Non ten privilexios suficientes para ver comentarios."),
 	OBTERCOMENTARIO_ERRORDB(332, "Erro obtendo os comentarios da base de datos."),
 	OBTERCOMENTARIO_NONEXISTENAINC(333, "Esta incidencia non ten comentarios asociados."),
+	CREARALBARAN_SENPERMISOS(340, "Non ten privilexios suficientes para engadir albaráns."),
+	CREARALBARAN_ERRODB(341, "Erro insertando o albarán na base de datos."),
+	CREARALBARAN_FICHEIRO(342, "Erro subindo o ficheiro albarán. Insertouse o albarán correctamente na base de datos."),
+	OBTERALBARAN_NONEXISTE(350, "O albaran solicitado non existe."),
+	OBTERALBARAN_SERPERMISOS1(351, "Non ten privilexios suficientes para ver este albarán."),
+	OBTERALBARAN_SENPERMISOS2(352, "Non ten privilexios suficientes para ver albaráns."),
+	OBTERALBARAN_ERRORDB(353, "Erro obtendo o albarán da base de datos."),
+	OBTERALBARAN_NONEXISTENAINC(354, "Esta incidencia non ten albaráns asociados."),
+	MODIFICARALBARAN_SENPERMISOS1(360, "Non ten privilexios suficientes para editar este albarán."),
+	MODIFICARALBARAN_SENPERMISOS2(361, "Non ten privilexios suficientes para editar albaráns."),
+	MODIFICARALBARAN_ERRORDB(362, "Erro modificando o albarán na base de datos."),
 
 	DEFAULT(-1, "Erro descoñecido.");
 	

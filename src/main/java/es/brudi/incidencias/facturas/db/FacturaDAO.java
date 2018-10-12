@@ -1,4 +1,4 @@
-package es.brudi.incidencias.db.dao;
+package es.brudi.incidencias.facturas.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,55 +21,48 @@ import es.brudi.incidencias.facturas.Factura;
  */
 public class FacturaDAO {
 
-	private final static String TABLENAME = "Facturas";
-	   
+	private static final String TABLENAME = "Facturas";
 	private static Logger logger = Logger.getLogger(FacturaDAO.class);
+	
+	private FacturaDAO() {
+		 throw new IllegalStateException("Utility class");
+	}
 	
 	/**
 	 * Inserta unha nova factura na base de datos.
 	 * @param id
-	 * @param ruta_ficheiro
-	 * @param tipo_ficheiro
+	 * @param rutaFicheiro
+	 * @param tipoFicheiro
 	 * @param comentarios
 	 * @return
 	 */
-	public static boolean crear(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	protected static boolean crear(String id, String rutaFicheiro, String tipoFicheiro, String comentarios) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "INSERT INTO "+TABLENAME+" (id, Ruta_ficheiro, Tipo_ficheiro, Comentarios) VALUES (?, ?, ?, ?);";
-		
-		PreparedStatement factura;
-		try
-		 {
+		int result = -1;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
 			
-			factura = conn.prepareStatement(query);
-			
 			int i = 1;
-			factura.setString(i++, id);
-			factura.setString(i++, ruta_ficheiro);
-			factura.setString(i++, tipo_ficheiro);
-			factura.setString(i++, comentarios);
+			pst.setString(i++, id);
+			pst.setString(i++, rutaFicheiro);
+			pst.setString(i++, tipoFicheiro);
+			pst.setString(i, comentarios);
 						
-			int res = factura.executeUpdate();
+			result = pst.executeUpdate();
 			
-			factura.close();
-			if(res==1) {
-				return true;
-			}		
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
 		
-		return false;
+		return (result==1);
 	}
 	
 	/**
@@ -77,87 +70,76 @@ public class FacturaDAO {
 	 * @param id
 	 * @return
 	 */
-	public static Factura getById(String id) {
+	protected static Factura getById(String id) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "SELECT * FROM "+TABLENAME+" WHERE id = ?;";
 		
-		PreparedStatement factura;
-		Factura ret = null;
-		ResultSet res;
-		try
-		 {
+		Factura factura = null;
+		ResultSet res = null;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
 			
-			factura = conn.prepareStatement(query);
-			factura.setString(1, id);
-						
-			res = factura.executeQuery();
+			pst.setString(1, id);
+			res = pst.executeQuery();
 			
 			if(res.next()) {
-				ret = new Factura(res);
+				factura = new Factura(res);
 			}
 			
-			res.close();
-			factura.close();
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return ret;
+		return factura;
 	}
 
 	/**
 	 * Modifica os parámetros da factura na base de datos
 	 * @param id
-	 * @param ruta_ficheiro - Ruta completa do ficheiro. NULL non o modifica.
-	 * @param tipo_ficheiro - Extensión do ficheiro. NULL non o modifica.
+	 * @param rutaFicheiro - Ruta completa do ficheiro. NULL non o modifica.
+	 * @param tipoFicheiro - Extensión do ficheiro. NULL non o modifica.
 	 * @param comentarios - Comentarios da factura. NULL non o modifica.
 	 * @return
 	 */
-	public static boolean modificar(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	protected static boolean modificar(String id, String rutaFicheiro, String tipoFicheiro, String comentarios) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		//Contruese a query segundo os datos proporcionados.
 		String query = "UPDATE "+TABLENAME+" SET";
-		query += (ruta_ficheiro != null && !ruta_ficheiro.equals("")) ? " Ruta_ficheiro = ?," : "";
-		query += (tipo_ficheiro != null && !tipo_ficheiro.equals("")) ? " Tipo_ficheiro = ?," : "";
-		query += (comentarios != null && !comentarios.equals("")) ? " Comentarios = ?," : "";
+		query += (rutaFicheiro != null && !rutaFicheiro.isEmpty()) ? " Ruta_ficheiro = ?," : "";
+		query += (tipoFicheiro != null && !tipoFicheiro.isEmpty()) ? " Tipo_ficheiro = ?," : "";
+		query += (comentarios != null && !comentarios.isEmpty()) ? " Comentarios = ?," : "";
 		query += " Id = Id";
 		query += " WHERE Id = ?;";
 		
-		PreparedStatement factura;
-		try
-		 {
-			
-			logger.debug("Realizase a consulta: "+query);
-			
-			factura = conn.prepareStatement(query);	
+		int result = -1;
+		
+		logger.debug("Realizase a consulta: "+query);
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			
 			//Engádense os parámetros pasados a query.
 			int i = 1;
-			if(ruta_ficheiro != null && !ruta_ficheiro.equals("")) factura.setString(i++, ruta_ficheiro);
-			if(tipo_ficheiro != null && !tipo_ficheiro.equals("")) factura.setString(i++, tipo_ficheiro);
-			if(comentarios != null && !comentarios.equals("")) factura.setString(i++, comentarios);
-			factura.setString(i++, id);
+			if(rutaFicheiro != null && !rutaFicheiro.isEmpty()) pst.setString(i++, rutaFicheiro);
+			if(tipoFicheiro != null && !tipoFicheiro.isEmpty()) pst.setString(i++, tipoFicheiro);
+			if(comentarios != null && !comentarios.isEmpty()) pst.setString(i++, comentarios);
+			pst.setString(i++, id);
 	
-			int res = factura.executeUpdate();
-			
-			factura.close();
-			
-			if(res == 1) {
-				return true;
-			}
-			return false;
-					
+			result = pst.executeUpdate();
 		 }
 		catch(SQLException se)
 		 {
@@ -170,6 +152,6 @@ public class FacturaDAO {
 			logger.error("Exception: ", e);
 		 }
 		
-		return false;
+		return (result==1);
 	}
 }

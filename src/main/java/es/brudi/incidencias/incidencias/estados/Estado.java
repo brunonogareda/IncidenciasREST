@@ -22,16 +22,16 @@ public enum Estado {
 	PENDENTE_P("Pendente de Presupostar", new Estado[]{Estado.PENDENTE_A}),
 	DEFAULT("Outro", new Estado[]{});
 	
-	private final String estado;
-	private final Estado[] estados_seg; 
+	private final String estadoS;
+	private final Estado[] estadosSeg; 
 	
-	private Estado(String estado, Estado[] estados_seg) {
-		this.estado = estado;
-		this.estados_seg = estados_seg;
+	private Estado(String estado, Estado[] estadosSeg) {
+		this.estadoS = estado;
+		this.estadosSeg = estadosSeg;
 	}
 	
 	public String getEstado() {
-		return estado;
+		return estadoS;
 	}
 	
 	public static Estado getByString(String estado) {
@@ -48,15 +48,11 @@ public enum Estado {
 	}
 	
 	public boolean estadoSegPosible(Estado estado) {
-		for(int i=0; i < this.estados_seg.length; i++) {
-			if (this.estados_seg[i].equals(estado))
+		for(int i=0; i < this.estadosSeg.length; i++) {
+			if (this.estadosSeg[i].equals(estado))
 				return true;
 		}
 		return false;
 	}
 	
-	
-	public boolean equals(Estado estado) {
-		return (this.getEstado().equals(estado.getEstado()));
-	}
 }

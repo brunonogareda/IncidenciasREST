@@ -132,7 +132,7 @@ public enum Error {
 	}
 	
 	public JSONObject<String, Object> toJSONError() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 		
 		ret.put("errno", this.code);
 		ret.put("message", description);

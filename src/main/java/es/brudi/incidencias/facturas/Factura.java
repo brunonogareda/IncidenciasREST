@@ -1,6 +1,5 @@
 package es.brudi.incidencias.facturas;
 
-//import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -18,24 +17,24 @@ import es.brudi.incidencias.util.JSONObject;
 public class Factura {
 
 	private String id;
-	private String ruta_ficheiro;
-	private String tipo_ficheiro;
+	private String rutaFicheiro;
+	private String tipoFicheiro;
 	private String comentarios;
 	
 	public Factura() {
 	}
 	
-	public Factura(String id, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	public Factura(String id, String rutaFicheiro, String tipoFicheiro, String comentarios) {
 		this.id = id;
-		this.ruta_ficheiro = ruta_ficheiro;
-		this.tipo_ficheiro = tipo_ficheiro;
+		this.rutaFicheiro = rutaFicheiro;
+		this.tipoFicheiro = tipoFicheiro;
 		this.comentarios = comentarios;
 	}
 	
 	public Factura(ResultSet res) throws SQLException {
 		this.id = res.getString("Id");
-		this.ruta_ficheiro = res.getString("Ruta_ficheiro");
-		this.tipo_ficheiro = res.getString("Tipo_ficheiro");
+		this.rutaFicheiro = res.getString("Ruta_ficheiro");
+		this.tipoFicheiro = res.getString("Tipo_ficheiro");
 		this.comentarios = res.getString("Comentarios");
 	}
 
@@ -52,31 +51,31 @@ public class Factura {
 		this.id = id;
 	}
 	/**
-	 * @return the ruta_ficheiro
+	 * @return the rutaFicheiro
 	 */
-	public String getRuta_ficheiro() {
-		return ruta_ficheiro;
+	public String getRutaFicheiro() {
+		return rutaFicheiro;
 	}
 
 	/**
-	 * @param ruta_ficheiro the ruta_ficheiro to set
+	 * @param rutaFicheiro the rutaFicheiro to set
 	 */
-	public void setRuta_ficheiro(String ruta_ficheiro) {
-		this.ruta_ficheiro = ruta_ficheiro;
+	public void setRutaFicheiro(String rutaFicheiro) {
+		this.rutaFicheiro = rutaFicheiro;
 	}
 
 	/**
-	 * @return the tipo_ficheiro
+	 * @return the tipoFicheiro
 	 */
-	public String getTipo_ficheiro() {
-		return tipo_ficheiro;
+	public String getTipoFicheiro() {
+		return tipoFicheiro;
 	}
 
 	/**
-	 * @param tipo_ficheiro the tipo_ficheiro to set
+	 * @param tipoFicheiro the tipoFicheiro to set
 	 */
-	public void setTipo_ficheiro(String tipo_ficheiro) {
-		this.tipo_ficheiro = tipo_ficheiro;
+	public void setTipoFicheiro(String tipoFicheiro) {
+		this.tipoFicheiro = tipoFicheiro;
 	}
 
 	/**
@@ -93,9 +92,9 @@ public class Factura {
 	}
 	
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 		ret.put("id", id);
-		ret.put("tipo_ficheiro", tipo_ficheiro);
+		ret.put("tipoFicheiro", tipoFicheiro);
 		ret.put("comentarios", comentarios);
 		return ret;
 	}	

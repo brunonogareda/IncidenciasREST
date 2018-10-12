@@ -10,12 +10,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.comentarios.XestionComentarios;
-import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.rest.util.Checkdb;
+import es.brudi.incidencias.rest.util.Secured;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.util.JSONObject;
@@ -34,29 +36,32 @@ import es.brudi.incidencias.util.Util;
  * 
  */
 @Path("/comentario")
+@Checkdb
 public class ComentarioRest {
 	
 private Logger logger = Logger.getLogger(ComentarioRest.class);
 	
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
+	@Context private SecurityContext securityContext;
 	
 	/**
 	 * Crea un novo comentario en unha incidencia na base de datos
 	 */
 	@Path("/insertar")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> insertar(@QueryParam("id_incidencia") String id_incidenciaS,
+    public JSONObject<String, Object> insertar(@QueryParam("id_incidencia") String idIncidenciaS,
     										   @QueryParam("texto") String texto,
     										   @QueryParam("tipo") String tipoS) { 
 		
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
         logger.debug("Invocouse o método insertar() de comentario.");
         
-        int id_incidencia = -1, tipo = -1;
+        int idIncidencia;
+        int tipo;
         try {
-      		id_incidencia = Util.stringToInt(false, id_incidenciaS);
+      		idIncidencia = Util.stringToInt(false, idIncidenciaS);
       		tipo = Util.stringToInt(true, tipoS);
       	}
       	catch(NumberFormatException e) {
@@ -66,24 +71,10 @@ private Logger logger = Logger.getLogger(ComentarioRest.class);
       		return Error.FALTANPARAM.toJSONError();
       	}
       	logger.debug("Parámetros correctos.");
-        if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionComentarios xest = new XestionComentarios();
-        	XestionUsuarios xestu = new XestionUsuarios();
-        	
-        	json = xestu.checkLogin(req);
-	        if (json == null) {
-	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.insertar(user, id_incidencia, texto, tipo);
-	        }
-	     
-        }
-        else {
-        	logger.warn("Non existe conexión coa base de datos.");
-        	json = Error.DATABASE.toJSONError();
-        }
-        
-        return json;
+		XestionComentarios xest = new XestionComentarios();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.insertar(user, idIncidencia, texto, tipo);
     }
 	
 	
@@ -95,17 +86,17 @@ private Logger logger = Logger.getLogger(ComentarioRest.class);
 	 */
 	@Path("/obterXIncidencia")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> obterXIncidencia(@QueryParam("id_incidencia") String id_incidenciaS) { 
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
+    public JSONObject<String, Object> obterXIncidencia(@QueryParam("id_incidencia") String idIncidenciaS) { 
 
         logger.debug("Invocouse o método obterXIncidencia() de comentario.");
                 
-        int id_incidencia = -1;
+        int idIncidencia;
         
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
       	try {
-      		id_incidencia = Util.stringToInt(false, id_incidenciaS);
+      		idIncidencia = Util.stringToInt(false, idIncidenciaS);
       	}
       	catch(NumberFormatException e) {
       		return Error.ERRORPARAM.toJSONError();
@@ -114,23 +105,10 @@ private Logger logger = Logger.getLogger(ComentarioRest.class);
       		return Error.FALTANPARAM.toJSONError();
       	}
       	logger.debug("Parámetros correctos.");
-        if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionComentarios xest = new XestionComentarios();
-        	XestionUsuarios xestu = new XestionUsuarios();
-        	
-        	json = xestu.checkLogin(req);
-	        if (json == null) {
-	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.obterXIncidencia(user, id_incidencia);
-	        }
-        }
-        else {
-        	logger.warn("Non existe conexión coa base de datos.");
-        	json = Error.DATABASE.toJSONError();
-        }
-        
-        return json;
+		XestionComentarios xest = new XestionComentarios();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.obterXIncidencia(user, idIncidencia);
     } 
 
 

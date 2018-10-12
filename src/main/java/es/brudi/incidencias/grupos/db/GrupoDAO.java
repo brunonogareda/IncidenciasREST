@@ -1,4 +1,4 @@
-package es.brudi.incidencias.db.dao;
+package es.brudi.incidencias.grupos.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,9 +21,13 @@ import es.brudi.incidencias.grupos.Grupo;
  */
 public class GrupoDAO {
 	
-	private final static String TABLENAME = "Grupos";
-		   
+	private static final String TABLENAME = "Grupos";
+	private static final String TABLENAME_INSTALACIONS = "Grupo_instalacion";
 	private static Logger logger = Logger.getLogger(GrupoDAO.class);
+	
+	private GrupoDAO() {
+		 throw new IllegalStateException("Utility class");
+	}
 	
 	/**
 	 * @return Número de tuplas na táboa de Grupos.
@@ -33,24 +37,28 @@ public class GrupoDAO {
 		Connection conn = DBConnectionManager.getConnection();
 	
 		String query = "SELECT COUNT(*) AS count FROM "+TABLENAME;
-	    PreparedStatement counter;
-	    try
-	    {
-	        counter = conn.prepareStatement(query);
-	        ResultSet res = counter.executeQuery();
+		ResultSet res = null;
+		int result = 0;
+	    try (PreparedStatement pst = conn.prepareStatement(query)) {
+	    	
+	        res = pst.executeQuery();
 	        res.next();
-	        int ret = res.getInt("count");
-	        res.close();
-	        counter.close();
-	        return ret;
+	        result = res.getInt("count");
 	    }
-	    catch(SQLException se)
-	    {
+	    catch(SQLException se) {
 	    	logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 	    }
-	    return 0;
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
+	    return result;
 	}
 	
 	/**
@@ -60,42 +68,31 @@ public class GrupoDAO {
 	public static Grupo getGrupoById(int id) {
 		
 		Connection conn = DBConnectionManager.getConnection();
-		String query = "SELECT * FROM "+TABLENAME+" WHERE Id=?;";
-		PreparedStatement grupo;
-		try
-		 {
-			
-			grupo = conn.prepareStatement(query);
-			grupo.setInt(1, id);
-			
-			ResultSet res = grupo.executeQuery();
-			
-			if(res.next()) {
-				String nome = res.getString("Nome");
-				String permisos = res.getString("Permisos");
-				
-				Grupo ret = new Grupo(id, nome, permisos);
-				res.close();
-				grupo.close();
-				
-				return ret;
-			}
-			else {
-				return null;
-			}			
+		String query = "SELECT * FROM "+TABLENAME+" LEFT JOIN "+TABLENAME_INSTALACIONS+" ON Id=Id_grupo WHERE Id=?;";
+		ResultSet res = null;
+		Grupo ret = null;
+		try(PreparedStatement pst = conn.prepareStatement(query)) {
+			pst.setInt(1, id);
+			res = pst.executeQuery();
+			ret = new Grupo(res);
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
-		
-		return null;
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
+		return ret;
 	}
 }
 	

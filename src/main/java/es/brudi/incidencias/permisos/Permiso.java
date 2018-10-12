@@ -34,7 +34,9 @@ public abstract class Permiso {
 	public static final int SUBIR = 3;
 	public static final int MODIFICAR = 4;
 
-	
+	 private Permiso() {
+	    throw new IllegalStateException("Utility class");
+	  }
 	
 	//Administrador 		2310444440
 	//Técnico				2200004320

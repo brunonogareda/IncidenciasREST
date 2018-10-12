@@ -1,10 +1,11 @@
-package es.brudi.incidencias.db.dao;
+package es.brudi.incidencias.instalacions.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -22,51 +23,48 @@ import es.brudi.incidencias.instalacions.Instalacion;
  */
 public class InstalacionDAO {
 	
-	private final static String TABLENAME = "Instalacions";
-	   
+	private InstalacionDAO() {
+		 throw new IllegalStateException("Utility class");
+	}
+	
+	public static final String TABLENAME = "Instalacions";
 	private static Logger logger = Logger.getLogger(InstalacionDAO.class);
 	
 	/**
 	 * @param id de instalación.
 	 * @return Devolve o obxecto de instalación que corresponde co id.
 	 */
-	public static Instalacion getInstalacionById(int id) {
+	protected static Instalacion getInstalacionById(int id) {
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Id=?;";
-		PreparedStatement grupo;
-		try
-		 {
+		ResultSet res = null;
+		Instalacion instalacion = null;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
+			pst.setInt(1, id);
+			res = pst.executeQuery();
 			
-			grupo = conn.prepareStatement(query);
-			grupo.setInt(1, id);
+			if(res.next())
+				instalacion = new Instalacion(res);
 			
-			ResultSet res = grupo.executeQuery();
-			
-			if(res.next()) {
-				
-				Instalacion ret = new Instalacion(res);
-				
-				res.close();
-				grupo.close();
-				
-				return ret;
-			}
-			else {
-				return null;
-			}			
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return null;
+		return instalacion;
 	}
 	
 	/**
@@ -75,48 +73,47 @@ public class InstalacionDAO {
 	 * @param idCliente Id do cliente do que se quere obter as instalacions
 	 * @return Lista de instalacions
 	 */
-	public static ArrayList<Instalacion> getInstalacionsByCliente(int idCliente) {
+	protected static List<Instalacion> getInstalacionsByCliente(int idCliente) {
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Cod_cliente=?;";
-		PreparedStatement grupo;
-		try
-		 {
+		ResultSet res = null;
+		List<Instalacion> instalacions = new ArrayList<>();
+		
+		if (idCliente < 0) //Se o idCliente é -1, eliminamos a condición e executase directamente.
+			query = "SELECT * FROM "+TABLENAME+";";
+		
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			
-			//Se o idCliente é -1, eliminamos a condición e executase directamente.
-			if(idCliente<0) {
-				query = "SELECT * FROM "+TABLENAME+";";
-				grupo = conn.prepareStatement(query);
+			if(idCliente >= 0) {
+				pst.setInt(1, idCliente);
 			}
-			else {
-				grupo = conn.prepareStatement(query);
-				grupo.setInt(1, idCliente);
-			}
-			
+
 			logger.debug("Realizase a consulta: "+query);
 			
-			ResultSet res = grupo.executeQuery();
-			
-			ArrayList<Instalacion> ret = new ArrayList<Instalacion>();
+			res = pst.executeQuery();
 						
 			while(res.next()) {			
-				ret.add(new Instalacion(res));
+				instalacions.add(new Instalacion(res));
 			}
-			res.close();
-			grupo.close();
-			return ret;
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return null;
+		return instalacions;
 	}
 
 }

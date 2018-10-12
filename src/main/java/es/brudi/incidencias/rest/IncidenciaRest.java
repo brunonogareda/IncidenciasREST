@@ -14,13 +14,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.XestionIncidencias;
+import es.brudi.incidencias.rest.util.Checkdb;
+import es.brudi.incidencias.rest.util.Secured;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.Util;
@@ -38,14 +40,16 @@ import es.brudi.incidencias.util.Util;
  * 
  */
 @Path("/incidencia")
+@Checkdb
 public class IncidenciaRest {
 	
 private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	
-	public final static SimpleDateFormat FORMATO_DATA = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
+	public final SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
 
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
+	@Context private SecurityContext securityContext;
 
 	/**
 	 * Crea unha nova incidencia.
@@ -54,46 +58,47 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	 * @param ot
 	 * @param id_cliente
 	 * @param id_instalacion
-	 * @param zona_apartamento
-	 * @param descripcion_curta
+	 * @param zonaApartamento
+	 * @param descripcionCurta
 	 * @param observacions
 	 * @param sol_presuposto
 	 * @return
 	 */
 	@Path("/create")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> create(@QueryParam("cod_parte") String cod_parteS,
+	public JSONObject<String, Object> create(@QueryParam("cod_parte") String codParteS,
 								   @QueryParam("ot") String otS,
-								   @QueryParam("id_instalacion") String id_instalacionS,
-								   @QueryParam("zona_apartamento") String zona_apartamento,
-								   @QueryParam("descripcion_curta") String descripcion_curta,
+								   @QueryParam("id_instalacion") String idInstalacionS,
+								   @QueryParam("zona_apartamento") String zonaApartamento,
+								   @QueryParam("descripcion_curta") String descripcionCurta,
 								   @QueryParam("observacions") String observacions,
-								   @QueryParam("sol_presuposto") String sol_presupostoS) { 
-		
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
+								   @QueryParam("sol_presuposto") String solPresupostoS) { 
 		
         logger.debug("Invocouse o método create() de Incidencia.");
 		
-		int cod_parte, ot, id_instalacion;
-		boolean sol_presuposto = false;
+		int codParte;
+		int ot;
+		int idInstalacion;
+		boolean solPresuposto = false;
 
 		//Comprobase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
 		try {
-			cod_parte = Util.stringToInt(true, cod_parteS);
+			codParte = Util.stringToInt(true, codParteS);
 			ot = Util.stringToInt(true, otS);
-			id_instalacion = Util.stringToInt(false, id_instalacionS);
+			idInstalacion = Util.stringToInt(false, idInstalacionS);
 			
-			if(cod_parte < 0 || ot < 0 || id_instalacion < 0) //Estes parámetros non poden ser negativos. Se son -1 serán nulos.
+			if(codParte < 0 || ot < 0 || idInstalacion < 0) //Estes parámetros non poden ser negativos. Se son -1 serán nulos.
 				throw new NumberFormatException();
 			
 			//Se o parametro sol_presuposto ven en true deixase en true, en outro caso ponse a false.
-			if(sol_presupostoS != null && sol_presupostoS.equals("true")) {
-				sol_presuposto = true;
+			if(solPresupostoS != null && solPresupostoS.equals("true")) {
+				solPresuposto = true;
 			}
 			
 			//Estes deben estar tamén cubertos, en outro caso retornamos erro de faltan parámetros.
-			if(zona_apartamento==null || descripcion_curta==null || observacions==null)
+			if(zonaApartamento==null || descripcionCurta==null || observacions==null)
 				throw new EmptyStackException();
 			
 		}
@@ -105,24 +110,12 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		}
 		
 		logger.debug("Parámetros correctos.");
-        if(DBConnectionManager.getConnection() != null ) {
-         
-        	XestionIncidencias xest = new XestionIncidencias();
-        	XestionUsuarios xestu = new XestionUsuarios();
-        	
-        	json = xestu.checkLogin(req);
-	        if (json == null) {
-	        	Usuario user = xestu.getUsuario(req);
-	        	json = xest.crear(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, sol_presuposto);
-	        }
-	     
-        }
-        else {
-        	logger.warn("Non existe conexión coa base de datos.");
-        	json = Error.DATABASE.toJSONError();
-        }
-        
-        return json;
+
+		XestionIncidencias xest = new XestionIncidencias();
+
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.crear(user, codParte, ot, idInstalacion, zonaApartamento, descripcionCurta, observacions,
+				solPresuposto);
     }
 	
 	/**
@@ -133,10 +126,9 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	 */
 	@Path("/getById")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject<String, Object> getById(@QueryParam("id") String idS) {
-
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
 		logger.debug("Invocouse o método getById() de Incidencia.");
 
@@ -153,97 +145,86 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		}
 
 		logger.debug("Parámetros correctos.");
-		if (DBConnectionManager.getConnection() != null) {
 
-			XestionIncidencias xest = new XestionIncidencias();
-			XestionUsuarios xestu = new XestionUsuarios();
-
-			json = xestu.checkLogin(req);
-			if (json == null) {
-				Usuario user = xestu.getUsuario(req);
-				json = xest.getById(user, id);
-			}
-
-		} else {
-			logger.warn("Non existe conexión coa base de datos.");
-			json = Error.DATABASE.toJSONError();
-		}
-
-		return json;
+		XestionIncidencias xest = new XestionIncidencias();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.getById(user, id);
 	}
 	
 
 	/**
 	 * Obten incidencias según os parámetros que se lle pasan.
 	 * 
-	 * @param cod_parteS
+	 * @param codParteS
 	 * @param otS
-	 * @param id_instalacionS
-	 * @param zona_apartamento
-	 * @param descripcion_curta
+	 * @param idInstalacionS
+	 * @param zonaApartamento
+	 * @param descripcionCurta
 	 * @param observacions
 	 * @param estado
-	 * @param sol_presuposto
+	 * @param solPresuposto
 	 * @param factura
 	 * @param presuposto
-	 * @param data_menorS
-	 * @param data_maiorS
+	 * @param dataMenorS
+	 * @param dataMaiorS
 	 * @param autor
-	 * @param cod_clienteS
+	 * @param codClienteS
 	 * @param verS
 	 * @return
 	 */
 	@Path("/get")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> get(@QueryParam("cod_parte") String cod_parteS,
+	public JSONObject<String, Object> get(@QueryParam("cod_parte") String codParteS,
 								   		  @QueryParam("ot") String otS,
-								   		  @QueryParam("id_instalacion") String id_instalacionS,
-								   		  @QueryParam("zona_apartamento") String zona_apartamento,
-								   		  @QueryParam("descripcion_curta") String descripcion_curta,
+								   		  @QueryParam("id_instalacion") String idInstalacionS,
+								   		  @QueryParam("zona_apartamento") String zonaApartamento,
+								   		  @QueryParam("descripcion_curta") String descripcionCurta,
 								   		  @QueryParam("observacions") String observacions,
 										  @QueryParam("estado") List<String> estados,								   
-								   		  @QueryParam("sol_presuposto") String sol_presuposto,
+								   		  @QueryParam("sol_presuposto") String solPresuposto,
 								   		  @QueryParam("factura") String factura,
 										  @QueryParam("presuposto") String presuposto,
-										  @QueryParam("data_menor") String data_menorS,
-										  @QueryParam("data_maior") String data_maiorS,
+										  @QueryParam("data_menor") String dataMenorS,
+										  @QueryParam("data_maior") String dataMaiorS,
 										  @QueryParam("autor") String autor,
-										  @QueryParam("cod_cliente") String cod_clienteS,
+										  @QueryParam("cod_cliente") String codClienteS,
 										  @QueryParam("ver") String verS) {
-
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
 		logger.debug("Invocouse o método get() de Incidencia.");
 
-		int cod_parte=-1, ot=-1, id_instalacion=-1, cod_cliente=-1, ver=-1;
-
-		Calendar data_menor = null;
-		Calendar data_maior = null;
+		int codParte;
+		int ot;
+		int idInstalacion;
+		int codCliente;
+		int ver;
+		Calendar dataMenor = null;
+		Calendar dataMaior = null;
 		
 		//Comprobase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
 		try {
-			cod_parte = Util.stringToInt(true, cod_parteS);
+			codParte = Util.stringToInt(true, codParteS);
 			ot = Util.stringToInt(true, otS);
-			id_instalacion = Util.stringToInt(true, id_instalacionS);
-			cod_cliente = Util.stringToInt(true, cod_clienteS);
+			idInstalacion = Util.stringToInt(true, idInstalacionS);
+			codCliente = Util.stringToInt(true, codClienteS);
 			ver = Util.stringToInt(true, verS);
 			
 			if(ver < 0) //Se é menor que -1, error de parámetro.
 				throw new NumberFormatException();
 						
-			if(sol_presuposto != null) { // Se sol_presuposto non é nulo, true ou false, devolvemos un erro.
-				if(!sol_presuposto.equals("true") && !sol_presuposto.equals("false"))
+			if(solPresuposto != null) { // Se sol_presuposto non é nulo, true ou false, devolvemos un erro.
+				if(!solPresuposto.equals("true") && !solPresuposto.equals("false"))
 					throw new NumberFormatException();
 			}
 			
-			if(data_menorS != null && !data_menorS.equals("")) {
-				data_menor = Calendar.getInstance();
-				data_menor.setTime(FORMATO_DATA.parse(data_menorS));
+			if(dataMenorS != null && !dataMenorS.equals("")) {
+				dataMenor = Calendar.getInstance();
+				dataMenor.setTime(formatoData.parse(dataMenorS));
 			}
-			if(data_maiorS != null && !data_maiorS.equals("")) {
-				data_maior = Calendar.getInstance();
-				data_maior.setTime(FORMATO_DATA.parse(data_maiorS));
+			if(dataMaiorS != null && !dataMaiorS.equals("")) {
+				dataMaior = Calendar.getInstance();
+				dataMaior.setTime(formatoData.parse(dataMaiorS));
 			}
 			
 		}
@@ -258,23 +239,11 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		}
 		
 		logger.debug("Parámetros correctos.");
-		if (DBConnectionManager.getConnection() != null) {
 
-			XestionIncidencias xest = new XestionIncidencias();
-			XestionUsuarios xestu = new XestionUsuarios();
-
-			json = xestu.checkLogin(req);
-			if (json == null) {
-				Usuario user = xestu.getUsuario(req);
-				json = xest.get(user, cod_parte, ot, id_instalacion, zona_apartamento, descripcion_curta, observacions, estados, sol_presuposto, factura, presuposto, data_menor, data_maior, autor, cod_cliente, ver);
-			}
-
-		} else {
-			logger.warn("Non existe conexión coa base de datos.");
-			json = Error.DATABASE.toJSONError();
-		}
-
-		return json;
+		XestionIncidencias xest = new XestionIncidencias();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.get(user, codParte, ot, idInstalacion, zonaApartamento, descripcionCurta, observacions, estados,
+				solPresuposto, factura, presuposto, dataMenor, dataMaior, autor, codCliente, ver);
 	}
 
 	/**
@@ -286,10 +255,9 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	 */
 	@Path("/cambiarEstado")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject<String, Object> cambiarEstado(@QueryParam("id") String idS, @QueryParam("estado") String estado) {
-
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
 		logger.debug("Invocouse o método cambiarEstado() de Incidencia.");
 
@@ -310,23 +278,10 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		}
 
 		logger.debug("Parámetros correctos.");
-		if (DBConnectionManager.getConnection() != null) {
 
-			XestionIncidencias xest = new XestionIncidencias();
-			XestionUsuarios xestu = new XestionUsuarios();
-
-			json = xestu.checkLogin(req);
-			if (json == null) {
-				Usuario user = xestu.getUsuario(req);
-				json = xest.cambiarEstado(user, id, estado);
-			}
-
-		} else {
-			logger.warn("Non existe conexión coa base de datos.");
-			json = Error.DATABASE.toJSONError();
-		}
-
-		return json;
+		XestionIncidencias xest = new XestionIncidencias();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.cambiarEstado(user, id, estado);
 	}
 	
 	/**
@@ -337,10 +292,9 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 	 */
 	@Path("/borrar")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject<String, Object> borrar(@QueryParam("id") String idS) {
-
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
 
 		logger.debug("Invocouse o método borrar() de Incidencia.");
 
@@ -357,23 +311,10 @@ private Logger logger = Logger.getLogger(IncidenciaRest.class);
 		}
 
 		logger.debug("Parámetros correctos.");
-		if (DBConnectionManager.getConnection() != null) {
 
-			XestionIncidencias xest = new XestionIncidencias();
-			XestionUsuarios xestu = new XestionUsuarios();
-
-			json = xestu.checkLogin(req);
-			if (json == null) {
-				Usuario user = xestu.getUsuario(req);
-				json = xest.borrar(user, id);
-			}
-
-		} else {
-			logger.warn("Non existe conexión coa base de datos.");
-			json = Error.DATABASE.toJSONError();
-		}
-
-		return json;
+		XestionIncidencias xest = new XestionIncidencias();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.borrar(user, id);
 	}
 	
 }

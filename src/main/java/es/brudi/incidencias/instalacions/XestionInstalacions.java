@@ -1,10 +1,10 @@
 package es.brudi.incidencias.instalacions;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.instalacions.db.InstalacionAccessor;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
 
@@ -26,18 +26,18 @@ public class XestionInstalacions {
 	 * @return Obxecto JSON coa resposta.
 	 */
 	public JSONObject<String, Object> getInstalacionsByCliente(Usuario user, int idCliente) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret;
 
-		if(user.getCliente().getCod_cliente()!=idCliente && user.getCliente().getCod_cliente()!=0) {
+		if(user.getCliente().getCodCliente()!=idCliente && user.getCliente().getCodCliente()!=0) {
 			return Error.GETINSTALACIONS_SENPERMISOS.toJSONError();
 		}
 		
-		ArrayList<Instalacion> Instalacions = InstalacionDAO.getInstalacionsByCliente(idCliente);
+		List<Instalacion> instalacions = InstalacionAccessor.getInstalacionsByCliente(idCliente);
 		
-		if(Instalacions != null) {
-			if(Instalacions.size()>0) {
+		if(instalacions != null) {
+			if(!instalacions.isEmpty()) {
 				ret = Mensaxe.GETINSTALACIONS_OK.toJSONMensaxe();
-				ret.put("instalacions", Instalacions);
+				ret.put("instalacions", instalacions);
 			}
 			else {
 				ret = Error.GETINSTALACIONS_SENINSTALACIONS.toJSONError();

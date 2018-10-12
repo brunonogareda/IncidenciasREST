@@ -2,7 +2,6 @@ package es.brudi.incidencias.presupostos;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -10,19 +9,18 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import es.brudi.incidencias.comentarios.Comentario;
-import es.brudi.incidencias.db.dao.ComentarioDAO;
-import es.brudi.incidencias.db.dao.IncidenciaDAO;
-import es.brudi.incidencias.db.dao.PresupostoDAO;
+import es.brudi.incidencias.comentarios.db.ComentarioAccessor;
 import es.brudi.incidencias.documentos.XestionFicheiros;
 import es.brudi.incidencias.mensaxes.Mensaxe;
+import es.brudi.incidencias.presupostos.db.PresupostoAccessor;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.incidencias.Incidencia;
+import es.brudi.incidencias.incidencias.db.IncidenciaAccessor;
 import es.brudi.incidencias.incidencias.estados.Estado;
 
 /**
@@ -41,32 +39,32 @@ public class XestionPresupostos {
 	/**
 	 * Crea un novo presuposto na base de datos. E garda o ficheiro en local se existe.
 	 * @param user
-	 * @param id_incidencia
-	 * @param id_presuposto
+	 * @param idIncidencia
+	 * @param idPresuposto
 	 * @param comentarios
 	 * @param aceptado
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> crear(Usuario user, int id_incidencia, String id_presuposto, String comentarios, boolean aceptado, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> crear(Usuario user, int idIncidencia, String idPresuposto, String comentarios, boolean aceptado, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEngadirPresuposto()) {
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(id_incidencia);
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREARPRESUPOSTO_SENPERMISOS.toJSONError();
 		}
 		if(aceptado && !user.podeAceptarPresuposto()) {
@@ -76,7 +74,7 @@ public class XestionPresupostos {
 			return Error.CREARPRESUPOSTO_EXISTE.toJSONError();
 		}
 		//comprobamos se xa existe algun presuposto con ese Id.
-		Presuposto presu = PresupostoDAO.getById(id_presuposto);
+		Presuposto presu = PresupostoAccessor.obterPorId(idPresuposto);
 		if(presu != null) {
 			return Error.CREARPRESUPOSTO_DUPLICADO.toJSONError();
 		}
@@ -85,43 +83,43 @@ public class XestionPresupostos {
 		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_presuposto.replaceAll("/", "-")+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_PRESUPOSTOS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			nomeFicheiro = idPresuposto.replaceAll("/", "-")+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos(), inc.getData());
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean Pret = PresupostoDAO.crear(id_presuposto, ruta_ficheiro, tipo_ficheiro, comentarios, aceptado); //Creamos o presuposto na táboa.
+		boolean Pret = PresupostoAccessor.crear(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado); //Creamos o presuposto na táboa.
 		if(!Pret) {
 			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 		}
 		
 		//Engadese o id de presuposto na incidencia correspondente e cambiase o estado
 		if(aceptado) {
-			if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_R.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_R.getEstado())) { 
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
 		else {
-			if(!IncidenciaDAO.modifcarPresupostoEstado(id_incidencia, id_presuposto, Estado.PENDENTE_A.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_A.getEstado())) { 
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
 		
-		Presuposto presuposto = new Presuposto(id_presuposto, aceptado, ruta_ficheiro, tipo_ficheiro, comentarios);
+		Presuposto presuposto = new Presuposto(idPresuposto, aceptado, rutaFicheiro, tipoFicheiro, comentarios);
 
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARPRESUPOSTO_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 
-		logger.debug("Creouse o presuposto correctamente: "+id_presuposto);
+		logger.debug("Creouse o presuposto correctamente: "+idPresuposto);
 
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, id_presuposto);
+		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARPRESUPOSTO_OK.toJSONMensaxe();
@@ -134,21 +132,21 @@ public class XestionPresupostos {
 	/**
 	 * Modifica un presuposto existente.
 	 * @param user
-	 * @param id_presuposto
+	 * @param idPresuposto
 	 * @param comentarios
 	 * @param aceptado
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> modificar(Usuario user, String id_presuposto, String comentarios, String aceptado,
+	public JSONObject<String, Object> modificar(Usuario user, String idPresuposto, String comentarios, String aceptado,
 			InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEditarPresuposto() && (comentarios != null || uploadedInputStream != null) ) {
@@ -157,66 +155,65 @@ public class XestionPresupostos {
 		if(aceptado!=null && !user.podeAceptarPresuposto()) {
 			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
 		}
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, id_presuposto, null, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		if(inc == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.MODIFICARPRESUPOSTO_SENPERMISOS1.toJSONError();
 		}
-		Presuposto presu = PresupostoDAO.getById(id_presuposto);
+		Presuposto presu = PresupostoAccessor.obterPorId(idPresuposto);
 		if(presu == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
 			
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_presuposto.replaceAll("/", "-")+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_PRESUPOSTOS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			nomeFicheiro = idPresuposto.replaceAll("/", "-")+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos(), inc.getData());
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean pret = PresupostoDAO.modificar(id_presuposto, ruta_ficheiro, tipo_ficheiro, comentarios, aceptado); //modificamos o presuposto na bd.
+		boolean pret = PresupostoAccessor.modificar(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado); //modificamos o presuposto na bd.
 		if(!pret) {
 			return Error.MODIFICARPRESUPOSTO_ERRORDB.toJSONError();
 		}
 		
 		if(aceptado != null && aceptado.equals("true") && !presu.isAceptado())  {
-			if(!IncidenciaDAO.modifcarPresupostoEstado(inc.getId(), id_presuposto, Estado.PENDENTE_R.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(inc.getId(), idPresuposto, Estado.PENDENTE_R.getEstado())) { 
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
 		else if(aceptado != null && aceptado.equals("false") && presu.isAceptado()) {
-			if(!IncidenciaDAO.modifcarPresupostoEstado(inc.getId(), id_presuposto, Estado.PENDENTE_A.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(inc.getId(), idPresuposto, Estado.PENDENTE_A.getEstado())) { 
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			if(presu.getRuta_ficheiro() != null && !presu.getRuta_ficheiro().equals("")) {//Se existe boramos o ficheiro antigo.
-				if(!XestionFicheiros.borrar(presu.getRuta_ficheiro())) {
-					logger.error("Erro o eliminar o ficheiro: "+presu.getRuta_ficheiro());
+			if(presu.getRutaFicheiro() != null && !presu.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
+				if(!XestionFicheiros.borrar(presu.getRutaFicheiro())) {
+					logger.error("Erro o eliminar o ficheiro: "+presu.getRutaFicheiro());
 				}
 			}
 			
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARPRESUPOSTO_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 		
-		Presuposto presuposto = PresupostoDAO.getById(id_presuposto); //Buscamos o presuposto que acabamos de modificar
+		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto); //Buscamos o presuposto que acabamos de modificar
 		if(presuposto == null) {
 			return Error.MODIFICARPRESUPOSTO_ERRORDB.toJSONError();
 		}
 		
-		logger.debug("Modificado o presuposto correctamente: "+id_presuposto);
+		logger.debug("Modificado o presuposto correctamente: "+idPresuposto);
 
 		//Engadimos o comentario de que se modificou o presuposto
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, id_presuposto);
+		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARPRESUPOSTO_OK.toJSONMensaxe();
@@ -229,31 +226,30 @@ public class XestionPresupostos {
 	/**
 	 * Obten os datos de un presuposto.
 	 * @param user
-	 * @param id_presuposto
+	 * @param idPresuposto
 	 * @return
 	 */
-	public JSONObject<String, Object> obter(Usuario user, String id_presuposto) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> obter(Usuario user, String idPresuposto) {
+		JSONObject<String, Object> ret;
 		
 		if(!user.podeVerPresuposto()) {
 			return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
 		
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, id_presuposto, null, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		if(inc == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
-		Presuposto presuposto = PresupostoDAO.getById(id_presuposto);
+		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto);
 		if(presuposto == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
 				
-		logger.debug("Obtivose o presuposto correctamente: "+id_presuposto);
+		logger.debug("Obtivose o presuposto correctamente: "+idPresuposto);
 
 		ret = Mensaxe.OBTERPRESUPOSTO_OK.toJSONMensaxe();
 		ret.put("Presuposto", presuposto.toJson());
@@ -267,33 +263,32 @@ public class XestionPresupostos {
 	 * @param id_presuposto
 	 * @return
 	 */
-	public Response obterFicheiro(Usuario user, String id_presuposto) {
+	public Response obterFicheiro(Usuario user, String idPresuposto) {
 
 		if(!user.podeVerPresuposto()) {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, id_presuposto, null, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		if(inc == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Response.status(Status.FORBIDDEN).build();
 		}
-		Presuposto presuposto = PresupostoDAO.getById(id_presuposto);
+		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto);
 		if(presuposto == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
-		File file = XestionFicheiros.obterFicheiro(presuposto.getRuta_ficheiro());
+		File file = XestionFicheiros.obterFicheiro(presuposto.getRutaFicheiro());
 		if(file == null) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
 		
-		logger.debug("Obtivose o presuposto correctamente: "+id_presuposto);
+		logger.debug("Obtivose o presuposto correctamente: "+idPresuposto);
 
 		ResponseBuilder response = Response.ok((Object) file);
 	    response.header("Content-Disposition", "attachment; filename="+file.getName());

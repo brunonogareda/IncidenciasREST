@@ -1,11 +1,11 @@
-package es.brudi.incidencias.db.dao;
+package es.brudi.incidencias.clientes.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -23,84 +23,85 @@ import es.brudi.incidencias.clientes.Cliente;
  */
 public class ClienteDAO {
 
-	private final static String TABLENAME = "Clientes";
-	   
+	private static final String TABLENAME = "Clientes";
 	private static Logger logger = Logger.getLogger(ClienteDAO.class);
+	
+	private ClienteDAO() {
+		 throw new IllegalStateException("Utility class");
+	}
 	
 	/**
 	 * @return Número de tuplas na táboa de Clientes.
 	 */
-	public static int count() {
+	protected static int count() {
 	    	
 	    Connection conn = DBConnectionManager.getConnection();
 	
 	    String query = "SELECT COUNT(*) AS count FROM "+TABLENAME;
-	    PreparedStatement counter;
-	    try
-	    {
-	        counter = conn.prepareStatement(query);
-	        ResultSet res = counter.executeQuery();
+	    ResultSet res = null;
+	    int ret = 0;
+	    try (PreparedStatement pst = conn.prepareStatement(query)) {
+	    	
+	        res = pst.executeQuery();
 	        
 	        res.next();
-	        int ret = res.getInt("count");
-	        counter.close();
-	        return ret;
+	        ret = res.getInt("count");
 	    }
-	    catch(SQLException se)
-	    {
+	    catch(SQLException se) {
 	    	logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 	    }
-	    return 0;
+	    finally {
+	    	try {
+	    		if(res != null)
+	    			res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+	    }
+	    
+	    return ret;
 	}
 	
 	/**
 	 * @return ArrayList con todos os Clientes da base de datos.
 	 */
-	public static ArrayList<Cliente> getClientes() {
+	protected static List<Cliente> getClientes() {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+";";
-		Statement cliente;
-		try
-		 {
-			ArrayList<Cliente> clientes = new ArrayList<Cliente>();
+		ResultSet res = null;
+		ArrayList<Cliente> clientes = new ArrayList<>();
+
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			
-			cliente = conn.createStatement();
-			
-			ResultSet res = cliente.executeQuery(query);
+			res = pst.executeQuery();
 			
 			while(res.next()) {
-	
-				int id = res.getInt("Cod_cliente");
-				String nome = res.getString("Nome");
-				String nome_curto = res.getString("Nome_curto");
-				String nif = res.getString("NIF");
-				//byte cod_parte_propio = res.getByte("Cod_parte_propio");
-				boolean cod_parte_propio = res.getBoolean("Cod_parte_propio");					
-				
-				Cliente cli = new Cliente(id, nome, nome_curto, nif, cod_parte_propio);
-				
+				Cliente cli = new Cliente(res);
 				clientes.add(cli);
 			}
 			
-			res.close();
-			cliente.close();
-			return clientes;
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return null;
+		return clientes;
 		
 	}
 	
@@ -108,48 +109,39 @@ public class ClienteDAO {
 	 * @param id de cliente
 	 * @return Devolve o obxecto cliente que corresponde co Id que se lle pasou.
 	 */
-	public static Cliente getClienteById(int id) {
+	protected static Cliente getClienteById(int id) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Cod_cliente=?;";
-		PreparedStatement cliente;
-		try
-		 {
+		ResultSet res = null;
+		Cliente ret = null;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			
-			cliente = conn.prepareStatement(query);
-			cliente.setInt(1, id);
-			
-			ResultSet res = cliente.executeQuery();
+			pst.setInt(1, id);
+			res = pst.executeQuery();
 							
 			if(res.next()) {
-				String nome = res.getString("Nome");
-				String nome_curto = res.getString("Nome_curto");
-				String nif = res.getString("NIF");
-				byte cod_parte_propio = res.getByte("Cod_parte_propio");
-				
-				Cliente ret = new Cliente(id, nome, nome_curto, nif, cod_parte_propio);
-				
-				res.close();
-				cliente.close();
-				
-				return ret;
+				ret = new Cliente(res);
 			}
-			else {
-				return null;
-			}			
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return null;
+		return ret;
 		
 	}
 }

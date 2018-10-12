@@ -51,13 +51,14 @@ public enum Mensaxe
     return code;
   }
   
+  @Override
   public String toString() {
     return code + ": " + description;
   }
 
   
   public JSONObject<String, Object> toJSONMensaxe() {
-	JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	JSONObject<String, Object> ret = new JSONObject<>();
     
     ret.put("errno", Integer.valueOf(code));
     ret.put("message", description);

@@ -21,6 +21,10 @@ public class Util {
 	
 	public static final TimeZone timeZone = TimeZone.getTimeZone("Europe/Madrid");
 	
+	private Util() {
+	    throw new IllegalStateException("Utility class");
+	 }
+	
 	/**
 	 * Comproba se un String é numérico
 	 * @param text

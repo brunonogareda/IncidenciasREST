@@ -1,5 +1,8 @@
 package es.brudi.incidencias.clientes;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import es.brudi.incidencias.util.JSONObject;
 
 /**
@@ -13,11 +16,11 @@ import es.brudi.incidencias.util.JSONObject;
  */
 public class Cliente {
 	
-	public int cod_cliente;
-	public String nome;
-	public String nome_curto;
-	public String nif;
-	public boolean cod_parte_propio;
+	private int codCliente;
+	private String nome;
+	private String nomeCurto;
+	private String nif;
+	private boolean codPartePropio;
 	
 	
 	public Cliente() {}
@@ -26,70 +29,77 @@ public class Cliente {
 	/**
 	 * 
 	 * Constructor principal da clase Cliente
-	 * @param cod_cliente
+	 * @param codCliente
 	 * @param nome
-	 * @param nome_curto
+	 * @param nomeCurto
 	 * @param nif
-	 * @param cod_parte_propio
+	 * @param codPartePropio
 	 */
-	public Cliente(int cod_cliente, String nome, String nome_curto, String nif, boolean cod_parte_propio) {
+	public Cliente(int codCliente, String nome, String nomeCurto, String nif, boolean codPartePropio) {
 		super();
-		this.cod_cliente = cod_cliente;
+		this.codCliente = codCliente;
 		this.nome = nome;
-		this.nome_curto = nome_curto;
+		this.nomeCurto = nomeCurto;
 		this.nif = nif;
-		this.cod_parte_propio = cod_parte_propio;
+		this.codPartePropio = codPartePropio;
 	}
 	
 	/**
 	 * Constructor da clase Cliente que reciben un obxecto byte, en caso de 1 pon a true en caso de 0 pon a false.
-	 * @param cod_cliente
+	 * @param codCliente
 	 * @param nome
-	 * @param nome_curto
+	 * @param nomeCurto
 	 * @param nif
-	 * @param cod_parte_propio
+	 * @param codPartePropio
 	 */
-	public Cliente(int cod_cliente, String nome, String nome_curto, String nif, byte cod_parte_propio) {		
-		this(cod_cliente, nome, nome_curto, nif, true);
-		if(cod_parte_propio==0) {
-			this.cod_parte_propio = false;
+	public Cliente(int codCliente, String nome, String nomeCurto, String nif, byte codPartePropio) {		
+		this(codCliente, nome, nomeCurto, nif, true);
+		if(codPartePropio==0) {
+			this.codPartePropio = false;
 		}
 	}
 
-
+	public Cliente(ResultSet res)  throws SQLException {
+		this.codCliente = res.getInt("Cod_cliente");
+		this.nome = res.getString("Nome");
+		this.nomeCurto = res.getString("Nome_curto");
+		this.nif = res.getString("NIF");
+		this.codPartePropio = res.getBoolean("Cod_parte_propio");
+	}
+	
 	@Override
 	public String toString() {
-		return "Cliente [cod_cliente=" + cod_cliente + ", nome=" + nome + ", nome_curto=" + nome_curto + ", nif=" + nif
-				+ ", cod_parte_propio=" + cod_parte_propio + "]";
+		return "Cliente [cod_cliente=" + codCliente + ", nome=" + nome + ", nome_curto=" + nomeCurto + ", nif=" + nif
+				+ ", cod_parte_propio=" + codPartePropio + "]";
 	}
 
 	/**
 	 * @return Devolve un obxecto json cos parámetros do cliente.Devolve un obxecto json cos parámetros do cliente.
 	 */
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		ret.put("cod_cliente", cod_cliente);
+		JSONObject<String, Object> ret = new JSONObject<>();
+		ret.put("cod_cliente", codCliente);
 		ret.put("nome", nome);
-		ret.put("nome_curto", nome_curto);
+		ret.put("nome_curto", nomeCurto);
 		ret.put("nif", nif);
-		ret.put("cod_parte_propio", cod_parte_propio);
+		ret.put("cod_parte_propio", codPartePropio);
 		return ret;
 	}
 
 
 	/**
-	 * @return the cod_cliente
+	 * @return the codCliente
 	 */
-	public int getCod_cliente() {
-		return cod_cliente;
+	public int getCodCliente() {
+		return codCliente;
 	}
 
 
 	/**
-	 * @param cod_cliente the cod_cliente to set
+	 * @param codCliente the codCliente to set
 	 */
-	public void setCod_cliente(int cod_cliente) {
-		this.cod_cliente = cod_cliente;
+	public void setCodCliente(int codCliente) {
+		this.codCliente = codCliente;
 	}
 
 
@@ -110,18 +120,18 @@ public class Cliente {
 
 
 	/**
-	 * @return the nome_curto
+	 * @return the nomeCurto
 	 */
-	public String getNome_curto() {
-		return nome_curto;
+	public String getNomeCurto() {
+		return nomeCurto;
 	}
 
 
 	/**
-	 * @param nome_curto the nome_curto to set
+	 * @param nomeCurto the nomeCurto to set
 	 */
-	public void setNome_curto(String nome_curto) {
-		this.nome_curto = nome_curto;
+	public void setNomeCurto(String nomeCurto) {
+		this.nomeCurto = nomeCurto;
 	}
 
 
@@ -142,18 +152,18 @@ public class Cliente {
 
 
 	/**
-	 * @return the cod_parte_propio
+	 * @return the codPartePropio
 	 */
-	public boolean isCod_parte_propio() {
-		return cod_parte_propio;
+	public boolean isCodPartePropio() {
+		return codPartePropio;
 	}
 
 
 	/**
-	 * @param cod_parte_propio the cod_parte_propio to set
+	 * @param codPartePropio the codPartePropio to set
 	 */
-	public void setCod_parte_propio(boolean cod_parte_propio) {
-		this.cod_parte_propio = cod_parte_propio;
+	public void setCodPartePropio(boolean codPartePropio) {
+		this.codPartePropio = codPartePropio;
 	}
 	
 	

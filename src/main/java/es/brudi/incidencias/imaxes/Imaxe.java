@@ -16,34 +16,57 @@ import org.json.simple.JSONObject;
  */
 public class Imaxe {
 
+	public enum Tipo {
+		ANTES,
+		DESPOIS;
+		
+		public boolean getBoolTipo() {
+			return (this.equals(DESPOIS));
+		}
+		
+		public static Tipo getTipoFromBool(boolean tipo) {
+			if(tipo)
+				return DESPOIS;
+			else
+				return ANTES;
+		}
+		
+		public static Tipo getTipoFromString(String tipo) {
+			if("despois".equalsIgnoreCase(tipo) || "despues".equalsIgnoreCase(tipo) || "después".equalsIgnoreCase(tipo))
+				return DESPOIS;
+			else
+				return ANTES;
+		}
+	}
+	
 	private int id;
-	private int id_incidencia;
+	private int idIncidencia;
 	private String nome;
-	private boolean antes_despois; //False -> Antes, True -> Despois
-	private String ruta_ficheiro;
-	private String tipo_ficheiro;
+	private Tipo tipo; //False -> Antes, True -> Despois
+	private String rutaFicheiro;
+	private String tipoFicheiro;
 	private String comentarios;
 	
 	public Imaxe() {}
 	
-	public Imaxe(int id, int id_incidencia, String nome, boolean antes_despois, String ruta_ficheiro, String tipo_ficheiro, String comentarios) {
+	public Imaxe(int id, int idIncidencia, String nome, Tipo tipo, String rutaFicheiro, String tipoFicheiro, String comentarios) {
 		super();
 		this.id = id;
-		this.id_incidencia = id_incidencia;
+		this.idIncidencia = idIncidencia;
 		this.nome = nome;
-		this.antes_despois = antes_despois;
-		this.ruta_ficheiro = ruta_ficheiro;
-		this.tipo_ficheiro = tipo_ficheiro;
+		this.tipo = tipo;
+		this.rutaFicheiro = rutaFicheiro;
+		this.tipoFicheiro = tipoFicheiro;
 		this.comentarios = comentarios;
 	}
 	
 	public Imaxe(ResultSet res) throws SQLException {
 		this.id = res.getInt("Id");
-		this.id_incidencia = res.getInt("Id_incidencia");
+		this.idIncidencia = res.getInt("Id_incidencia");
 		this.nome = res.getString("Nome");
-		this.antes_despois = res.getBoolean("Antes_despois");
-		this.ruta_ficheiro = res.getString("Ruta_ficheiro");
-		this.tipo_ficheiro = res.getString("Tipo_ficheiro");
+		this.tipo = Tipo.getTipoFromBool(res.getBoolean("Antes_despois"));
+		this.rutaFicheiro = res.getString("Ruta_ficheiro");
+		this.tipoFicheiro = res.getString("Tipo_ficheiro");
 		this.comentarios = res.getString("Comentarios");
 	}
 	
@@ -60,17 +83,17 @@ public class Imaxe {
 		this.id = id;
 	}
 	/**
-	 * @return the id_incidencia
+	 * @return the idIncidencia
 	 */
-	public int getId_incidencia() {
-		return id_incidencia;
+	public int getIdIncidencia() {
+		return idIncidencia;
 	}
 
 	/**
-	 * @param id_incidencia the id_incidencia to set
+	 * @param idIncidencia the idIncidencia to set
 	 */
-	public void setId_incidencia(int id_incidencia) {
-		this.id_incidencia = id_incidencia;
+	public void setIdncidencia(int idIncidencia) {
+		this.idIncidencia = idIncidencia;
 	}
 
 	/**
@@ -88,17 +111,17 @@ public class Imaxe {
 	}
 
 	/**
-	 * @return the antes_despois
+	 * @return tipo
 	 */
-	public boolean isAntes_despois() {
-		return antes_despois;
+	public Tipo getTipo() {
+		return tipo;
 	}
 
 	/**
-	 * @param antes_despois the antes_despois to set
+	 * @param tipo the tipo to set
 	 */
-	public void setAntes_despois(boolean antes_despois) {
-		this.antes_despois = antes_despois;
+	public void setTipo(Tipo tipo) {
+		this.tipo = tipo;
 	}
 
 	/**
@@ -108,31 +131,31 @@ public class Imaxe {
 		return comentarios;
 	}
 	/**
-	 * @return the ruta_ficheiro
+	 * @return the rutaFicheiro
 	 */
-	public String getRuta_ficheiro() {
-		return ruta_ficheiro;
+	public String getRutaFicheiro() {
+		return rutaFicheiro;
 	}
 
 	/**
-	 * @param ruta_ficheiro the ruta_ficheiro to set
+	 * @param rutaFicheiro the rutaFicheiro to set
 	 */
-	public void setRuta_ficheiro(String ruta_ficheiro) {
-		this.ruta_ficheiro = ruta_ficheiro;
+	public void setRutaFicheiro(String rutaFicheiro) {
+		this.rutaFicheiro = rutaFicheiro;
 	}
 
 	/**
-	 * @return the tipo_ficheiro
+	 * @return the tipoFicheiro
 	 */
-	public String getTipo_ficheiro() {
-		return tipo_ficheiro;
+	public String getTipoFicheiro() {
+		return tipoFicheiro;
 	}
 
 	/**
-	 * @param tipo_ficheiro the tipo_ficheiro to set
+	 * @param tipoFicheiro the tipoFicheiro to set
 	 */
-	public void setTipo_ficheiro(String tipo_ficheiro) {
-		this.tipo_ficheiro = tipo_ficheiro;
+	public void setTipoFicheiro(String tipoFicheiro) {
+		this.tipoFicheiro = tipoFicheiro;
 	}
 
 	/**
@@ -146,10 +169,10 @@ public class Imaxe {
 	public JSONObject toJson() {
 		JSONObject ret = new JSONObject();
 		ret.put("id", id);
-		ret.put("id_incidencia", id_incidencia);
+		ret.put("idIncidencia", idIncidencia);
 		ret.put("nome", nome);
-		ret.put("antes_despois", antes_despois);
-		ret.put("tipo_ficheiro", tipo_ficheiro);
+		ret.put("tipo", tipo.getBoolTipo());
+		ret.put("tipoFicheiro", tipoFicheiro);
 		ret.put("comentarios", comentarios);
 		return ret;
 		

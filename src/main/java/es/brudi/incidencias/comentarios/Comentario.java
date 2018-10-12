@@ -18,33 +18,33 @@ import es.brudi.incidencias.util.JSONObject;
  */
 public class Comentario {
 	
-	public final static int CREACION_INCIDENCIA = 1;
-	public final static int MODIFICACION_PUBLICA = 2;
-	public final static int MODIFICACION_TECNICOS = 3;
-	public final static int MODIFICACION_ADMINISTRACION = 4;
-	public final static int MODIFICACION_ADMINISTRACION_BRUDI = 5;
-	public final static int TIPO_COMENTARIOS_MIN = 10;
-	public final static int COMENTARIO_PUBLICO = 10;
-	public final static int COMENTARIO_TECNICOS = 11;
-	public final static int COMENTARIO_ADMINISTRACION = 12;
-	public final static int COMENTARIO_ADMINISTRACION_BRUDI = 13;
-	public final static int TIPO_COMENTARIO_MAX = 13;
+	public static final int CREACION_INCIDENCIA = 1;
+	public static final int MODIFICACION_PUBLICA = 2;
+	public static final int MODIFICACION_TECNICOS = 3;
+	public static final int MODIFICACION_ADMINISTRACION = 4;
+	public static final int MODIFICACION_ADMINISTRACION_BRUDI = 5;
+	public static final int TIPO_COMENTARIOS_MIN = 10;
+	public static final int COMENTARIO_PUBLICO = 10;
+	public static final int COMENTARIO_TECNICOS = 11;
+	public static final int COMENTARIO_ADMINISTRACION = 12;
+	public static final int COMENTARIO_ADMINISTRACION_BRUDI = 13;
+	public static final int TIPO_COMENTARIO_MAX = 13;
 	
-	public final static String ACCION_CREAR_INCIDENCIA = "creou a incidencia.";
-	public final static String ACCION_CAMBIOESTADO = "cambiou o estado da incidencia a";
-	public final static String ACCION_BORRAR_INCIDENCIA = "eliminiou a incidencia.";
-	public final static String ACCION_COMENTAR = "comentou a incidencia";
-	public final static String ACCION_INSERTAR_FACTURA = "engadiu a factura";
-	public final static String ACCION_MODIFICAR_FACTURA = "modificou a factura";
-	public final static String ACCION_INSERTAR_PRESUPOSTO = "engadiu o presuposto";
-	public final static String ACCION_MODIFICAR_PRESUPOSTO = "modificou o presuposto";
-	public final static String ACCION_INSERTAR_IMAXE = "engadiu a imaxe";
-	public final static String ACCION_MODIFICAR_IMAXE = "modificou a imaxe";
-	public final static String ACCION_INSERTAR_ALBARAN = "engadiu o albarán";
-	public final static String ACCION_MODIFICAR_ALBARAN = "modificou o albarán";
+	public static final String ACCION_CREAR_INCIDENCIA = "creou a incidencia.";
+	public static final String ACCION_CAMBIOESTADO = "cambiou o estado da incidencia a";
+	public static final String ACCION_BORRAR_INCIDENCIA = "eliminiou a incidencia.";
+	public static final String ACCION_COMENTAR = "comentou a incidencia";
+	public static final String ACCION_INSERTAR_FACTURA = "engadiu a factura";
+	public static final String ACCION_MODIFICAR_FACTURA = "modificou a factura";
+	public static final String ACCION_INSERTAR_PRESUPOSTO = "engadiu o presuposto";
+	public static final String ACCION_MODIFICAR_PRESUPOSTO = "modificou o presuposto";
+	public static final String ACCION_INSERTAR_IMAXE = "engadiu a imaxe";
+	public static final String ACCION_MODIFICAR_IMAXE = "modificou a imaxe";
+	public static final String ACCION_INSERTAR_ALBARAN = "engadiu o albarán";
+	public static final String ACCION_MODIFICAR_ALBARAN = "modificou o albarán";
 	
 	private int id;
-	private int id_incidencia;
+	private int idIncidencia;
 	private String autor;
 	private String accion;
 	private int tipo;
@@ -54,10 +54,10 @@ public class Comentario {
 	public Comentario() {
 	}
 
-	public Comentario(int id, int id_incidencia, String autor, String accion, int tipo, String texto, Calendar data) {
+	public Comentario(int id, int idIncidencia, String autor, String accion, int tipo, String texto, Calendar data) {
 		super();
 		this.id = id;
-		this.id_incidencia = id_incidencia;
+		this.idIncidencia = idIncidencia;
 		this.autor = autor;
 		this.accion = accion;
 		this.tipo = tipo;
@@ -65,10 +65,10 @@ public class Comentario {
 		this.data = data;
 	}
 	
-	public Comentario(int id, int id_incidencia, String autor, String accion, int tipo, String texto, Date data) {
+	public Comentario(int id, int idIncidencia, String autor, String accion, int tipo, String texto, Date data) {
 		super();
 		this.id = id;
-		this.id_incidencia = id_incidencia;
+		this.idIncidencia = idIncidencia;
 		this.autor = autor;
 		this.accion = accion;
 		this.tipo = tipo;
@@ -79,7 +79,7 @@ public class Comentario {
 	
 	public Comentario(ResultSet res) throws SQLException {
 		this.id = res.getInt("Id");
-		this.id_incidencia = res.getInt("Id_incidencia");
+		this.idIncidencia = res.getInt("Id_incidencia");
 		this.autor = res.getString("Autor");
 		this.accion = res.getString("Accion");
 		this.tipo = res.getInt("Tipo");
@@ -88,8 +88,8 @@ public class Comentario {
 	}
 	
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
-		json.put("id_incidencia", id_incidencia);
+		JSONObject<String, Object> json = new JSONObject<>();
+		json.put("id_incidencia", idIncidencia);
 		json.put("autor", autor);
 		json.put("titulo", obterTitulo());
 		json.put("texto", obterTexto());
@@ -137,17 +137,17 @@ public class Comentario {
 	}
 
 	/**
-	 * @return the id_incidencia
+	 * @return the idIncidencia
 	 */
-	public int getId_incidencia() {
-		return id_incidencia;
+	public int getIdIncidencia() {
+		return idIncidencia;
 	}
 
 	/**
-	 * @param id_incidencia the id_incidencia to set
+	 * @param idIncidencia the idIncidencia to set
 	 */
-	public void setId_incidencia(int id_incidencia) {
-		this.id_incidencia = id_incidencia;
+	public void setIdIncidencia(int idIncidencia) {
+		this.idIncidencia = idIncidencia;
 	}
 
 	/**

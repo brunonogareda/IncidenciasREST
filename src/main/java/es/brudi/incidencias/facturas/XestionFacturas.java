@@ -2,7 +2,6 @@ package es.brudi.incidencias.facturas;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -10,19 +9,18 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import es.brudi.incidencias.comentarios.Comentario;
-import es.brudi.incidencias.db.dao.ComentarioDAO;
-import es.brudi.incidencias.db.dao.FacturaDAO;
-import es.brudi.incidencias.db.dao.IncidenciaDAO;
+import es.brudi.incidencias.comentarios.db.ComentarioAccessor;
 import es.brudi.incidencias.documentos.XestionFicheiros;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.facturas.db.FacturaAccessor;
 import es.brudi.incidencias.incidencias.Incidencia;
+import es.brudi.incidencias.incidencias.db.IncidenciaAccessor;
 import es.brudi.incidencias.incidencias.estados.Estado;
 
 /**
@@ -41,38 +39,38 @@ public class XestionFacturas {
 	/**
 	 * Crea unha nova factura na base de datos. E garda o ficheiro en local se existe.
 	 * @param user
-	 * @param id_incidencia
-	 * @param id_factura
+	 * @param idIncidencia
+	 * @param idFactura
 	 * @param comentarios
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> crear(Usuario user, int id_incidencia, String id_factura, String comentarios, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> crear(Usuario user, int idIncidencia, String idFactura, String comentarios, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEngadirFactura()) {
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(id_incidencia);
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREARFACTURA_SENPERMISOS.toJSONError();
 		}
 		if(inc.getFactura() != null) {//A incidencia xa ten factura.
 			return Error.CREARFACTURA_EXISTE.toJSONError();
 		}
 		//comprobamos se xa existe algunha factura con ese Id.
-		Factura fact = FacturaDAO.getById(id_factura);
+		Factura fact = FacturaAccessor.getById(idFactura);
 		if(fact != null) {
 			return Error.CREARFACTURA_DUPLICADA.toJSONError();
 		}
@@ -81,38 +79,38 @@ public class XestionFacturas {
 		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_factura.replaceAll("/", "-")+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			nomeFicheiro = idFactura.replaceAll("/", "-")+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaFacturas(), inc.getData());
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean fret = FacturaDAO.crear(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
+		boolean fret = FacturaAccessor.crear(idFactura, rutaFicheiro, tipoFicheiro, comentarios); //Creamos a factura na táboa.
 		if(!fret) {
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARFACTURA_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 		
-		Factura factura = FacturaDAO.getById(id_factura); //Buscamos a factura que acabamos de insertar
+		Factura factura = FacturaAccessor.getById(idFactura); //Buscamos a factura que acabamos de insertar
 		if(factura == null) {
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
 		//Engadese o id de factura na incidencia correspondente e cambiase o estado
-		if(!IncidenciaDAO.modifcarFacturaEstado(id_incidencia, id_factura, Estado.FACTURADO.getEstado())) { 
+		if(!IncidenciaAccessor.modifcarFacturaEstado(idIncidencia, idFactura, Estado.FACTURADO.getEstado())) { 
 			return Error.CREARFACTURA_ERRORDB.toJSONError();
 		}
 		
-		logger.debug("Creouse a factura correctamente: "+id_factura);
+		logger.debug("Creouse a factura correctamente: "+idFactura);
 
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, id_factura);
+		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARFACTURA_OK.toJSONMensaxe();
@@ -125,75 +123,74 @@ public class XestionFacturas {
 	/**
 	 * Modifica unha factura existente.
 	 * @param user
-	 * @param id_factura
+	 * @param idFactura
 	 * @param comentarios
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> modificar(Usuario user, String id_factura, String comentarios,
+	public JSONObject<String, Object> modificar(Usuario user, String idFactura, String comentarios,
 			InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEditarFactura()) {
 			return Error.MODIFICARFACTURA_SENPERMISOS2.toJSONError();
 		}
 		
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, null, id_factura, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorFactura(idFactura);
+		if(inc == null) {
 			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.MODIFICARFACTURA_SENPERMISOS1.toJSONError();
 		}
-		Factura fact = FacturaDAO.getById(id_factura);
+		Factura fact = FacturaAccessor.getById(idFactura);
 		if(fact == null) {
 			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
 		}
 			
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id_factura.replaceAll("/", "-")+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_FACTURAS, inc.getData());
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			nomeFicheiro = idFactura.replaceAll("/", "-")+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaFacturas(), inc.getData());
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean fret = FacturaDAO.modificar(id_factura, ruta_ficheiro, tipo_ficheiro, comentarios); //Creamos a factura na táboa.
+		boolean fret = FacturaAccessor.modificar(idFactura, rutaFicheiro, tipoFicheiro, comentarios); //Creamos a factura na táboa.
 		if(!fret) {
 			return Error.MODIFICARFACTURA_ERRORDB.toJSONError();
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			if(fact.getRuta_ficheiro() != null && !fact.getRuta_ficheiro().equals("")) {//Se existe boramos o ficheiro antigo.
-				if(!XestionFicheiros.borrar(fact.getRuta_ficheiro())) {
-					logger.error("Erro o eliminar o ficheiro: "+fact.getRuta_ficheiro());
+			if(fact.getRutaFicheiro() != null && !fact.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
+				if(!XestionFicheiros.borrar(fact.getRutaFicheiro())) {
+					logger.error("Erro o eliminar o ficheiro: "+fact.getRutaFicheiro());
 				}
 			}
 			
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARFACTURA_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 		
-		Factura factura = FacturaDAO.getById(id_factura); //Buscamos a factura que acabamos de insertar
+		Factura factura = FacturaAccessor.getById(idFactura); //Buscamos a factura que acabamos de insertar
 		if(factura == null) {
 			return Error.MODIFICARFACTURA_ERRORDB.toJSONError();
 		}
 		
-		logger.debug("Modificada a factura correctamente: "+id_factura);
+		logger.debug("Modificada a factura correctamente: "+idFactura);
 
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, id_factura);
+		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARFACTURA_OK.toJSONMensaxe();
@@ -206,31 +203,30 @@ public class XestionFacturas {
 	/**
 	 * Obten os datos de unha factura.
 	 * @param user
-	 * @param id_factura
+	 * @param idFactura
 	 * @return
 	 */
-	public JSONObject<String, Object> obter(Usuario user, String id_factura) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> obter(Usuario user, String idFactura) {
+		JSONObject<String, Object> ret;
 		
 		if(!user.podeVerFactura()) {
 			return Error.OBTERFACTURA_SENPERMISOS2.toJSONError();
 		}
 		
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, null, id_factura, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorFactura(idFactura);
+		if(inc == null) {
 			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.MODIFICARFACTURA_SENPERMISOS1.toJSONError();
 		}
-		Factura factura = FacturaDAO.getById(id_factura);
+		Factura factura = FacturaAccessor.getById(idFactura);
 		if(factura == null) {
 			return Error.OBTERFACTURA_NONEXISTE.toJSONError();
 		}
 				
-		logger.debug("Obtivose a factura correctamente: "+id_factura);
+		logger.debug("Obtivose a factura correctamente: "+idFactura);
 
 		ret = Mensaxe.OBTERFACTURA_OK.toJSONMensaxe();
 		ret.put("Factura", factura.toJson());
@@ -241,36 +237,35 @@ public class XestionFacturas {
 	/**
 	 * Obten o ficheiro local.
 	 * @param user
-	 * @param id_factura
+	 * @param idFactura
 	 * @return
 	 */
-	public Response obterFicheiro(Usuario user, String id_factura) {
+	public Response obterFicheiro(Usuario user, String idFactura) {
 
 		if(!user.podeVerFactura()) {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		
-		ArrayList<Incidencia> incL = IncidenciaDAO.get(0, 0, 0, null, null, null, null, null, null, id_factura, null, null, null, 0, 0);
-		if(incL.size()!=1) {
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorFactura(idFactura);
+		if(inc == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		Incidencia inc = incL.get(0);
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Response.status(Status.FORBIDDEN).build();
 		}
-		Factura factura = FacturaDAO.getById(id_factura);
+		Factura factura = FacturaAccessor.getById(idFactura);
 		if(factura == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		
-		File file = XestionFicheiros.obterFicheiro(factura.getRuta_ficheiro());
+		File file = XestionFicheiros.obterFicheiro(factura.getRutaFicheiro());
 		if(file == null) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
 		
-		logger.debug("Obtivose a factura correctamente: "+id_factura);
+		logger.debug("Obtivose a factura correctamente: "+idFactura);
 
 		ResponseBuilder response = Response.ok((Object) file);
 	    response.header("Content-Disposition", "attachment; filename="+file.getName());

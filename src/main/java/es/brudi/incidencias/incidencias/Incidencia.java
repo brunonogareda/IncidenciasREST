@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import java.util.Calendar;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.dao.InstalacionDAO;
 import es.brudi.incidencias.incidencias.estados.Estado;
 import es.brudi.incidencias.instalacions.Instalacion;
+import es.brudi.incidencias.instalacions.db.InstalacionAccessor;
 
 /**
  * 
@@ -21,57 +21,51 @@ import es.brudi.incidencias.instalacions.Instalacion;
 public class Incidencia {
 
 	private int id;
-	private int cod_parte;
+	private int codParte;
 	private int ot;
 	private Instalacion instalacion;
-	private String zona_apartamento;
-	private String descripcion_curta;
+	private String zonaApartamento;
+	private String descripcionCurta;
 	private String observacions;
 	private Estado estado;
-	private boolean sol_presuposto;
+	private boolean solPresuposto;
 	private String presuposto;
 	private String factura;
 	private Calendar data = Calendar.getInstance();
-//	private int grupo_asig;
-//	private String usuario_asig;
 	private String autor;
 	
-	public Incidencia(int id, int cod_parte, int ot, Instalacion instalacion, String zona_apartamento,
-			String descripcion_curta, String observacions, Estado estado, boolean sol_presuposto, String presuposto,
-			String factura, Calendar data, int grupo_asig, String usuario_asig, String autor) {
+	public Incidencia(int id, int codParte, int ot, Instalacion instalacion, String zonaApartamento,
+			String descripcionCurta, String observacions, Estado estado, boolean solPresuposto, String presuposto,
+			String factura, Calendar data, String autor) {
 		super();
 		this.id = id;
-		this.cod_parte = cod_parte;
+		this.codParte = codParte;
 		this.ot = ot;
 		this.instalacion = instalacion;
-		this.zona_apartamento = zona_apartamento;
-		this.descripcion_curta = descripcion_curta;
+		this.zonaApartamento = zonaApartamento;
+		this.descripcionCurta = descripcionCurta;
 		this.observacions = observacions;
 		this.estado = estado;
-		this.sol_presuposto = sol_presuposto;
+		this.solPresuposto = solPresuposto;
 		this.presuposto = presuposto;
 		this.factura = factura;
 		this.data = data;
-//		this.grupo_asig = grupo_asig;
-//		this.usuario_asig = usuario_asig;
 		this.autor = autor;
 	}
 	
 	public Incidencia(ResultSet res) throws SQLException {
 		id = res.getInt("Id");
-		cod_parte = res.getInt("Cod_parte");
+		codParte = res.getInt("Cod_parte");
 		ot = res.getInt("Orden_traballo");
-		instalacion = InstalacionDAO.getInstalacionById(res.getInt("Instalacion"));
-		zona_apartamento = res.getString("Zona_apartamento");
-		descripcion_curta = res.getString("descripcion_curta");
+		instalacion = InstalacionAccessor.getInstalacionById(res.getInt("Instalacion"));
+		zonaApartamento = res.getString("Zona_apartamento");
+		descripcionCurta = res.getString("descripcion_curta");
 		observacions = res.getString("Observacions");
 		estado = Estado.getByString(res.getString("Estado"));
-		sol_presuposto = res.getBoolean("Solicitase_presuposto");
+		solPresuposto = res.getBoolean("Solicitase_presuposto");
 		presuposto = res.getString("Presuposto");
 		factura = res.getString("Factura");
 		data.setTime(res.getTimestamp("Data"));
-//		grupo_asig = res.getInt("Grupo_asignado");
-//		usuario_asig = res.getString("Usuario_asignado");
 		autor = res.getString("Autor");
 	}
 	
@@ -90,17 +84,17 @@ public class Incidencia {
 	}
 
 	/**
-	 * @return the cod_parte
+	 * @return the codParte
 	 */
-	public int getCod_parte() {
-		return cod_parte;
+	public int getCodParte() {
+		return codParte;
 	}
 
 	/**
-	 * @param cod_parte the cod_parte to set
+	 * @param codParte the codParte to set
 	 */
-	public void setCod_parte(int cod_parte) {
-		this.cod_parte = cod_parte;
+	public void setCodParte(int codParte) {
+		this.codParte = codParte;
 	}
 
 	/**
@@ -132,31 +126,31 @@ public class Incidencia {
 	}
 
 	/**
-	 * @return the zona_apartamento
+	 * @return the zonaApartamento
 	 */
-	public String getZona_apartamento() {
-		return zona_apartamento;
+	public String getZonaApartamento() {
+		return zonaApartamento;
 	}
 
 	/**
-	 * @param zona_apartamento the zona_apartamento to set
+	 * @param zonaApartamento the zona_apartamento to set
 	 */
-	public void setZona_apartamento(String zona_apartamento) {
-		this.zona_apartamento = zona_apartamento;
+	public void setZonaApartamento(String zonaApartamento) {
+		this.zonaApartamento = zonaApartamento;
 	}
 
 	/**
-	 * @return the descripcion_curta
+	 * @return the descripcionCurta
 	 */
-	public String getDescripcion_curta() {
-		return descripcion_curta;
+	public String getDescripcionCurta() {
+		return descripcionCurta;
 	}
 
 	/**
-	 * @param descripcion_curta the descripcion_curta to set
+	 * @param descripcionCurta the descripcionCurta to set
 	 */
-	public void setDescripcion_curta(String descripcion_curta) {
-		this.descripcion_curta = descripcion_curta;
+	public void setDescripcionCurta(String descripcionCurta) {
+		this.descripcionCurta = descripcionCurta;
 	}
 
 	/**
@@ -190,15 +184,15 @@ public class Incidencia {
 	/**
 	 * @return the sol_presuposto
 	 */
-	public boolean isSol_presuposto() {
-		return sol_presuposto;
+	public boolean isSolPresuposto() {
+		return solPresuposto;
 	}
 
 	/**
-	 * @param sol_presuposto the sol_presuposto to set
+	 * @param solPresuposto the solPresuposto to set
 	 */
-	public void setSol_presuposto(boolean sol_presuposto) {
-		this.sol_presuposto = sol_presuposto;
+	public void setSolPresuposto(boolean solPresuposto) {
+		this.solPresuposto = solPresuposto;
 	}
 
 	/**
@@ -258,15 +252,15 @@ public class Incidencia {
 	}
 
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 		ret.put("id", id);
-		ret.put("cod_parte", cod_parte);
+		ret.put("codParte", codParte);
 		ret.put("ot", ot);
 		ret.put("instalacion", instalacion);
-		ret.put("zona_apartamento", zona_apartamento);
-		ret.put("descripcion_curta", descripcion_curta);
+		ret.put("zonaApartamento", zonaApartamento);
+		ret.put("descripcionCurta", descripcionCurta);
 		ret.put("observacions", observacions);
-		ret.put("sol_presuposto", sol_presuposto);
+		ret.put("solPresuposto", solPresuposto);
 		ret.put("estado", estado.getEstado());
 		ret.put("presuposto", presuposto);
 		ret.put("factura", factura);

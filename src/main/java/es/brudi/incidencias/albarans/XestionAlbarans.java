@@ -2,7 +2,7 @@ package es.brudi.incidencias.albarans;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -10,20 +10,19 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-
+import es.brudi.incidencias.albarans.db.AlbaranAccessor;
 import es.brudi.incidencias.comentarios.Comentario;
-import es.brudi.incidencias.db.dao.AlbaranDAO;
-import es.brudi.incidencias.db.dao.ComentarioDAO;
-import es.brudi.incidencias.db.dao.IncidenciaDAO;
+import es.brudi.incidencias.comentarios.db.ComentarioAccessor;
 import es.brudi.incidencias.documentos.XestionFicheiros;
+import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.incidencias.Incidencia;
+import es.brudi.incidencias.incidencias.db.IncidenciaAccessor;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.error.Error;
-import es.brudi.incidencias.incidencias.Incidencia;
 
 /**
  * 
@@ -41,63 +40,63 @@ public class XestionAlbarans {
 	/**
 	 * Crea un novo albarán na base de datos. E garda o ficheiro en local se existe.
 	 * @param user
-	 * @param id_incidencia
+	 * @param idIncidencia
 	 * @param nome
 	 * @param proveedor
-	 * @param num_albaran
+	 * @param numAlbaran
 	 * @param comentarios
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> crear(Usuario user, int id_incidencia, String nome, String proveedor, String num_albaran, String comentarios, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> crear(Usuario user, int idIncidencia, String nome, String proveedor, String numAlbaran, String comentarios, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEngadirAlbaran()) {
 			return Error.CREARALBARAN_SENPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(id_incidencia);
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Error.CREARALBARAN_SENPERMISOS.toJSONError();
 		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			int nextId = AlbaranDAO.getNextId();
-			nome_ficheiro = nextId+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_ALBARANS, inc.getData())+"/"+inc.getId();
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			int nextId = AlbaranAccessor.getNextId();
+			nomeFicheiro = nextId+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaAlbarans(), inc.getData())+"/"+inc.getId();
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		int idA = AlbaranDAO.crear(id_incidencia, ruta_ficheiro, tipo_ficheiro, nome, proveedor, num_albaran, comentarios); //Creamos o albarán na táboa.
+		int idA = AlbaranAccessor.crear(idIncidencia, rutaFicheiro, tipoFicheiro, nome, proveedor, numAlbaran, comentarios); //Creamos o albarán na táboa.
 		if(idA <= 0) {
 			return Error.CREARALBARAN_ERRODB.toJSONError();
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARALBARAN_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 		
-		Albaran albaran = new Albaran(idA, id_incidencia, nome, proveedor, num_albaran, comentarios, ruta_ficheiro, tipo_ficheiro);
+		Albaran albaran = new Albaran(idA, idIncidencia, nome, proveedor, numAlbaran, comentarios, rutaFicheiro, tipoFicheiro);
 				
 		logger.debug("Creouse o albarán correctamente: "+idA);
 
 		//Engadimos o comentario de que se engadiu un albarán
-		ComentarioDAO.crear(id_incidencia, user.getNome(), Comentario.ACCION_INSERTAR_ALBARAN, Comentario.MODIFICACION_TECNICOS, String.valueOf(idA));
+		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_ALBARAN, Comentario.MODIFICACION_TECNICOS, String.valueOf(idA));
 		
 		if(!errFile)
 			ret = Mensaxe.CREARALBARAN_OK.toJSONMensaxe();
@@ -112,70 +111,71 @@ public class XestionAlbarans {
 	 * @param user
 	 * @param id
 	 * @param nome
+	 * @param numAlbaran
 	 * @param comentarios
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> modificar(Usuario user, int id, String nome, String num_albaran, String comentarios,
+	public JSONObject<String, Object> modificar(Usuario user, int id, String nome, String numAlbaran, String comentarios,
 			InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 
-		String nome_ficheiro = null;
-		String tipo_ficheiro = null;
-		String dir_ficheiro = null;
-		String ruta_ficheiro = null;
+		String nomeFicheiro = null;
+		String tipoFicheiro = null;
+		String dirFicheiro = null;
+		String rutaFicheiro = null;
 		boolean errFile = false;
 		
 		if(!user.podeEditarAlbaran()) {
 			return Error.MODIFICARALBARAN_SENPERMISOS2.toJSONError();
 		}
 
-		Albaran alb = AlbaranDAO.getById(id);
+		Albaran alb = AlbaranAccessor.getById(id);
 		if(alb == null) {
 			return Error.OBTERALBARAN_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(alb.getId_incidencia());
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(alb.getIdIncidencia());
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.MODIFICARALBARAN_SENPERMISOS1.toJSONError();
 		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
-			tipo_ficheiro = FilenameUtils.getExtension(fileDetail.getFileName());
-			nome_ficheiro = id+"."+tipo_ficheiro;
-			dir_ficheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.RUTA_ALBARANS, inc.getData())+"/"+inc.getId();
-			ruta_ficheiro = dir_ficheiro+"/"+nome_ficheiro;
+			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
+			nomeFicheiro = id+"."+tipoFicheiro;
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaAlbarans(), inc.getData())+"/"+inc.getId();
+			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 				
-		boolean aret = AlbaranDAO.modificar(id, ruta_ficheiro, tipo_ficheiro, nome, null, num_albaran, comentarios); //modificamos o presuposto na bd.
+		boolean aret = AlbaranAccessor.modificar(id, rutaFicheiro, tipoFicheiro, nome, null, numAlbaran, comentarios); //modificamos o presuposto na bd.
 		if(!aret) {
 			return Error.MODIFICARALBARAN_ERRORDB.toJSONError();
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			if(alb.getRuta_ficheiro() != null && !alb.getRuta_ficheiro().equals("")) {//Se existe boramos o ficheiro antigo.
-				if(!XestionFicheiros.borrar(alb.getRuta_ficheiro())) {
-					logger.error("Erro o eliminar o ficheiro: "+alb.getRuta_ficheiro());
+			if(alb.getRutaFicheiro() != null && !alb.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
+				if(!XestionFicheiros.borrar(alb.getRutaFicheiro())) {
+					logger.error("Erro o eliminar o ficheiro: "+alb.getRutaFicheiro());
 				}
 			}
 			
-			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dir_ficheiro, nome_ficheiro);
+			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
 				ret = Error.CREARALBARAN_FICHEIRO.toJSONError();
 				errFile = true;
 			}
 		}
 				
-		Albaran albaran = new Albaran(id, alb.getId_incidencia(), nome, alb.getProveedor(), num_albaran, comentarios, ruta_ficheiro, tipo_ficheiro);
+		Albaran albaran = new Albaran(id, alb.getIdIncidencia(), nome, alb.getProveedor(), numAlbaran, comentarios, rutaFicheiro, tipoFicheiro);
 		
 		logger.debug("Modificad o albarán correctamente: "+id);
 
 		//Engadimos o comentario de que se modificou o albarán
-		ComentarioDAO.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_ALBARAN, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
+		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_ALBARAN, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARALBARAN_OK.toJSONMensaxe();
@@ -192,22 +192,22 @@ public class XestionAlbarans {
 	 * @return
 	 */
 	public JSONObject<String, Object> obter(Usuario user, int id) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret;
 		
 		if(!user.podeVerAlbaran()) {
 			return Error.OBTERALBARAN_SENPERMISOS2.toJSONError();
 		}
 		
-		Albaran albaran = AlbaranDAO.getById(id);
+		Albaran albaran = AlbaranAccessor.getById(id);
 		if(albaran == null) {
 			return Error.OBTERALBARAN_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(albaran.getId_incidencia());
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(albaran.getIdIncidencia());
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.OBTERALBARAN_SENPERMISOS2.toJSONError();
 		}
 				
@@ -222,38 +222,38 @@ public class XestionAlbarans {
 	/**
 	 * Obten os datos dos albaráns mediante o id da incidencia
 	 * @param user
-	 * @param id_incidencia
+	 * @param idIncidencia
 	 * @return
 	 */
-	public JSONObject<String, Object> obterXIncidencia(Usuario user, int id_incidencia) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		JSONArray<Object> jsonAlbarans = new JSONArray<Object>();
+	public JSONObject<String, Object> obterXIncidencia(Usuario user, int idIncidencia) {
+		JSONObject<String, Object> ret;
+		JSONArray<Object> jsonAlbarans = new JSONArray<>();
 
 		
 		if(!user.podeVerAlbaran()) {
 			return Error.OBTERALBARAN_SENPERMISOS2.toJSONError();
 		}
 		
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(id_incidencia);
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 				return Error.OBTERALBARAN_SENPERMISOS2.toJSONError();
 		}
 		
-		ArrayList<Albaran> Albarans = AlbaranDAO.getByIdIncidencia(id_incidencia);
-		if(Albarans == null) {
+		List<Albaran> albarans = AlbaranAccessor.getByIdIncidencia(idIncidencia);
+		if(albarans == null) {
 			return Error.OBTERALBARAN_ERRORDB.toJSONError();
 		}
-		if(Albarans.size() <= 0) {
+		if(albarans.isEmpty()) {
 			return Error.OBTERALBARAN_NONEXISTENAINC.toJSONError();
 		}
 				
-		logger.debug("Obtiveronse "+Albarans.size()+" albarans na incidencia: "+id_incidencia);
+		logger.debug("Obtiveronse "+albarans.size()+" albarans na incidencia: "+idIncidencia);
 
-		for(Albaran i : Albarans)
+		for(Albaran i : albarans)
 			jsonAlbarans.add(i.toJson());
 		
 		ret = Mensaxe.OBTERALBARANSINC_OK.toJSONMensaxe();
@@ -274,20 +274,20 @@ public class XestionAlbarans {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		
-		Albaran albaran = AlbaranDAO.getById(id);
+		Albaran albaran = AlbaranAccessor.getById(id);
 		if(albaran == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		Incidencia inc = IncidenciaDAO.getIncidenciaById(albaran.getId_incidencia());
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(albaran.getIdIncidencia());
 		if(inc == null) {
 			return Response.status(Status.FORBIDDEN).build();
 		}
-		if(inc.getInstalacion().getCliente().getCod_cliente() != user.getCliente().getCod_cliente() &&
-		user.getCliente().getCod_cliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
+		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
+		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		
-		File file = XestionFicheiros.obterFicheiro(albaran.getRuta_ficheiro());
+		File file = XestionFicheiros.obterFicheiro(albaran.getRutaFicheiro());
 		if(file == null) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}

@@ -8,12 +8,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.DBConnectionManager;
-import es.brudi.incidencias.error.Error;
+import es.brudi.incidencias.rest.util.Checkdb;
+import es.brudi.incidencias.rest.util.Secured;
+import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.clientes.XestionClientes;
 
@@ -30,41 +32,30 @@ import es.brudi.incidencias.clientes.XestionClientes;
  * 
  */
 @Path("/cliente")
+@Checkdb
 public class ClienteRest {
 	
 	private Logger logger = Logger.getLogger(ClienteRest.class);
 	
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
+	@Context private SecurityContext securityContext;
 	
 	/**
 	 * Devolve un listado dos clientes da base de datos.
 	 */
 	@Path("/get")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
     public JSONObject<String, Object> get() { 
 		
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
-
         logger.debug("Invocouse o método get() de clientes.");
-        if(DBConnectionManager.getConnection() != null ) {
-         
-        	XestionClientes xest = new XestionClientes();
-        	XestionUsuarios xestu = new XestionUsuarios();
-        	
-        	json = xestu.checkLogin(req);
-	        if (json == null) {
-	        	json = xest.getClientes(req);
-	        }
-	     
-        }
-        else {
-        	logger.warn("Non existe conexión coa base de datos.");
-        	json = Error.DATABASE.toJSONError();
-        }
-        
-        return json;
+
+		XestionClientes xest = new XestionClientes();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+
+        return xest.getClientes(user);
     } 
 
 

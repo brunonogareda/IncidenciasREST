@@ -17,50 +17,50 @@ import es.brudi.incidencias.util.JSONObject;
 public class Albaran {
 
 	private int id;
-	private int id_incidencia;
+	private int idIncidencia;
 	private String nome;
 	private String proveedor;
-	private String num_albaran;
+	private String numAlbaran;
 	private String comentarios;
-	private String ruta_ficheiro;
-	private String tipo_ficheiro;
+	private String rutaFicheiro;
+	private String tipoFicheiro;
 	
 	
 	public Albaran() {
 	}
 	
-	public Albaran(int id, int id_incidencia, String nome, String proveedor, String num_albaran, String comentarios,
-			String ruta_ficheiro, String tipo_ficheiro) {
+	public Albaran(int id, int idIncidencia, String nome, String proveedor, String numAlbaran, String comentarios,
+			String rutaFicheiro, String tipoFicheiro) {
 		super();
 		this.id = id;
-		this.id_incidencia = id_incidencia;
+		this.idIncidencia = idIncidencia;
 		this.nome = nome;
 		this.proveedor = proveedor;
-		this.num_albaran = num_albaran;
+		this.numAlbaran = numAlbaran;
 		this.comentarios = comentarios;
-		this.ruta_ficheiro = ruta_ficheiro;
-		this.tipo_ficheiro = tipo_ficheiro;
+		this.rutaFicheiro = rutaFicheiro;
+		this.tipoFicheiro = tipoFicheiro;
 	}
 
 	public Albaran(ResultSet res) throws SQLException {
 		id = res.getInt("Id");
-		id_incidencia = res.getInt("Id_incidencia");
+		idIncidencia = res.getInt("Id_incidencia");
 		nome = res.getString("Nome");
 		proveedor = res.getString("Proveedor");
-		num_albaran = res.getString("Num_albaran");
+		numAlbaran = res.getString("Num_albaran");
 		comentarios = res.getString("Comentarios");
-		ruta_ficheiro = res.getString("Ruta_ficheiro");
-		tipo_ficheiro = res.getString("Tipo_ficheiro");
+		rutaFicheiro = res.getString("Ruta_ficheiro");
+		tipoFicheiro = res.getString("Tipo_ficheiro");
 	}
 	
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
-		json.put("id_incidencia", id_incidencia);
+		JSONObject<String, Object> json = new JSONObject<>();
+		json.put("id_incidencia", idIncidencia);
 		json.put("nome", nome);
 		json.put("proveedor", proveedor);
-		json.put("num_albaran", num_albaran);
+		json.put("num_albaran", numAlbaran);
 		json.put("comentarios", comentarios);
-		json.put("tipo_ficheiro", tipo_ficheiro);
+		json.put("tipo_ficheiro", tipoFicheiro);
 		return json;
 	}
 	
@@ -79,17 +79,17 @@ public class Albaran {
 	}
 
 	/**
-	 * @return the id_incidencia
+	 * @return the idIncidencia
 	 */
-	public int getId_incidencia() {
-		return id_incidencia;
+	public int getIdIncidencia() {
+		return idIncidencia;
 	}
 
 	/**
-	 * @param id_incidencia the id_incidencia to set
+	 * @param idIncidencia the idIncidencia to set
 	 */
-	public void setId_incidencia(int id_incidencia) {
-		this.id_incidencia = id_incidencia;
+	public void setIdIncidencia(int idIncidencia) {
+		this.idIncidencia = idIncidencia;
 	}
 
 	/**
@@ -121,17 +121,17 @@ public class Albaran {
 	}
 
 	/**
-	 * @return the num_albaran
+	 * @return the numAlbaran
 	 */
-	public String getNum_albaran() {
-		return num_albaran;
+	public String getNumAlbaran() {
+		return numAlbaran;
 	}
 
 	/**
-	 * @param num_albaran the num_albaran to set
+	 * @param numAlbaran the numAlbaran to set
 	 */
-	public void setNum_albaran(String num_albaran) {
-		this.num_albaran = num_albaran;
+	public void setNumAlbaran(String numAlbaran) {
+		this.numAlbaran = numAlbaran;
 	}
 
 	/**
@@ -149,34 +149,31 @@ public class Albaran {
 	}
 
 	/**
-	 * @return the ruta_ficheiro
+	 * @return the rutaFicheiro
 	 */
-	public String getRuta_ficheiro() {
-		return ruta_ficheiro;
+	public String getRutaFicheiro() {
+		return rutaFicheiro;
 	}
 
 	/**
-	 * @param ruta_ficheiro the ruta_ficheiro to set
+	 * @param rutaFicheiro the rutaFicheiro to set
 	 */
-	public void setRuta_ficheiro(String ruta_ficheiro) {
-		this.ruta_ficheiro = ruta_ficheiro;
+	public void setRutaFicheiro(String rutaFicheiro) {
+		this.rutaFicheiro = rutaFicheiro;
 	}
 
 	/**
-	 * @return the tipo_ficheiro
+	 * @return the tipoFicheiro
 	 */
-	public String getTipo_ficheiro() {
-		return tipo_ficheiro;
+	public String getTipoFicheiro() {
+		return tipoFicheiro;
 	}
 
 	/**
-	 * @param tipo_ficheiro the tipo_ficheiro to set
+	 * @param tipoFicheiro the tipoFicheiro to set
 	 */
-	public void setTipo_ficheiro(String tipo_ficheiro) {
-		this.tipo_ficheiro = tipo_ficheiro;
+	public void setTipoFicheiro(String tipoFicheiro) {
+		this.tipoFicheiro = tipoFicheiro;
 	}
-	
-	
-	
 	
 }

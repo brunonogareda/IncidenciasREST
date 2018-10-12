@@ -1,4 +1,4 @@
-package es.brudi.incidencias.db.dao;
+package es.brudi.incidencias.comentarios.db;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
@@ -24,14 +24,18 @@ import es.brudi.incidencias.util.Util;
  * 
  */
 public class ComentarioDAO {
-	private final static String TABLENAME = "Comentarios";
-	   
+	
+	private static final String TABLENAME = "Comentarios";
 	private static Logger logger = Logger.getLogger(ComentarioDAO.class);
 
+	private ComentarioDAO() {
+		 throw new IllegalStateException("Utility class");
+	}
+	
 	/**
 	 * Inserta un novo comentario na base de datos.
 	 * 
-	 * @param id_incidencia - Incidencia coque se corresponde o comentario
+	 * @param idIncidencia - Incidencia coque se corresponde o comentario
 	 * @param autor - Autor do comentario
 	 * @param accion - Acción realizada para que se inserte o comentario.
 	 * @param tipo - Tipo de comentario.
@@ -39,92 +43,97 @@ public class ComentarioDAO {
 	 * @param data - Data do comentario.
 	 * @return - Id do novo comentario. -1 existiuu algún error ao insertar.
 	 */
-	public static int crear(int id_incidencia, String autor, String accion, int tipo, String texto) {
+	protected static int crear(int idIncidencia, String autor, String accion, int tipo, String texto) {
 		
 		Timestamp data = Util.obterTimestampActual();
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "INSERT INTO "+TABLENAME+" (Id_incidencia, Autor, Accion, Tipo, Texto, Data) VALUES (?, ?, ?, ?, ?, ?);";
-		PreparedStatement comentario;
-		try
-		 {
-			comentario = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-			comentario.setInt(1, id_incidencia);
-			comentario.setString(2, autor);
-			comentario.setString(3, accion);
-			comentario.setInt(4, tipo);
-			comentario.setString(5, texto);
-			comentario.setTimestamp(6, data);
-			int res = comentario.executeUpdate();
+		ResultSet res = null;
+		int id = -1;
+		try (PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+			pst.setInt(1, idIncidencia);
+			pst.setString(2, autor);
+			pst.setString(3, accion);
+			pst.setInt(4, tipo);
+			pst.setString(5, texto);
+			pst.setTimestamp(6, data);
 			
-			if(res==1) {
-				ResultSet id = comentario.getGeneratedKeys();
-				if(id.next()) {
-					return id.getInt(1);
+			int result = pst.executeUpdate();
+			
+			if(result==1) {
+				res = pst.getGeneratedKeys();
+				if(res.next()) {
+					id = res.getInt(1);
 				}
 			}		
 			
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return -1;
+		return id;
 	}
 	
 
 	/**
 	 * Obten unha Listaxe de Comentarios que teñan a Id_incidencia que se lle pase.
 	 * 
-	 * @param id_incidencia
+	 * @param idIncidencia
 	 * @return
 	 */
-	public static ArrayList<Comentario> getByIdIncidencia(int id_incidencia) {
+	protected static ArrayList<Comentario> getByIdIncidencia(int idIncidencia) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Id_incidencia = ?";
 		
-		PreparedStatement comentario;
-		try
-		 {
+		ResultSet res = null;
+		ArrayList<Comentario> comentarios = new ArrayList<>();
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			
 			logger.debug("Realizase a consulta: "+query);
 			
-			comentario = conn.prepareStatement(query);
-			
-			comentario.setInt(1, id_incidencia);
+			pst.setInt(1, idIncidencia);
 						
-			ResultSet res = comentario.executeQuery();
+			res = pst.executeQuery();
 			
-			ArrayList<Comentario> ret = new ArrayList<Comentario>();
-					
 			while(res.next()) {			
-				ret.add(new Comentario(res));
+				comentarios.add(new Comentario(res));
 			}
 			
-			res.close();
-			comentario.close();
-			return ret;
 		 }
-		catch(SQLException se)
-		 {
+		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
 			logger.error("SQLState: " + se.getSQLState());
 			logger.error("VendorError: " + se.getErrorCode());
 		 }
-		catch(Exception e)
-		 {
+		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
 		
-		return null;
+		return comentarios;
 	}
 	
 	

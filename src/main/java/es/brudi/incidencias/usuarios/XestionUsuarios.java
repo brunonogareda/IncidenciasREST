@@ -1,12 +1,13 @@
 package es.brudi.incidencias.usuarios;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.dao.UsuarioDAO;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
+import es.brudi.incidencias.rest.util.SecuredFilter.User;
+import es.brudi.incidencias.usuarios.db.UsuarioAccessor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.validator.routines.EmailValidator;
 
 
@@ -23,33 +24,25 @@ public class XestionUsuarios {
 	
 	/**
 	 * 
-	 * Método que establece a sesión do usuario se este introduciu correctamente os datos.
-	 * Crea un id de sesión e garda no contexto do servlet un obxecto usuario correspondente.
+	 * Método que devolve o token para o usuario se este introduciu correctamente os datos.
 	 * 
-	 * @param req - RequestHttp do servlet
 	 * @param username - nome que introduce o usuario
 	 * @param password - Contrasinal que introduce o usuario
-	 * @return Obxecto json coa resposta
+	 * @return Obxecto json coa resposta, token e datos do usuario.
 	 */
-	public JSONObject<String, Object> login(HttpServletRequest req, String username, String password) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		JSONObject<String, Object> usuario = new JSONObject<String, Object>();
+	public JSONObject<String, Object> login(String username, String password) {
+		JSONObject<String, Object> ret;
 		
-		Usuario user = UsuarioDAO.comprobar_usuario(username, password);
+		Usuario user = UsuarioAccessor.comprobarUsuario(username, password);
 		
 		if(user == null) {
 			return Error.LOGIN_USER.toJSONError();
 		}
 		
-		HttpSession session=req.getSession();
-        session.setAttribute("usuario", (Usuario)user);
-
         ret = Mensaxe.LOGIN_OK.toJSONMensaxe();
-        usuario.put("sessionId", session.getId());
-        usuario.put("username", user.getNome());
-        usuario.put("nome", user.getNome_completo());
-
-        ret.put("usuario", usuario);
+        
+        ret.put("usuario", user.toJSON());
+        ret.put("token", XestionTokens.xerarFirmarToken(username));
 
         return ret;
 	}
@@ -57,14 +50,11 @@ public class XestionUsuarios {
 	/**
 	 * Método que permite cambiar o contrasial o usuario
 	 * 
-	 * @param req - RequestHttp do servlet
 	 * @param email - Email novo que desexa modificar o usuario.
 	 * @return Obxecto json coa resposta
 	 */
-	public JSONObject<String, Object> changemail(HttpServletRequest req, String email) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		
-		Usuario user = this.getUsuario(req);
+	public JSONObject<String, Object> changemail(Usuario user, String email) {
+		JSONObject<String, Object> ret;
 		
 		//Comprobase que o formato do email enviado sexa correcto
 		EmailValidator validator = EmailValidator.getInstance();
@@ -72,7 +62,7 @@ public class XestionUsuarios {
 		   ret = Error.CHANGEMAIL_ERRORPARAMETROS.toJSONError();
 		}
 		else {
-			boolean cambiado = UsuarioDAO.cambiarEmail(email, user.getId());
+			boolean cambiado = UsuarioAccessor.cambiarEmail(email, user.getId());
 			
 			if(cambiado) {
 				ret = Mensaxe.CHANGEMAIL_OK.toJSONMensaxe();
@@ -89,26 +79,24 @@ public class XestionUsuarios {
 	 * Método que permite cambiar o contrainal do usuario.
 	 * 
 	 * @param req - RequestHttp do servlet
-	 * @param pass_old - Antigo contrasinal do usuario.
-	 * @param pass_new1 - Novo contrasinal do usuario.
-	 * @param pass_new2 - Repetición do novo contrasinal.
+	 * @param passOld - Antigo contrasinal do usuario.
+	 * @param passNew1 - Novo contrasinal do usuario.
+	 * @param passNew2 - Repetición do novo contrasinal.
 	 * @return Obxecto json coa resposta
 	 */
-	public JSONObject<String, Object> changepass(HttpServletRequest req, String pass_old, String pass_new1, String pass_new2) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+	public JSONObject<String, Object> changepass(Usuario user, String passOld, String passNew1, String passNew2) {
+		JSONObject<String, Object> ret;
 				
-		Usuario user = this.getUsuario(req);
-		
-		Usuario user_comp = UsuarioDAO.comprobar_usuario(user.getNome(), pass_old);
+		Usuario userComp = UsuarioAccessor.comprobarUsuario(user.getNome(), passOld);
 		
 		//Comprobase que o contrasinal antigo é o correcto do usuario que ten a sesión iniciada.
-		if(user_comp == null || user_comp.getId() != user.getId()) {
+		if(userComp == null || userComp.getId() != user.getId()) {
 			return Error.CHANGEPASS_ERRORPASS.toJSONError();
 		}
 		
 		//Comprobase que os dous contrasinais novos son iguais.
-		if(pass_new1.equals(pass_new2)) {
-			boolean cambiado = UsuarioDAO.cambiarPass(pass_new1, user.getId());
+		if(passNew1.equals(passNew2)) {
+			boolean cambiado = UsuarioAccessor.cambiarPass(passNew1, user.getId());
 			
 			if(cambiado) {
 				ret = Mensaxe.CHANGEPASS_OK.toJSONMensaxe();
@@ -131,7 +119,7 @@ public class XestionUsuarios {
 	 * @return
 	 */
 	public JSONObject<String, Object> obterPermisos(Usuario user) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret;
 
 		ret = Mensaxe.OBTERPERMISOS_OK.toJSONMensaxe();
 		ret.put("Permisos", user.getPermisosFinalesJSON());
@@ -139,32 +127,15 @@ public class XestionUsuarios {
 		return ret;
 	}
 	
-	
-	/**
-	 * Método que comproba que exista un no request da petición un atributo usuario, é dicir, que o usuario que solicita a petición teña a sesión iniciada
-	 * 
-	 * @param req - RequestHttp do servlet
-	 * @return Obxecto json de erro. Devolve nulo en caso de que o login sexa correcto.
-	 */
-	public JSONObject<String, Object> checkLogin(HttpServletRequest req) {
-		Usuario user = this.getUsuario(req);
-
-		if(user==null) {
-			return Error.USER_NOLOGIN.toJSONError();
-		}
-
-		return null;
-	}
-	
 	/**
 	 * 
 	 * Método que devolve o obxecto usuario do contexto do request.
 	 * 
-	 * @param req - RequestHttp do servlet
 	 * @return Usuario que ten iniciada a sesión.
 	 */
-	public Usuario getUsuario(HttpServletRequest req) {
-		return (Usuario)req.getSession().getAttribute("usuario");
+	public static Usuario getUsuario(SecurityContext securityContext) {
+		return ((User)securityContext.getUserPrincipal()).obterUsuario();
 	}
+	
 	
 }

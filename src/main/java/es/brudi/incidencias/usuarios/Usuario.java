@@ -1,5 +1,8 @@
 package es.brudi.incidencias.usuarios;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.clientes.Cliente;
@@ -24,40 +27,42 @@ public class Usuario {
 	private Cliente cliente;
 	private Grupo grupo;
 	private String email;
-	private String nome_completo;
+	private String nomeCompleto;
     private String permisos;
+    private List<Integer> instalacionsXestionadas = new ArrayList<>();
     
 	private static Logger logger = Logger.getLogger(Usuario.class);
     
 	public Usuario() {
 	}
 	
-	public Usuario(int id, String nome, Cliente cliente, Grupo grupo, String email, String nome_completo, String permisos) {
+	public Usuario(int id, String nome, Cliente cliente, Grupo grupo, String email, String nomeCompleto, String permisos, List<Integer> instalacionsXestionadas) {
 		super();
 		this.id = id;
 		this.nome = nome;
 		this.cliente = cliente;
 		this.grupo = grupo;
 		this.email = email;
-		this.nome_completo = nome_completo;
+		this.nomeCompleto = nomeCompleto;
 		this.permisos = permisos;
+		this.instalacionsXestionadas = instalacionsXestionadas;
 	}
 
 	@Override
 	public String toString() {
 		return "Usuario [id=" + id + ", nome=" + nome + ", cliente=" + cliente.toString() + ", grupo=" + grupo.toString() + ", email=" + email
-				+ ", nome_completo=" + nome_completo + ", permisos=" + permisos + "]";
+				+ ", nome_completo=" + nomeCompleto + ", permisos=" + permisos + "]";
 	}
 	/**
 	 * @return Devolve un obxecto json con datos básicos do usuario
 	 */
 	
 	public JSONObject<String, Object> toJSON() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 		
 		ret.put("id", id);
         ret.put("nome", nome);
-        ret.put("nome_completo", nome_completo);
+        ret.put("nome_completo", nomeCompleto);
         
         return ret;
 	}
@@ -133,17 +138,17 @@ public class Usuario {
 	}
 
 	/**
-	 * @return the nome_completo
+	 * @return the nomeCompleto
 	 */
-	public String getNome_completo() {
-		return nome_completo;
+	public String getNomeCompleto() {
+		return nomeCompleto;
 	}
 
 	/**
-	 * @param nome_completo the nome_completo to set
+	 * @param nomeCompleto the nomeCompleto to set
 	 */
-	public void setNome_completo(String nome_completo) {
-		this.nome_completo = nome_completo;
+	public void setNomeCompleto(String nomeCompleto) {
+		this.nomeCompleto = nomeCompleto;
 	}
 
 	/**
@@ -160,6 +165,20 @@ public class Usuario {
 		this.permisos = permisos;
 	}
 	
+	/**
+	 * @return the instalacionsXestionadas
+	 */
+	public List<Integer> getInstalacionsXestionadas() {
+		return instalacionsXestionadas;
+	}
+
+	/**
+	 * @param instalacionsXestionadas the instalacionsXestionadas to set
+	 */
+	public void setInstalacionsXestionadas(List<Integer> instalacionsXestionadas) {
+		this.instalacionsXestionadas = instalacionsXestionadas;
+	}
+
 	/**
 	 * Retora el valor máximo de los permisos de un tipo en concreto del usuario y el grupo.
 	 * @param tipo - Posición del permiso en el string de permisos.
@@ -187,7 +206,7 @@ public class Usuario {
 	 * @return
 	 */
 	public Object getPermisosFinalesJSON() {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
+		JSONObject<String, Object> ret = new JSONObject<>();
 		ret.put("CrearIncidencia", podeCrearIncidencia());
 		ret.put("MarcarSolPresuposto", podeMarcarSolPresuposto());
 		ret.put("VerIncidencia", podeVerIncidencia());
@@ -196,7 +215,6 @@ public class Usuario {
 		ret.put("CambiarEstadoIncidencia", podeCambiarEstadoIncidencia());
 		ret.put("EngadirFactura", podeEngadirFactura());
 		ret.put("EditarFactura", podeEditarFactura());
-		ret.put("EngadirFactura", podeEngadirFactura());
 		ret.put("VerFactura", podeVerFactura());
 		ret.put("EngadirPresuposto", podeEngadirPresuposto());
 		ret.put("EditarPresuposto", podeEditarPresuposto());
@@ -219,11 +237,11 @@ public class Usuario {
 	public String getPermisosFinales() {
 		String permisosg = this.grupo.getPermisos();
 		int numpermisos = Math.min(permisos.length(), permisosg.length());
-		String permisosf = "";
+		StringBuilder bld = new StringBuilder();
 		for(int i=0; i<numpermisos; i++) {
-			permisosf += getPermisoByType(i);
+			bld.append(i);
 		}
-		return permisosf;
+		return bld.toString();
 	}
 	
 	//***************************************************************
@@ -344,7 +362,7 @@ public class Usuario {
 	public boolean podeVerComentarioTipo(int tipo) {
 		//Se o usuario e un administrador de brudi pode ver este tipo de comentarios
 		if((( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_ADMINISTRACION_BRUDI )
-				|| tipo <= Comentario.MODIFICACION_ADMINISTRACION_BRUDI) && this.cliente.getCod_cliente() == 0 && this.grupo.getNome().equals("Administrador"))
+				|| tipo <= Comentario.MODIFICACION_ADMINISTRACION_BRUDI) && this.cliente.getCodCliente() == 0 && this.grupo.getNome().equals("Administrador"))
 			return true;
 		
 		//Se o usuario e un cliente de facturación de calquera cliente pode ver este tipo de comentarios.
@@ -354,7 +372,7 @@ public class Usuario {
 		
 		//Se o usuario e un técnico de Brudi pode ver este tipo de comentarios.
 		if((( Comentario.TIPO_COMENTARIOS_MIN <= tipo && tipo <= Comentario.COMENTARIO_TECNICOS )
-				|| tipo <= Comentario.MODIFICACION_TECNICOS) && this.cliente.getCod_cliente() == 0 && this.grupo.getNome().equals("Técnico"))
+				|| tipo <= Comentario.MODIFICACION_TECNICOS) && this.cliente.getCodCliente() == 0 && this.grupo.getNome().equals("Técnico"))
 			return true;
 		
 		//Calquera usuario pode ver os comentarios públicos.
@@ -363,6 +381,10 @@ public class Usuario {
 		
 		
 		return false;
+	}
+
+	public boolean xestionaInstalacion(int instalacion) {
+		return (this.instalacionsXestionadas.contains(instalacion) || this.grupo.getInstalacionsXestionadas().contains(instalacion));
 	}
 	
 }

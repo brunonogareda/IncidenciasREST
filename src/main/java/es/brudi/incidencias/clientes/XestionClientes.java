@@ -1,15 +1,12 @@
 package es.brudi.incidencias.clientes;
 
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.dao.ClienteDAO;
+import es.brudi.incidencias.clientes.db.ClienteAccessor;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
-import es.brudi.incidencias.usuarios.XestionUsuarios;
 
 /**
  * 
@@ -30,23 +27,20 @@ public class XestionClientes {
 	 * @param req - RequestHttp do servlet
 	 * @return Obxecto json coa resposta
 	 */
-	public JSONObject<String, Object> getClientes(HttpServletRequest req) {
-		JSONObject<String, Object> ret = new JSONObject<String, Object>();
-		
-		XestionUsuarios xest = new XestionUsuarios();
-		Usuario user = xest.getUsuario(req);
+	public JSONObject<String, Object> getClientes(Usuario user) {
+		JSONObject<String, Object> ret;
 		
 		//Compraba que o usuario que realiza a petición pertenzca a Brudi.
-		if(user.getCliente().getCod_cliente()!=0) {
+		if(user.getCliente().getCodCliente()!=0) {
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
 		
-		ArrayList<Cliente> Clientes = ClienteDAO.getClientes();
+		List<Cliente> clientes = ClienteAccessor.getClientes();
 		
-		if(Clientes != null) {
-			if(Clientes.size()>0) {
+		if(clientes != null) {
+			if(!clientes.isEmpty()) {
 				ret = Mensaxe.GETCLIENTES_OK.toJSONMensaxe();
-				ret.put("clientes", Clientes);
+				ret.put("clientes", clientes);
 			}
 			else {
 				ret = Error.GETCLIENTES_SENCLIENTES.toJSONError();

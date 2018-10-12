@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.clientes.Cliente;
-import es.brudi.incidencias.db.dao.ClienteDAO;
+import es.brudi.incidencias.clientes.db.ClienteAccessor;
 
 /**
  * 
@@ -31,7 +31,7 @@ public class Instalacion {
 	public Instalacion(ResultSet res) throws SQLException {
 		id = res.getInt("Id");
 		nome = res.getString("Nome");
-		cliente = ClienteDAO.getClienteById(res.getInt("Cod_cliente"));
+		cliente = ClienteAccessor.getClienteById(res.getInt("Cod_cliente"));
 		direccion = res.getString("Direccion");
 		datos = res.getString("Datos");
 	}
@@ -117,7 +117,7 @@ public class Instalacion {
 	
 	
 	public JSONObject<String, Object> toJson() {
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
+		JSONObject<String, Object> json = new JSONObject<>();
 		json.put("id", id);
 		json.put("nome", nome);
 		json.put("idcliente", cliente.getNome());

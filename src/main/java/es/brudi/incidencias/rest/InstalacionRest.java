@@ -8,13 +8,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.error.Error;
 import es.brudi.incidencias.instalacions.XestionInstalacions;
+import es.brudi.incidencias.rest.util.Checkdb;
+import es.brudi.incidencias.rest.util.Secured;
+import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.util.Util;
 
@@ -31,24 +34,25 @@ import es.brudi.incidencias.util.Util;
  * 
  */
 @Path("/instalacion")
+@Checkdb
 public class InstalacionRest {
 	
 	private Logger logger = Logger.getLogger(InstalacionRest.class);
 	
 	@Context private HttpServletRequest req;
 	@Context private HttpServletResponse res;
+	@Context private SecurityContext securityContext;
 	
 	/**
 	 * Devolve un listado das instalacións da base de datos según o id de cliente que se lle pase.
 	 */
 	@Path("/getByCliente")
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject<String, Object> getByCliente(@QueryParam("idCliente") String idClienteS) { 
 		
-		JSONObject<String, Object> json = new JSONObject<String, Object>();
-		
-		int idCliente = -1;
+		int idCliente;
 		
 		//O parámetro debe ser un número maior ou igual a 0.
 		//En caso de non existir o parámetro, retornarase todas as incidencias. Sempre que o usuario teña permisos suficientes.
@@ -65,23 +69,10 @@ public class InstalacionRest {
 		}
 
         logger.debug("Invocouse o método getByCliente() de Instalacion.");
-        if(DBConnectionManager.getConnection() != null ) {
          
-        	XestionInstalacions xest = new XestionInstalacions();
-        	XestionUsuarios xestu = new XestionUsuarios();
-        	
-        	json = xestu.checkLogin(req);
-	        if (json == null) {
-	        	json = xest.getInstalacionsByCliente(xestu.getUsuario(req), idCliente);
-	        }
-	     
-        }
-        else {
-        	logger.warn("Non existe conexión coa base de datos.");
-        	json = Error.DATABASE.toJSONError();
-        }
-        
-        return json;
-    } 
+		XestionInstalacions xest = new XestionInstalacions();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.getInstalacionsByCliente(user, idCliente);
+	}
 
 }

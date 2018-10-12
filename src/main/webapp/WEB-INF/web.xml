@@ -13,10 +13,6 @@
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>es.brudi.incidencias.rest</param-value>
         </init-param>
-<!--         <init-param> -->
-<!-- 	        <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name> -->
-<!-- 	        <param-value>es.brudi.incidencias.rest.util.CORSFilter</param-value> -->
-<!-- 	    </init-param> -->
 	    <init-param>
 		    <param-name>jersey.config.server.provider.classnames</param-name>
 		    <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>

@@ -1,9 +1,13 @@
 package es.brudi.incidencias.servlet;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Random;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -14,6 +18,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.documentos.XestionFicheiros;
+import es.brudi.incidencias.usuarios.XestionTokens;
 
 /**
  * 
@@ -58,6 +63,20 @@ public class AppContextListener implements ServletContextListener {
     	String pathImaxes = ctx.getInitParameter("pathImaxes");
     	String pathAlbarans = ctx.getInitParameter("pathAlbarans");
     	XestionFicheiros.updateParams(pathFacturas, pathPresupostos, pathImaxes, pathAlbarans);
+    	
+    	
+    	Random random = new Random();
+    	StringBuilder sb = new StringBuilder();
+		while (sb.length() < 64 ) {
+    		sb.append(Integer.toHexString(random.nextInt()));
+    	}
+    	
+		try {
+			SecretKey secretKey = KeyGenerator.getInstance("AES").generateKey();
+	    	XestionTokens.updateClave(secretKey);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
     	
     	//Iniciase a conexión coa base de datos según os parámetros do web.xml
     	@SuppressWarnings("unused")

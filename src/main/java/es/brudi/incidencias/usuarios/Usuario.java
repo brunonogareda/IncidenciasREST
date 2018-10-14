@@ -180,8 +180,8 @@ public class Usuario {
 	}
 
 	/**
-	 * Retora el valor máximo de los permisos de un tipo en concreto del usuario y el grupo.
-	 * @param tipo - Posición del permiso en el string de permisos.
+	 * Retorna o valor máximo dos permisos de un tipo en concreto do usuario e do grupo.
+	 * @param tipo - Posición do permiso no string de permisos.
 	 * @return
 	 */
 	public int getPermisoByType(int tipo) {
@@ -205,7 +205,7 @@ public class Usuario {
 	 * Retorna un Obxecto JSON, con varios boolean cos diferentes permisos posibles.
 	 * @return
 	 */
-	public Object getPermisosFinalesJSON() {
+	public Object getPermisosFinaisJSON() {
 		JSONObject<String, Object> ret = new JSONObject<>();
 		ret.put("crearIncidencia", podeCrearIncidencia());
 		ret.put("marcarSolPresuposto", podeMarcarSolPresuposto());
@@ -234,7 +234,7 @@ public class Usuario {
 	/**
 	 * @return String de permisos finais do usuario, máximo entre os permisos do usuario e do grupo.
 	 */
-	public String getPermisosFinales() {
+	public String getPermisosFinais() {
 		String permisosg = this.grupo.getPermisos();
 		int numpermisos = Math.min(permisos.length(), permisosg.length());
 		StringBuilder bld = new StringBuilder();
@@ -350,6 +350,11 @@ public class Usuario {
 	
 	public boolean podeVerComentario() {
 		int p = getPermisoByType(Permiso.POS_COMENTARIOS);
+		return (p >= Permiso.VER);
+	}
+	
+	public boolean podeVerClientes() {
+		int p = getPermisoByType(Permiso.POS_CLIENTES);
 		return (p >= Permiso.VER);
 	}
 

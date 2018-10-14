@@ -20,6 +20,7 @@ public abstract class Permiso {
 	public static final int POS_IMAXES = 6;
 	public static final int POS_ALBARANS = 7;
 	public static final int POS_COMENTARIOS = 8;
+	public static final int POS_CLIENTES = 9;
 	
 	public static final int VER_INCIDENCIA_PROPIA = 1;
 	public static final int VER_INCIDENCIA = 2;
@@ -38,7 +39,7 @@ public abstract class Permiso {
 	    throw new IllegalStateException("Utility class");
 	  }
 	
-	//Administrador 		2310444440
+	//Administrador 		2310444444
 	//Técnico				2200004320
 	//Cliente_creacion 		1100003010
 	//Clientes_facturación	2111212020

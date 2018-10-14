@@ -44,7 +44,6 @@ public class ClienteRest {
 	/**
 	 * Devolve un listado dos clientes da base de datos.
 	 */
-	@Path("/get")
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)

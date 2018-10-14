@@ -109,7 +109,7 @@ public class XestionUsuarios {
 		JSONObject<String, Object> ret;
 
 		ret = Mensaxe.OBTERPERMISOS_OK.toJSONMensaxe();
-		ret.put("permisos", user.getPermisosFinalesJSON());
+		ret.put("permisos", user.getPermisosFinaisJSON());
 		
 		return ret;
 	}

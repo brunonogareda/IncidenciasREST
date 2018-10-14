@@ -112,7 +112,7 @@ public class PresupostoDAO {
 	 * @param id_presuposto
 	 * @return Presuposto
 	 */
-	protected static Presuposto obterPresupostoEInstalacionPorId(String idPresuposto) {
+	protected static Presuposto obterPresupostoEInstalacionPorId(String id) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "SELECT P.*, I.Instalacion AS Instalacion FROM "+TABLENAME+" AS P INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON P.Id=I.Presuposto WHERE P.Id=?;";
@@ -121,7 +121,7 @@ public class PresupostoDAO {
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
 			
-			pst.setString(1, idPresuposto);
+			pst.setString(1, id);
 						
 			res = pst.executeQuery();
 			

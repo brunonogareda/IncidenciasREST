@@ -26,12 +26,7 @@ public class Presuposto {
 	public Presuposto() {}
 	
 	public Presuposto(String id, boolean aceptado, String rutaFicheiro, String tipoFicheiro, String comentarios, int instalacion) {
-		super();
-		this.id = id;
-		this.aceptado = aceptado;
-		this.rutaFicheiro = rutaFicheiro;
-		this.tipoFicheiro = tipoFicheiro;
-		this.comentarios = comentarios;
+		new Presuposto(id, aceptado, rutaFicheiro, tipoFicheiro, comentarios);
 		this.instalacion = instalacion;
 	}
 	

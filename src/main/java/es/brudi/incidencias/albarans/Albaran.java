@@ -24,7 +24,7 @@ public class Albaran {
 	private String comentarios;
 	private String rutaFicheiro;
 	private String tipoFicheiro;
-	
+	private int instalacion; //Instalación a que pertence a Incidencia asociada o albarán.
 	
 	public Albaran() {
 	}
@@ -41,6 +41,12 @@ public class Albaran {
 		this.rutaFicheiro = rutaFicheiro;
 		this.tipoFicheiro = tipoFicheiro;
 	}
+	
+	public Albaran(int id, int idIncidencia, String nome, String proveedor, String numAlbaran, String comentarios,
+			String rutaFicheiro, String tipoFicheiro, int instalacion) {
+		new Albaran(id, idIncidencia, nome, proveedor, numAlbaran, comentarios, rutaFicheiro, tipoFicheiro);
+		this.instalacion = instalacion;
+	}
 
 	public Albaran(ResultSet res) throws SQLException {
 		id = res.getInt("Id");
@@ -55,12 +61,13 @@ public class Albaran {
 	
 	public JSONObject<String, Object> toJson() {
 		JSONObject<String, Object> json = new JSONObject<>();
-		json.put("id_incidencia", idIncidencia);
+		json.put("id", id);
+		json.put("idIncidencia", idIncidencia);
 		json.put("nome", nome);
 		json.put("proveedor", proveedor);
-		json.put("num_albaran", numAlbaran);
+		json.put("numAlbaran", numAlbaran);
 		json.put("comentarios", comentarios);
-		json.put("tipo_ficheiro", tipoFicheiro);
+		json.put("tipoFicheiro", tipoFicheiro);
 		return json;
 	}
 	
@@ -175,5 +182,18 @@ public class Albaran {
 	public void setTipoFicheiro(String tipoFicheiro) {
 		this.tipoFicheiro = tipoFicheiro;
 	}
-	
+
+	/**
+	 * @return the instalacion
+	 */
+	public int getInstalacion() {
+		return instalacion;
+	}
+
+	/**
+	 * @param instalacion the instalacion to set
+	 */
+	public void setInstalacion(int instalacion) {
+		this.instalacion = instalacion;
+	}
 }

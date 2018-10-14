@@ -492,7 +492,7 @@ public class IncidenciaDAO {
 	 * @param id
 	 * @return
 	 */
-	protected static boolean delete(int id) {
+	protected static boolean eliminar(int id) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "DELETE FROM "+TABLENAME+" WHERE Id = ?;";

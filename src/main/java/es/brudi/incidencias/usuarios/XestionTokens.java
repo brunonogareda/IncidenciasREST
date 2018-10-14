@@ -1,7 +1,8 @@
 package es.brudi.incidencias.usuarios;
 
-import java.security.Key;
 import java.util.Calendar;
+
+import javax.crypto.SecretKey;
 
 import org.apache.log4j.Logger;
 
@@ -22,7 +23,7 @@ import io.jsonwebtoken.SignatureException;
 public class XestionTokens {
 
 	private static final String DEFAULT_ADMIN_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbmlzdHJhZG9yIiwiaWF0IjoxNTI1NjI3OTUyLCJleHAiOjE1MjgyMTk5NTJ9.wVBB_AjYdGVsBO46tA4Pvxb9mEv7L9NG9WFFCtxBUItb26PtjVqJc31-uf-3bDlqa2iC5-xFgbP2DQi_p7jUSw";	
-	private static Key clave;
+	private static SecretKey clave;
 	//Tempo que tarde en caducar un token dende que se expide (en minutos)
 	private static final int MIN_CADUCIDADE = 43200; //30 Dias
 	private static Logger logger = Logger.getLogger(XestionTokens.class);
@@ -36,7 +37,7 @@ public class XestionTokens {
 	 * Só se debería executar cando se inicia o servlet
 	 * @param clave
 	 */
-	public static void updateClave(Key clave) {
+	public static void updateClave(SecretKey clave) {
 		XestionTokens.clave = clave;
 	}
 	

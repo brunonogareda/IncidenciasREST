@@ -62,7 +62,7 @@ public class Usuario {
 		
 		ret.put("id", id);
         ret.put("nome", nome);
-        ret.put("nome_completo", nomeCompleto);
+        ret.put("nomeCompleto", nomeCompleto);
         
         return ret;
 	}
@@ -207,24 +207,24 @@ public class Usuario {
 	 */
 	public Object getPermisosFinalesJSON() {
 		JSONObject<String, Object> ret = new JSONObject<>();
-		ret.put("CrearIncidencia", podeCrearIncidencia());
-		ret.put("MarcarSolPresuposto", podeMarcarSolPresuposto());
-		ret.put("VerIncidencia", podeVerIncidencia());
-		ret.put("VerIncidenciaPropia", podeVerIncidenciaPropia());
-		ret.put("BorrarIncidencia", podeBorrarIncidencia());
-		ret.put("CambiarEstadoIncidencia", podeCambiarEstadoIncidencia());
-		ret.put("EngadirFactura", podeEngadirFactura());
-		ret.put("EditarFactura", podeEditarFactura());
-		ret.put("VerFactura", podeVerFactura());
-		ret.put("EngadirPresuposto", podeEngadirPresuposto());
-		ret.put("EditarPresuposto", podeEditarPresuposto());
-		ret.put("VerPresuposto", podeVerPresuposto());
-		ret.put("AceptarPresuposto", podeAceptarPresuposto());
-		ret.put("EngadirImaxe", podeEngadirImaxe());
-		ret.put("EditarImaxe", podeEditarImaxe());
-		ret.put("VerImaxe", podeVerImaxe());
-		ret.put("EngadirComentario", podeEngadirComentario());
-		ret.put("VerComentario", podeVerComentario());
+		ret.put("crearIncidencia", podeCrearIncidencia());
+		ret.put("marcarSolPresuposto", podeMarcarSolPresuposto());
+		ret.put("verIncidencia", podeVerIncidencia());
+		ret.put("verIncidenciaPropia", podeVerIncidenciaPropia());
+		ret.put("borrarIncidencia", podeBorrarIncidencia());
+		ret.put("cambiarEstadoIncidencia", podeCambiarEstadoIncidencia());
+		ret.put("engadirFactura", podeEngadirFactura());
+		ret.put("editarFactura", podeEditarFactura());
+		ret.put("verFactura", podeVerFactura());
+		ret.put("engadirPresuposto", podeEngadirPresuposto());
+		ret.put("editarPresuposto", podeEditarPresuposto());
+		ret.put("verPresuposto", podeVerPresuposto());
+		ret.put("aceptarPresuposto", podeAceptarPresuposto());
+		ret.put("engadirImaxe", podeEngadirImaxe());
+		ret.put("editarImaxe", podeEditarImaxe());
+		ret.put("verImaxe", podeVerImaxe());
+		ret.put("engadirComentario", podeEngadirComentario());
+		ret.put("verComentario", podeVerComentario());
 
 		return ret;
 	}
@@ -383,6 +383,11 @@ public class Usuario {
 		return false;
 	}
 
+	/**
+	 * Comproba se o usuario xestiona a instalación directamente ou pertence a un grupo que a xestione.
+	 * @param instalacion
+	 * @return
+	 */
 	public boolean xestionaInstalacion(int instalacion) {
 		return (this.instalacionsXestionadas.contains(instalacion) || this.grupo.getInstalacionsXestionadas().contains(instalacion));
 	}

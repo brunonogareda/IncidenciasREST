@@ -140,7 +140,7 @@ public class IncidenciaAccessor {
 	 * @return
 	 */
 	public static boolean delete(int id) {
-		return IncidenciaDAO.delete(id);
+		return IncidenciaDAO.eliminar(id);
 	}
 	
 	

@@ -25,6 +25,21 @@ public class ComentarioAccessor {
 		return ComentarioDAO.crear(idIncidencia, autor, accion, tipo, texto);
 	}
 	
+	/**
+	 * Inserta un novo comentario.
+	 * 
+	 * @param idIncidencia - Incidencia coque se corresponde o comentario
+	 * @param autor - Autor do comentario
+	 * @param accion - Acción realizada para que se inserte o comentario.
+	 * @param tipo - Tipo de comentario.
+	 * @param texto - Texto do comentario.
+	 * @param data - Data do comentario.
+	 * @return - Id do novo comentario. -1 existiuu algún error ao insertar.
+	 */
+	public static int crear(int idIncidencia, String autor, String accion, int tipo, int texto) {
+		return ComentarioAccessor.crear(idIncidencia, autor, accion, tipo, String.valueOf(texto));
+	}
+	
 
 	/**
 	 * Obten unha Listaxe de Comentarios que teñan a Id_incidencia que se lle pase.

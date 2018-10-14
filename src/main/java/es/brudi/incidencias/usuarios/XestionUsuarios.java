@@ -8,7 +8,7 @@ import es.brudi.incidencias.usuarios.db.UsuarioAccessor;
 
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -22,6 +22,8 @@ import org.apache.commons.validator.routines.EmailValidator;
  */
 public class XestionUsuarios {
 	
+	private Logger logger = Logger.getLogger(XestionUsuarios.class);
+	
 	/**
 	 * 
 	 * Método que devolve o token para o usuario se este introduciu correctamente os datos.
@@ -33,15 +35,14 @@ public class XestionUsuarios {
 	public JSONObject<String, Object> login(String username, String password) {
 		JSONObject<String, Object> ret;
 		
-		Usuario user = UsuarioAccessor.comprobarUsuario(username, password);
-		
-		if(user == null) {
+		String nomeCompleto = UsuarioAccessor.comprobarUsuario(username, password);
+		if(nomeCompleto == null)
 			return Error.LOGIN_USER.toJSONError();
-		}
 		
+		logger.debug("Login correcto do usuario: "+username);
         ret = Mensaxe.LOGIN_OK.toJSONMensaxe();
         
-        ret.put("usuario", user.toJSON());
+        ret.put("usuario", nomeCompleto);
         ret.put("token", XestionTokens.xerarFirmarToken(username));
 
         return ret;
@@ -56,21 +57,13 @@ public class XestionUsuarios {
 	public JSONObject<String, Object> changemail(Usuario user, String email) {
 		JSONObject<String, Object> ret;
 		
-		//Comprobase que o formato do email enviado sexa correcto
-		EmailValidator validator = EmailValidator.getInstance();
-		if (!validator.isValid(email)) {
-		   ret = Error.CHANGEMAIL_ERRORPARAMETROS.toJSONError();
-		}
-		else {
-			boolean cambiado = UsuarioAccessor.cambiarEmail(email, user.getId());
-			
-			if(cambiado) {
-				ret = Mensaxe.CHANGEMAIL_OK.toJSONMensaxe();
-			}
-			else {
-				ret = Error.CHANGEMAIL_ERROR.toJSONError();
-			}
-		}
+		boolean cambiado = UsuarioAccessor.cambiarEmail(email, user.getId());
+
+		if (cambiado)
+			ret = Mensaxe.CHANGEMAIL_OK.toJSONMensaxe();
+		else
+			ret = Error.CHANGEMAIL_ERROR.toJSONError();
+		
 		return ret;
 	}
 	
@@ -87,28 +80,22 @@ public class XestionUsuarios {
 	public JSONObject<String, Object> changepass(Usuario user, String passOld, String passNew1, String passNew2) {
 		JSONObject<String, Object> ret;
 				
-		Usuario userComp = UsuarioAccessor.comprobarUsuario(user.getNome(), passOld);
-		
 		//Comprobase que o contrasinal antigo é o correcto do usuario que ten a sesión iniciada.
-		if(userComp == null || userComp.getId() != user.getId()) {
+		if(UsuarioAccessor.comprobarUsuario(user.getNome(), passOld) == null) {
 			return Error.CHANGEPASS_ERRORPASS.toJSONError();
 		}
+		logger.debug("Contrasinal antigo correcto.");
 		
 		//Comprobase que os dous contrasinais novos son iguais.
 		if(passNew1.equals(passNew2)) {
 			boolean cambiado = UsuarioAccessor.cambiarPass(passNew1, user.getId());
-			
-			if(cambiado) {
+			if(cambiado)
 				ret = Mensaxe.CHANGEPASS_OK.toJSONMensaxe();
-			}
-			else {
+			else
 				ret = Error.CHANGEPASS_ERROR.toJSONError();
-			}
 		}
-		else {
+		else
 			ret = Error.CHANGEPASS_DIFERENTES.toJSONError();
-		}
-		
 			
 		return ret;
 	}
@@ -122,7 +109,7 @@ public class XestionUsuarios {
 		JSONObject<String, Object> ret;
 
 		ret = Mensaxe.OBTERPERMISOS_OK.toJSONMensaxe();
-		ret.put("Permisos", user.getPermisosFinalesJSON());
+		ret.put("permisos", user.getPermisosFinalesJSON());
 		
 		return ret;
 	}

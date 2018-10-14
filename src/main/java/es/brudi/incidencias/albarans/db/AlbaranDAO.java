@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.albarans.Albaran;
 import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.incidencias.db.IncidenciaDAO;
 
 /**
  * 
@@ -137,7 +138,7 @@ public class AlbaranDAO {
 	 * @param id
 	 * @return
 	 */
-	protected static Albaran getById(int id) {
+	protected static Albaran obterPorId(int id) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		String query = "SELECT * FROM "+TABLENAME+" WHERE id = ?;";
@@ -176,6 +177,49 @@ public class AlbaranDAO {
 		
 		return ret;
 	}
+	
+	/**
+	 * Obten o albarán solicitado coa incidencia a que pertence a instalación a que está asignado.
+	 * @param id
+	 * @return Albaran
+	 */
+	protected static Albaran obterAlbaranEInstalacionPorId(int id) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		String query = "SELECT A.*, I.Instalacion AS Instalacion FROM "+TABLENAME+" AS A INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON A.Id_incidencia=I.Id WHERE A.Id=?;";
+		Albaran albaran = null;
+		ResultSet res = null;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
+			logger.debug("Realizase a consulta: "+query);
+			
+			pst.setInt(1, id);
+						
+			res = pst.executeQuery();
+			
+			if(res.next()) {
+				albaran = new Albaran(res);
+				albaran.setInstalacion(res.getInt("Instalacion"));
+			}
+		 }
+		catch(SQLException se) {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e) {
+			logger.error("Exception in DAO: ", e);
+		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
+		
+		return albaran;
+	}	
 
 	/**
 	 * Obten unha Listaxe de Albarans que teñan a Id_incidencia que se lle pase.
@@ -183,10 +227,10 @@ public class AlbaranDAO {
 	 * @param id_incidencia
 	 * @return
 	 */
-	protected static ArrayList<Albaran> getByIdIncidencia(int idIncidencia) {
+	protected static ArrayList<Albaran> obterPorIdIncidencia(int idIncidencia) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "SELECT * FROM "+TABLENAME+" WHERE Id_incidencia = ?";
+		String query = "SELECT A.*, I.Instalacion AS Instalacion FROM "+TABLENAME+" AS A INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON A.Id_incidencia=I.Id WHERE Id_incidencia = ?";
 		
 		ArrayList<Albaran> ret = new ArrayList<>();
 
@@ -199,8 +243,10 @@ public class AlbaranDAO {
 						
 			res = pst.executeQuery();
 					
-			while(res.next()) {			
-				ret.add(new Albaran(res));
+			while(res.next()) {
+				Albaran albaran = new Albaran(res);
+				albaran.setInstalacion(res.getInt("Instalacion"));
+				ret.add(albaran);
 			}
 			
 			res.close();
@@ -280,5 +326,35 @@ public class AlbaranDAO {
 		 }
 		
 		return (ret == 1);
+	}
+
+	/**
+	 * Borra o albarán da base de datos.
+	 * @param id
+	 * @return
+	 */
+	public static boolean eliminar(int id) {
+		Connection conn = DBConnectionManager.getConnection();
+
+		String query = "DELETE FROM "+TABLENAME+" WHERE Id = ?;";
+		int result = -1;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
+			logger.debug("Realizase a consulta: "+query);
+			
+			pst.setInt(1, id);
+			result = pst.executeUpdate();
+		 }
+		catch(SQLException se)
+		 {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e)
+		 {
+			logger.error("Exception: ", e);
+		 }
+		
+		return (result == 1);
 	}
 }

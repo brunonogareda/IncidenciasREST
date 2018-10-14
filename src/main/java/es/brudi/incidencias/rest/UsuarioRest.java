@@ -2,16 +2,19 @@ package es.brudi.incidencias.rest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET; 
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import es.brudi.incidencias.util.JSONObject;
 import es.brudi.incidencias.usuarios.Usuario;
@@ -34,7 +37,7 @@ import es.brudi.incidencias.rest.util.Secured;
  * @year Decembro - 2017
  * 
  */
-@Path("/usuario")
+@Path("/")
 @XmlRootElement
 @Checkdb
 public class UsuarioRest {
@@ -50,83 +53,68 @@ public class UsuarioRest {
 	 * Inicia a sesión do usuario. Devolve un mensaxe de estado e datos do usuario.
 	 */
 	@Path("/login")
-	@GET
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> login(@QueryParam("username") String username, @QueryParam("password") String password) { 
-		
-		JSONObject<String, Object> json;
+    public JSONObject<String, Object> login(@FormDataParam("username") String username, @FormDataParam("password") String password) { 
 		logger.debug("Invocouse o método login() de usuario.");
-		if (username == null || password == null) {
-			json = Error.LOGIN_SENPARAMETROS.toJSONError();
-		} else {
-			XestionUsuarios xest = new XestionUsuarios();
-			json = xest.login(username, password);
-		}
-		return json;
-    } 
+		if (username == null || password == null)
+			return Error.LOGIN_SENPARAMETROS.toJSONError();
+		
+		logger.debug("Parámetros correctos.");
+		XestionUsuarios xest = new XestionUsuarios();
+		return xest.login(username, password);
+    }
 
 	/**
 	 * 
-	 * Cambia o contrasinal do usuario que se encontra logueado. Devolve un mensaxe de estado.
+	 * Cambia o contrasinal do usuario que o solicita. Devolve un mensaxe de estado.
 	 */
-	@Path("/changepassword")
-	@GET
+	@Path("/usuario/cambiarPassword")
+	@PUT
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> changepassword(@QueryParam("pass_old") String passOld, @QueryParam("pass_new1") String passNew1,
-			@QueryParam("pass_new2") String passNew2) {
-		
-		JSONObject<String, Object> json;
+	public JSONObject<String, Object> cambiarPassword(@FormDataParam("passOld") String passOld, @FormDataParam("passNew1") String passNew1,
+			@FormDataParam("passNew2") String passNew2) {
+		logger.debug("Invocouse o método cambiarPassword() de usuario.");
+		if (passOld == null)
+			return Error.CHANGEPASS_SENPARAMETROANT.toJSONError();
+		if (passNew1 == null || passNew2 == null)
+			return Error.CHANGEPASS_SENPARAMETROPASS.toJSONError();
 
-		logger.debug("Invocouse o método changepassword() de usuario.");
-		if (passOld != null) {
-
-			if (passNew1 != null && passNew2 != null) {
-
-				Usuario user = XestionUsuarios.getUsuario(securityContext);
-				XestionUsuarios xest = new XestionUsuarios();
-				json = xest.changepass(user, passOld, passNew1, passNew2);
-			} else {
-				json = Error.CHANGEPASS_SENPARAMETROPASS.toJSONError();
-			}
-		} else {
-			json = Error.CHANGEPASS_SENPARAMETROANT.toJSONError();
-		}
-		return json;
+		logger.debug("Parámetros correctos.");
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		XestionUsuarios xest = new XestionUsuarios();
+		return xest.changepass(user, passOld, passNew1, passNew2);
 	}
 	
 	/**
 	 * 
-	 * Cambia o email do usuario logueado. Devolve un mensaxe de estado.
+	 * Cambia o email do usuario que o solicita. Devolve un mensaxe de estado.
 	 */
-	@Path("/changemail")
-	@GET
+	@Path("/usuario/cambiarMail")
+	@PUT
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> changemail(@QueryParam("mail") String mail) {
+	public JSONObject<String, Object> cambiarMail(@FormDataParam("mail") String mail) {
+		logger.debug("Invocouse o método cambiarMail() de usuario.");
+		if(mail == null)
+			return Error.CHANGEMAIL_SENPARAMETROS.toJSONError();
+		//Comprobase que o formato do email enviado sexa correcto
+		EmailValidator validator = EmailValidator.getInstance();
+		if (!validator.isValid(mail))
+			return Error.CHANGEMAIL_ERRORPARAMETROS.toJSONError();
 		
-		JSONObject<String, Object> json;
-
-		logger.debug("Invocouse o método changemail() de usuario.");
-		if(mail != null) {
-
-			XestionUsuarios xest = new XestionUsuarios();
-			Usuario user = XestionUsuarios.getUsuario(securityContext);
-			
-			json = xest.changemail(user, mail);
-		}
-		else {
-			json = Error.CHANGEMAIL_SENPARAMETROS.toJSONError();
-		}
-
-        return json;
+		logger.debug("Parámetros correctos.");
+		XestionUsuarios xest = new XestionUsuarios();
+		Usuario user = XestionUsuarios.getUsuario(securityContext);
+		return xest.changemail(user, mail);
 	}
 	
 	/**
 	 * 
 	 * Obten os permisos do usuario
 	 */
-	@Path("/obterPermisos")
+	@Path("/usuario/obterPermisos")
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)

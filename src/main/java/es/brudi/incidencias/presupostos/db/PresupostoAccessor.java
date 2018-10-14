@@ -18,15 +18,28 @@ public class PresupostoAccessor {
 		throw new IllegalStateException("Utility class");
 	}
 
-	public static Presuposto obterPresupostoPorId(String id, Usuario usuario) {
+	/**
+	 * Devolve o presuposto buscando por Id. Sempres que o usuario que se pasa xestione a instalación correspondente a incidencia.
+	 * @param id
+	 * @param usuario
+	 * @return
+	 */
+	public static Presuposto obterPorId(String id, Usuario usuario) {
 		Presuposto presuposto = null;
-		
 		presuposto = PresupostoDAO.obterPresupostoEInstalacionPorId(id);
-		
 		if(presuposto != null && usuario.xestionaInstalacion(presuposto.getInstalacion()))
 			return presuposto;
-		
-		return presuposto;
+		else
+			return null;
+	}
+	
+	/**
+	 * Obten un presuposto mediante o id.
+	 * @param id
+	 * @return
+	 */
+	public static Presuposto obterPorId(String id) {
+		return PresupostoDAO.obterPorId(id);
 	}
 	
 	/**
@@ -40,15 +53,6 @@ public class PresupostoAccessor {
 	 */
 	public static boolean crear(String id, String rutaFicheiro, String tipoFicheiro, String comentarios, boolean aceptado) {
 		return PresupostoDAO.crear(id, rutaFicheiro, tipoFicheiro, comentarios, aceptado);
-	}
-	
-	/**
-	 * Obten un presuposto mediante o id.
-	 * @param id
-	 * @return
-	 */
-	public static Presuposto obterPorId(String id) {
-		return PresupostoDAO.obterPorId(id);
 	}
 	
 	/**

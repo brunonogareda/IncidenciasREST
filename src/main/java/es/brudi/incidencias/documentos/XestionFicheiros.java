@@ -116,12 +116,24 @@ public class XestionFicheiros {
 	/**
 	 * Obten a ruta onde se gardará o ficheiro
 	 * 
-	 * @param ruta
+	 * @param rutaBase
 	 * @param data
 	 * @return
 	 */
-	public static String getRuteToFile(String ruta, Calendar data) {
-		return ruta + "/" + data.get(Calendar.YEAR) + "/" + (data.get(Calendar.MONTH)+1);
+	public static String getRuteToFile(String rutaBase, Calendar data) {
+		return rutaBase + "/" + data.get(Calendar.YEAR) + "/" + (data.get(Calendar.MONTH)+1);
+	}
+	
+	/**
+	 * Obten a ruta onde se gardará o ficheiro
+	 * 
+	 * @param rutaBase
+	 * @param data
+	 * @param id
+	 * @return
+	 */
+	public static String getRuteToFile(String rutaBase, Calendar data, int id) {
+		return getRuteToFile(rutaBase, data) + "/" + id;
 	}
 	
 	/**

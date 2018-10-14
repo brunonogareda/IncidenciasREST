@@ -19,9 +19,9 @@ public class UsuarioAccessor {
 	 * Método se comproba que o usuario que se lle pasa existe e coincide o contrasinal da base de datos co que se lle pasa.
 	 * @param username
 	 * @param password
-	 * @return Devolve un obxecto usuario.
+	 * @return Devolve o nome completo do usuario. Se é nulo, a nome e contraseinal non coinciden.
 	 */
-	public static Usuario comprobarUsuario(String username, String password) {
+	public static String comprobarUsuario(String username, String password) {
 		return UsuarioDAO.comprobarUsuario(username, password);
 	}
 	

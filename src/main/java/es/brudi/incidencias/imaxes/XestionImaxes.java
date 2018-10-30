@@ -96,7 +96,7 @@ public class XestionImaxes {
 		logger.debug("Creouse a imaxe correctamente: "+idI);
 
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(idI));
+		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(idI));
 		
 		if(!errFile)
 			ret = Mensaxe.CREARIMAXE_OK.toJSONMensaxe();
@@ -175,7 +175,7 @@ public class XestionImaxes {
 		logger.debug("Modificada a imaxe correctamente: "+id);
 
 		//Engadimos o comentario de que se engadiu a imaxe
-		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
+		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARIMAXE_OK.toJSONMensaxe();

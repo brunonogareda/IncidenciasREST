@@ -67,4 +67,10 @@ public class Util {
 		return new Timestamp(agora.getTimeInMillis());
 	}
 	
+	public static Calendar obterCalendarActual() {
+		Calendar agora = Calendar.getInstance();
+		agora.setTimeZone(Util.timeZone);
+		return agora;
+	}
+	
 }

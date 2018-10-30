@@ -110,7 +110,7 @@ public class XestionFacturas {
 		logger.debug("Creouse a factura correctamente: "+idFactura);
 
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
+		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARFACTURA_OK.toJSONMensaxe();
@@ -190,7 +190,7 @@ public class XestionFacturas {
 		logger.debug("Modificada a factura correctamente: "+idFactura);
 
 		//Engadimos o comentario de que se engadiu unha factura
-		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
+		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARFACTURA_OK.toJSONMensaxe();

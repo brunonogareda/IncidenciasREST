@@ -119,7 +119,7 @@ public class XestionPresupostos {
 		logger.debug("Creouse o presuposto correctamente: "+idPresuposto);
 
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
+		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARPRESUPOSTO_OK.toJSONMensaxe();
@@ -213,7 +213,7 @@ public class XestionPresupostos {
 		logger.debug("Modificado o presuposto correctamente: "+idPresuposto);
 
 		//Engadimos o comentario de que se modificou o presuposto
-		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
+		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARPRESUPOSTO_OK.toJSONMensaxe();

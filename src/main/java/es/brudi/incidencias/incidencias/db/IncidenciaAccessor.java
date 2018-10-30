@@ -1,9 +1,14 @@
 package es.brudi.incidencias.incidencias.db;
 
-import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import es.brudi.incidencias.incidencias.Incidencia;
+import es.brudi.incidencias.incidencias.estados.Estado;
+import es.brudi.incidencias.instalacions.Instalacion;
+import es.brudi.incidencias.usuarios.Usuario;
+import es.brudi.incidencias.util.Util;
 
 public class IncidenciaAccessor {
 
@@ -17,6 +22,20 @@ public class IncidenciaAccessor {
 	 */
 	public static Incidencia obterIncidenciaPorId(int id) {
 		return IncidenciaDAO.obterIncidenciaPorId(id);
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param user
+	 * @return Devolve o obxecto incidencia que corresponde co Id que se lle pasou, sempre que pertenza a unha instalación que xestione o usuario.
+	 */
+	public static Incidencia obterIncidenciaPorId(int id, Usuario user) {
+		Incidencia inc = IncidenciaDAO.obterIncidenciaPorId(id);
+		if(inc != null && !user.xestionaInstalacion(inc.getInstalacion().getId()))
+			inc = null;
+		
+		return inc;
 	}
 	
 	/**
@@ -50,11 +69,19 @@ public class IncidenciaAccessor {
 	 * @param solPresuposto
 	 * @param data
 	 * @param autor
-	 * @return - Id da nova incidencia. (Se -1 existiu un erro creando a incidencia).
+	 * @return - Un obxecto coa nova incidencia. Null se ocorreu un erro.
 	 */
-	public static int crear(int codParte, int ot, int idInstalacion, String zonaApartamento,
-			String descripcionCurta, String observacions, String estado, boolean solPresuposto, Timestamp data, String autor) {
-		return IncidenciaDAO.crear(codParte, ot, idInstalacion, zonaApartamento, descripcionCurta, observacions, estado, solPresuposto, data, autor);
+	public static Incidencia crear(int codParte, int ot, Instalacion instalacion, String zonaApartamento,
+			String descripcionCurta, String observacions, Estado estado, boolean solPresuposto, int autor) {
+		Incidencia ret = null;
+		Calendar data = Util.obterCalendarActual();
+		int id = IncidenciaDAO.crear(codParte, ot, instalacion.getId(), zonaApartamento, descripcionCurta, observacions,
+				estado.getEstado(), solPresuposto, data, autor);
+		if (id >= 0)
+			ret = new Incidencia(id, codParte, ot, instalacion, zonaApartamento, descripcionCurta, observacions, estado,
+					solPresuposto, null, null, data, autor);
+
+		return ret;
 	}
 
 	/**
@@ -75,13 +102,20 @@ public class IncidenciaAccessor {
 	 * @param autor - autora buscar. NULL: busca calquera autor.
 	 * @param codCliente - Cod_cliente a buscar. 0: busca calquera cliente.
 	 * @param ver - Número de incidencias máximas a buscar. NULL: Sen límite.
+	 * @param user - Usuario que realiza a consulta
 	 * @return
 	 */
 	public static List<Incidencia> obter(int codParte, int ot, int idInstalacion,
 			String zonaApartamento, String descripcionCurta, String observacions, List<String> estados,
-			String solPresuposto, String presuposto, String factura, Timestamp dataMenor, Timestamp dataMaior,
-			String autor, int codCliente, int ver) {
-		return IncidenciaDAO.obter(codParte, ot, idInstalacion, zonaApartamento, descripcionCurta, observacions, estados, solPresuposto, presuposto, factura, dataMenor, dataMaior, autor, codCliente, ver);
+			String solPresuposto, String presuposto, String factura, Calendar dataMenor, Calendar dataMaior,
+			int autor, int ver, Usuario user) {
+		List<Incidencia> incidencias = IncidenciaDAO.obter(codParte, ot, idInstalacion, zonaApartamento, descripcionCurta, observacions, estados, solPresuposto, presuposto, factura, dataMenor, dataMaior, autor, ver);
+		List<Incidencia> ret = new ArrayList<>();
+		for(Incidencia inc : incidencias) {
+			if(user.xestionaInstalacion(inc.getInstalacion().getId())) //Solo se devolven as incidencias das instalacions que xestiona o usuario.
+				ret.add(inc);
+		}
+		return ret;
 	}
 	
 	/**

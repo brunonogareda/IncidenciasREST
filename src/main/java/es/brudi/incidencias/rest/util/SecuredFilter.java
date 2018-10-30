@@ -76,6 +76,13 @@ public class SecuredFilter implements ContainerRequestFilter {
         Set<String> roles = new HashSet<>();
         roles.add("ADMIN");
        	Authorizer authorizer = new Authorizer(roles, subject, originalContext.isSecure());
+       	
+       	if(((User)authorizer.getUserPrincipal()).obterUsuario() == null) {
+       		logger.error("O token é correcto, pero non se obtiveron correctamente os datos do usuario.");
+       		requestContext.abortWith(
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+       	}
+       		
        	requestContext.setSecurityContext(authorizer);
     }
     
@@ -83,17 +90,19 @@ public class SecuredFilter implements ContainerRequestFilter {
 
         Set<String> roles;
         String username;
+        Usuario user;
         boolean isSecure;
         
         public Authorizer(Set<String> roles, final String username, boolean isSecure) {
             this.roles = roles;
             this.username = username;
+            this.user = UsuarioAccessor.obterUsuario(username);
             this.isSecure = isSecure;
         }
 
         @Override
         public Principal getUserPrincipal() {
-            return new User(username);
+            return new User(user);
         }
 
         @Override
@@ -114,19 +123,20 @@ public class SecuredFilter implements ContainerRequestFilter {
     } 
 
     public static class User implements Principal {
-        String name;
+        Usuario usuario;
 
-        public User(String name) {
-            this.name = name;
+        public User(Usuario user) {
+            this.usuario = user;
         }
 
         @Override
         public String getName() {
-        	return name;
+        	return usuario.getNome();
         }
         
         public Usuario obterUsuario() {
-        	return UsuarioAccessor.obterUsuario(name);
+        	return usuario;
+//        	return UsuarioAccessor.obterUsuario(name);
         }
     }
 

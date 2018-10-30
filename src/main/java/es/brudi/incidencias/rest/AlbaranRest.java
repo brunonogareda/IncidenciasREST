@@ -5,6 +5,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -70,17 +71,17 @@ public class AlbaranRest {
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-    public JSONObject<String, Object> insertar(@FormDataParam("idIncidencia") int idIncidencia,
+    public JSONObject<String, Object> insertar(@DefaultValue("-1") @FormDataParam("idIncidencia") int idIncidencia,
     										   @FormDataParam("nome") String nome,
     										   @FormDataParam("proveedor") String proveedor,
-    										   @FormDataParam("num_albaran") String numAlbaran,
+    										   @FormDataParam("numAlbaran") String numAlbaran,
     										   @FormDataParam("comentarios") String comentarios,
     										   @FormDataParam("file") InputStream uploadedInputStream,
     										   @FormDataParam("file") FormDataContentDisposition fileDetail) {	
 		
         logger.debug("Invocouse o método insertar() de albarans.");
 		// Compróbase que os parámetros obligatorios se enviaron.
-		if (proveedor == null || proveedor.equals("") || idIncidencia == 0 || uploadedInputStream == null
+		if (proveedor == null || proveedor.equals("") || idIncidencia == -1 || uploadedInputStream == null
 				|| fileDetail == null)
 			return Error.FALTANPARAM.toJSONError();
 
@@ -105,7 +106,7 @@ public class AlbaranRest {
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-    public JSONObject<String, Object> modificar(@FormDataParam("id") int id,
+    public JSONObject<String, Object> modificar(@DefaultValue("-1") @FormDataParam("id") int id,
     										    @FormDataParam("nome") String nome,
     										    @FormDataParam("numAlbaran") String numAlbaran,
 								    		    @FormDataParam("comentarios") String comentarios,
@@ -114,7 +115,7 @@ public class AlbaranRest {
 		
         logger.debug("Invocouse o método modificar() de albaran.");
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado, convertindo os string en int en caso de ser necesario
-        if(id == 0)
+        if(id == -1)
         	return Error.FALTANPARAM.toJSONError();
       	
       	logger.debug("Parámetros correctos.");
@@ -133,10 +134,10 @@ public class AlbaranRest {
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> obter(@PathParam("id") int id) { 
+    public JSONObject<String, Object> obter(@DefaultValue("-1") @PathParam("id") int id) { 
         logger.debug("Invocouse o método obter() de albaran.");
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
-        if(id == 0)
+        if(id == -1)
         	return Error.FALTANPARAM.toJSONError();
 
         logger.debug("Parámetros correctos.");
@@ -155,17 +156,17 @@ public class AlbaranRest {
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-    public JSONObject<String, Object> obterXIncidencia(@PathParam("id") int idIncidencia) { 
+    public JSONObject<String, Object> obterPorIncidencia(@DefaultValue("-1") @PathParam("id") int idIncidencia) { 
 
 		logger.debug("Invocouse o método obterXIncidencia() de albarán.");
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
-      	if(idIncidencia == 0)
+      	if(idIncidencia == -1)
       		return Error.FALTANPARAM.toJSONError();
 
       	logger.debug("Parámetros correctos.");
 		XestionAlbarans xest = new XestionAlbarans();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
-		return xest.obterXIncidencia(user, idIncidencia);
+		return xest.obterPorIncidencia(user, idIncidencia);
     } 
 	
 	
@@ -178,11 +179,11 @@ public class AlbaranRest {
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response obterFicheiro(@PathParam("id") int id) {
+	public Response obterFicheiro(@DefaultValue("-1") @PathParam("id") int id) {
 		
 		logger.debug("Invocouse o método obterFicheiro() de albarán.");
         //Compróbase que os parámetros obligatorios se pasaron e que están no formato adecuado.
-      	if(id == 0)
+      	if(id == -1)
       		return Response.status(Status.BAD_REQUEST).entity("").build();
 
       	logger.debug("Parámetros correctos.");

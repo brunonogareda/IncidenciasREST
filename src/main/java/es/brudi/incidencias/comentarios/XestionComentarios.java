@@ -1,6 +1,5 @@
 package es.brudi.incidencias.comentarios;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -13,7 +12,6 @@ import es.brudi.incidencias.mensaxes.Mensaxe;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.util.JSONArray;
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.util.Util;
 
 /**
  * 
@@ -41,30 +39,21 @@ public class XestionComentarios {
 		if(tipo < Comentario.TIPO_COMENTARIOS_MIN || tipo > Comentario.TIPO_COMENTARIO_MAX)
 			tipo = Comentario.TIPO_COMENTARIOS_MIN;
 		
-		if(!user.podeEngadirComentario()) {
-			return Error.INSERTARCOMENTARIO_SENPERMISOS2.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
-		if(inc == null) {
+		if(!user.podeEngadirComentario())
+			return Error.INSERTARCOMENTARIO_SENPERMISOS.toJSONError();
+
+		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia, user);
+		if(inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Error.INSERTARCOMENTARIO_SENPERMISOS1.toJSONError();
-		}
 		
-		int idC = ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_COMENTAR, tipo, texto);
-		if(idC <= 0) {
+		Comentario comentario = ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_COMENTAR, tipo, texto);
+		if(comentario == null)
 			return Error.INSERTARCOMENTARIO_ERRORDB.toJSONError();
-		}
 		
-		Timestamp data = Util.obterTimestampActual();
-		Comentario comentario = new Comentario(idC, idIncidencia, user.getNome(), Comentario.ACCION_COMENTAR, Comentario.COMENTARIO_PUBLICO, texto, data);
-				
-		logger.debug("Creouse o comentario "+idC+" correctamente na incidencia: "+idIncidencia);
+		logger.debug("Creouse o comentario "+comentario.getId()+" correctamente na incidencia: "+idIncidencia);
 		
 		ret = Mensaxe.INSERTARCOMENTARIO_OK.toJSONMensaxe();
-		ret.put("Comentario", comentario);
+		ret.put("comentario", comentario);
 		
 		return ret;
 	}
@@ -79,27 +68,15 @@ public class XestionComentarios {
 		JSONObject<String, Object> ret;
 		JSONArray<Object> jsonComentarios = new JSONArray<>();
 		
-		if(!user.podeVerComentario()) {
+		if(!user.podeVerComentario())
 			return Error.OBTERCOMENTARIO_SENPERMISOS2.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
-		if(inc == null) {
-			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Error.OBTERCOMENTARIO_SENPERMISOS1.toJSONError();
-		}
-		
-		List<Comentario> comentarios = ComentarioAccessor.getByIdIncidencia(idIncidencia);
 
-		if(comentarios == null) {
+		List<Comentario> comentarios = ComentarioAccessor.obterPorIdIncidencia(idIncidencia, user);
+		if(comentarios == null)
 			return Error.OBTERCOMENTARIO_ERRORDB.toJSONError();
-		}
-				
-		if(comentarios.isEmpty()) {
+
+		if(comentarios.isEmpty())
 			return Error.OBTERCOMENTARIO_NONEXISTENAINC.toJSONError();
-		}
 						
 		logger.debug("Obtiveronse "+comentarios.size()+" comentarios na incidencia: "+idIncidencia);
 		
@@ -108,9 +85,7 @@ public class XestionComentarios {
 			if(user.podeVerComentarioTipo(Comentario.getTipo()))
 				jsonComentarios.add(Comentario.toJson());
 		}
-			
-		ret.put("Comentarios", jsonComentarios);
-		
+		ret.put("comentarios", jsonComentarios);
 		return ret;
 	}
 	

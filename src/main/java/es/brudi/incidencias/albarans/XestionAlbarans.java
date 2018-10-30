@@ -94,7 +94,7 @@ public class XestionAlbarans {
 		logger.debug("Creouse o albarán correctamente: "+albaran.getId());
 
 		//Engadimos o comentario de que se engadiu un albarán
-		ComentarioAccessor.crear(idIncidencia, user.getNome(), Comentario.ACCION_INSERTAR_ALBARAN, Comentario.MODIFICACION_TECNICOS, albaran.getId());
+		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_ALBARAN, Comentario.MODIFICACION_TECNICOS, albaran.getId());
 		
 		ret.put("albaran", albaran.toJson());
 		
@@ -162,7 +162,7 @@ public class XestionAlbarans {
 		logger.debug("Modificado o albarán correctamente: "+id);
 
 		//Engadimos o comentario de que se modificou o albarán
-		ComentarioAccessor.crear(inc.getId(), user.getNome(), Comentario.ACCION_MODIFICAR_ALBARAN, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
+		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_ALBARAN, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARALBARAN_OK.toJSONMensaxe();
@@ -201,7 +201,7 @@ public class XestionAlbarans {
 	 * @param idIncidencia
 	 * @return
 	 */
-	public JSONObject<String, Object> obterXIncidencia(Usuario user, int idIncidencia) {
+	public JSONObject<String, Object> obterPorIncidencia(Usuario user, int idIncidencia) {
 		JSONObject<String, Object> ret;
 		JSONArray<Object> jsonAlbarans = new JSONArray<>();
 

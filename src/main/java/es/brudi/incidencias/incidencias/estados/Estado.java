@@ -1,6 +1,5 @@
 package es.brudi.incidencias.incidencias.estados;
 
-
 /**
  * 
  * Tipo Enum co un grupo de estados posibles de unha incidencia
@@ -48,6 +47,11 @@ public enum Estado {
 	}
 	
 	public boolean estadoSegPosible(Estado estado) {
+		//Se o estado é un dos seguintes non se pode cambiar de forma manual.
+		if (estado.equals(Estado.FACTURADO) || estado.equals(Estado.PENDENTE_A) ||
+				estado.equals(Estado.PENDENTE_P) || estado.equals(Estado.PENDENTE_R))
+			return false;
+		
 		for(int i=0; i < this.estadosSeg.length; i++) {
 			if (this.estadosSeg[i].equals(estado))
 				return true;

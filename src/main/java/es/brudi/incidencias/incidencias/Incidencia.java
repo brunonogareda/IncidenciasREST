@@ -32,11 +32,11 @@ public class Incidencia {
 	private String presuposto;
 	private String factura;
 	private Calendar data = Calendar.getInstance();
-	private String autor;
+	private int autor;
 	
 	public Incidencia(int id, int codParte, int ot, Instalacion instalacion, String zonaApartamento,
 			String descripcionCurta, String observacions, Estado estado, boolean solPresuposto, String presuposto,
-			String factura, Calendar data, String autor) {
+			String factura, Calendar data, int autor) {
 		super();
 		this.id = id;
 		this.codParte = codParte;
@@ -66,7 +66,7 @@ public class Incidencia {
 		presuposto = res.getString("Presuposto");
 		factura = res.getString("Factura");
 		data.setTime(res.getTimestamp("Data"));
-		autor = res.getString("Autor");
+		autor = res.getInt("Autor");
 	}
 	
 	/**
@@ -240,14 +240,14 @@ public class Incidencia {
 	/**
 	 * @return the autor
 	 */
-	public String getAutor() {
+	public int getAutor() {
 		return autor;
 	}
 
 	/**
 	 * @param autor the autor to set
 	 */
-	public void setAutor(String autor) {
+	public void setAutor(int autor) {
 		this.autor = autor;
 	}
 
@@ -265,7 +265,7 @@ public class Incidencia {
 		ret.put("presuposto", presuposto);
 		ret.put("factura", factura);
 		ret.put("data", data);
-		ret.put(autor, autor);
+		ret.put("autor", autor);
 		return ret;
 	}
 

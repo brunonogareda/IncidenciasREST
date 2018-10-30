@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -166,13 +167,14 @@ public class IncidenciaDAO {
 	 * @return - Id da nova incidencia. (Se -1 existiu un erro creando a incidencia).
 	 */
 	protected static int crear(int codParte, int ot, int idInstalacion, String zonaApartamento,
-			String descripcionCurta, String observacions, String estado, boolean solPresuposto, Timestamp data, String autor) {
+			String descripcionCurta, String observacions, String estado, boolean solPresuposto, Calendar data, int autor) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "INSERT INTO "+TABLENAME+" (Cod_parte, Orden_traballo, Instalacion, Zona_apartamento, Descripcion_curta, "
 						+ "Observacions, Estado, Solicitase_presuposto, Data, Autor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		int id = -1;
+		Timestamp time = new Timestamp(data.getTimeInMillis());
 		ResultSet res = null;
 		try (PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			logger.debug("Realizase a consulta: "+query);
@@ -180,8 +182,8 @@ public class IncidenciaDAO {
 			int i = 1;
 			
 			//Se son -1, ponse a null.
-			String codParteS = (codParte == 0) ? null : String.valueOf(codParte);
-			String otS = (ot == 0) ? null : String.valueOf(ot);
+			String codParteS = (codParte == -1) ? null : String.valueOf(codParte);
+			String otS = (ot == -1) ? null : String.valueOf(ot);
 			
 			pst.setString(i++, codParteS);
 			pst.setString(i++, otS);
@@ -191,8 +193,8 @@ public class IncidenciaDAO {
 			pst.setString(i++, observacions);
 			pst.setString(i++, estado);
 			pst.setBoolean(i++, solPresuposto);
-			pst.setTimestamp(i++, data);
-			pst.setString(i++, autor);
+			pst.setTimestamp(i++, time);
+			pst.setInt(i++, autor);
 
 			int result = pst.executeUpdate();
 									
@@ -244,28 +246,29 @@ public class IncidenciaDAO {
 	 */
 	protected static List<Incidencia> obter(int codParte, int ot, int idInstalacion,
 			String zonaApartamento, String descripcionCurta, String observacions, List<String> estados,
-			String solPresuposto, String presuposto, String factura, Timestamp dataMenor, Timestamp dataMaior,
-			String autor, int codCliente, int ver) {
+			String solPresuposto, String presuposto, String factura, Calendar dataMenorC, Calendar dataMaiorC,
+			int autor, int ver) {
 		Connection conn = DBConnectionManager.getConnection();
 
 		//Construimos a query final. Se algún parámetro se busca calquera, non se engade o where na consulta.
-		String query = "SELECT * FROM "+TABLENAME+" INC JOIN Instalacions INS ON INC.Instalacion=INS.Id WHERE";
-		query += " INS.Cod_cliente LIKE ?";
-		query += (codParte > 0) ? " AND Cod_parte = ?" : "";
-		query += (codParte < 0 ) ? " AND Cod_parte IS NULL" : "";
-		query += (ot > 0) ? " AND Orden_traballo = ?" : "";
-		query += (ot < 0 ) ? " AND Orden_traballo IS NULL" : "";
-		query += (idInstalacion > 0) ? " AND Instalacion = ?" : "";
+		String query = "SELECT * FROM "+TABLENAME+" WHERE Id LIKE '%'";
+		query += (codParte > -1) ? " AND Cod_parte = ?" : "";
+		query += (codParte < -1) ? " AND Cod_parte IS NULL" : "";
+		query += (ot > -1) ? " AND Orden_traballo = ?" : "";
+		query += (ot < -1) ? " AND Orden_traballo IS NULL" : "";
+		query += (idInstalacion > -1) ? " AND Instalacion = ?" : "";
 		query += (zonaApartamento != null && !zonaApartamento.isEmpty()) ? " AND Zona_apartamento LIKE ?" : "";
 		query += (descripcionCurta != null && !descripcionCurta.isEmpty()) ? " AND Descripcion_curta LIKE ?" : "";
 		query += (observacions != null && !observacions.isEmpty()) ? " AND Observacions LIKE ?" : "";
 		if(estados != null && !estados.isEmpty()) { //Recorremos o listado de estados e engaimos según o número.
-			query += " AND (";
+			StringBuilder queryEstados = new StringBuilder();
+			queryEstados.append(" AND (");
 			for(int j=0; j<estados.size(); j++) {
-				query += " Estado = ?";
-				if(j<estados.size()-1) query += " OR";
-				else query += " )";
+				queryEstados.append(" Estado = ?");
+				if(j<estados.size()-1) queryEstados.append(" OR");
+				else queryEstados.append(" )");
 			}
+			query += queryEstados.toString();
 		}
 		query += (solPresuposto != null && (solPresuposto.equals("true") || solPresuposto.equals("false"))) ? " AND Solicitase_presuposto = ?" : "";
 		if(presuposto != null && !presuposto.isEmpty()) {
@@ -274,9 +277,10 @@ public class IncidenciaDAO {
 		if(factura != null && !factura.equals("")) {
 			query += (factura.equals("-1")) ? " AND Factura IS NULL" : " AND Factura = ?";
 		}
-		query += (dataMenor != null) ? " AND Data >= ?" : "";
-		query += (dataMaior != null) ? " AND Data <= ?" : "";
-		query += (autor != null && !autor.isEmpty()) ? " AND Autor= ?" : "";
+		query += (dataMenorC != null) ? " AND Data >= ?" : "";
+		query += (dataMaiorC != null) ? " AND Data <= ?" : "";
+		query += (autor > -1) ? " AND Autor = ?" : "";
+		query += (autor < -1) ? " AND Autor IS NULL" : "";
 		query += " ORDER BY Data";												//Engadimos un condición para ordenar por data
 		query += (ver > 0) ? " LIMIT ?" : "";
 		query += ";";
@@ -286,14 +290,11 @@ public class IncidenciaDAO {
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
 			
-			String codClienteS = (codCliente == 0) ? "%" : String.valueOf(codCliente);
-			
 			//Engadimos os valores a query en caso de ser necesario.
 			int i = 1;
-			pst.setString(i++, codClienteS);
-			if(codParte > 0) pst.setInt(i++, codParte);
-			if(ot > 0) pst.setInt(i++, ot);
-			if(idInstalacion > 0)  pst.setInt(i++, idInstalacion);
+			if(codParte > -1) pst.setInt(i++, codParte);
+			if(ot > -1) pst.setInt(i++, ot);
+			if(idInstalacion > -1)  pst.setInt(i++, idInstalacion);
 			if(zonaApartamento != null && !zonaApartamento.isEmpty()) pst.setString(i++, "%"+zonaApartamento+"%");
 			if(descripcionCurta != null && !descripcionCurta.isEmpty()) pst.setString(i++, "%"+descripcionCurta+"%");
 			if(observacions != null && !observacions.isEmpty()) pst.setString(i++, "%"+observacions+"%");
@@ -305,9 +306,9 @@ public class IncidenciaDAO {
 			if(solPresuposto != null && solPresuposto.equals("false")) pst.setBoolean(i++, false);
 			if(presuposto != null && !presuposto.isEmpty() && !presuposto.equals("-1")) pst.setString(i++, presuposto);
 			if(factura != null && !factura.isEmpty() && !factura.equals("-1")) pst.setString(i++, factura);
-			if(dataMenor != null) pst.setTimestamp(i++, dataMenor);
-			if(dataMaior != null) pst.setTimestamp(i++, dataMaior);
-			if(autor != null && !autor.isEmpty()) pst.setString(i++, autor);
+			if(dataMenorC != null) pst.setTimestamp(i++, new Timestamp(dataMenorC.getTimeInMillis()));
+			if(dataMaiorC != null) pst.setTimestamp(i++, new Timestamp(dataMaiorC.getTimeInMillis()));
+			if(autor > -1) pst.setInt(i++, autor);
 			if(ver > 0) pst.setInt(i++, ver);
 						
 			res = pst.executeQuery();

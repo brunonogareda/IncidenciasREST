@@ -45,16 +45,17 @@ public class Comentario {
 	
 	private int id;
 	private int idIncidencia;
-	private String autor;
+	private int autor;
 	private String accion;
 	private int tipo;
 	private String texto;
 	private Calendar data = Calendar.getInstance();
+	private int instalacion; //Identificador da instalación a que pertence a incidencia correspondente.
 	
 	public Comentario() {
 	}
 
-	public Comentario(int id, int idIncidencia, String autor, String accion, int tipo, String texto, Calendar data) {
+	public Comentario(int id, int idIncidencia, int autor, String accion, int tipo, String texto, Calendar data) {
 		super();
 		this.id = id;
 		this.idIncidencia = idIncidencia;
@@ -65,7 +66,7 @@ public class Comentario {
 		this.data = data;
 	}
 	
-	public Comentario(int id, int idIncidencia, String autor, String accion, int tipo, String texto, Date data) {
+	public Comentario(int id, int idIncidencia, int autor, String accion, int tipo, String texto, Date data) {
 		super();
 		this.id = id;
 		this.idIncidencia = idIncidencia;
@@ -80,7 +81,7 @@ public class Comentario {
 	public Comentario(ResultSet res) throws SQLException {
 		this.id = res.getInt("Id");
 		this.idIncidencia = res.getInt("Id_incidencia");
-		this.autor = res.getString("Autor");
+		this.autor = res.getInt("Autor");
 		this.accion = res.getString("Accion");
 		this.tipo = res.getInt("Tipo");
 		this.texto = res.getString("Texto");
@@ -89,7 +90,7 @@ public class Comentario {
 	
 	public JSONObject<String, Object> toJson() {
 		JSONObject<String, Object> json = new JSONObject<>();
-		json.put("id_incidencia", idIncidencia);
+		json.put("idIncidencia", idIncidencia);
 		json.put("autor", autor);
 		json.put("titulo", obterTitulo());
 		json.put("texto", obterTexto());
@@ -153,14 +154,14 @@ public class Comentario {
 	/**
 	 * @return the autor
 	 */
-	public String getAutor() {
+	public int getAutor() {
 		return autor;
 	}
 
 	/**
 	 * @param autor the autor to set
 	 */
-	public void setAutor(String autor) {
+	public void setAutor(int autor) {
 		this.autor = autor;
 	}
 
@@ -220,6 +221,18 @@ public class Comentario {
 		this.data = data;
 	}
 
-	
-	
+	/**
+	 * @return the instalacion
+	 */
+	public int getInstalacion() {
+		return instalacion;
+	}
+
+	/**
+	 * @param instalacion the instalacion to set
+	 */
+	public void setInstalacion(int instalacion) {
+		this.instalacion = instalacion;
+	}
+
 }

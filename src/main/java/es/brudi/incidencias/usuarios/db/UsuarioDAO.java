@@ -177,9 +177,9 @@ public class UsuarioDAO {
 		ResultSet res = null;
 		
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
+			logger.debug("Realizase a consulta: "+query);
 			pst.setString(1, username);
 			res = pst.executeQuery();
-			
 			if(res.next()) {
 				int id = res.getInt("Id");
 				String user = res.getString("Usuario");
@@ -193,7 +193,6 @@ public class UsuarioDAO {
 							
 				Cliente c = ClienteAccessor.getClienteById(idCliente);
 				Grupo g = GrupoAccessor.getGrupoById(idGrupo);
-				
 				ret = new Usuario(id, user, c, g, email, nome, permisos, instalacions);
 			 }
 		 }

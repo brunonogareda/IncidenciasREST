@@ -37,7 +37,7 @@ public class IncidenciaDAO {
 	 * @param id de Incidencia
 	 * @return Devolve o obxecto incidencia que corresponde co Id que se lle pasou.
 	 */
-	protected static Incidencia obterIncidenciaPorId(int id) {
+	protected static Incidencia obterPorId(int id) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Id=?;";
@@ -76,19 +76,19 @@ public class IncidenciaDAO {
 	 * @param id de Factura
 	 * @return Devolve o obxecto incidencia que corresponde que conteña a factura correspondente.
 	 */
-	protected static Incidencia obterIncidenciaPorFactura(String factura) {
+	protected static List<Incidencia> obterPorFactura(String factura) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Factura=?;";
-		Incidencia ret = null;
+		List<Incidencia> ret = new ArrayList<>();
 		ResultSet res = null;
 		try (PreparedStatement pst = conn.prepareStatement(query)) {			
 			logger.debug("Realizase a consulta: "+query);
 
 			pst.setString(1, factura);
 			res = pst.executeQuery();
-			if(res.next()) {
-				ret = new Incidencia(res);
+			while(res.next()) {
+				ret.add(new Incidencia(res));
 			}
 		 }
 		catch(SQLException se) {

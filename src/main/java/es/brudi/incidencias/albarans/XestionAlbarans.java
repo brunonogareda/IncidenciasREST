@@ -60,7 +60,7 @@ public class XestionAlbarans {
 		String dirFicheiro = null;
 		String rutaFicheiro = null;
 		
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
 		if(inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		
@@ -129,7 +129,7 @@ public class XestionAlbarans {
 		if(alb == null)
 			return Error.OBTERALBARAN_NONEXISTE.toJSONError();
 		
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(alb.getIdIncidencia());
+		Incidencia inc = IncidenciaAccessor.obterPorId(alb.getIdIncidencia());
 		if(inc == null)
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 

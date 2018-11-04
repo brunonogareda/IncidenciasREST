@@ -16,7 +16,7 @@ public class ComentarioAccessor {
 	/**
 	 * Inserta un novo comentario.
 	 * 
-	 * @param idIncidencia - Incidencia coque se corresponde o comentario
+	 * @param idIncidencia - Incidencia coa que se corresponde o comentario
 	 * @param autor - Autor do comentario
 	 * @param accion - Acción realizada para que se inserte o comentario.
 	 * @param tipo - Tipo de comentario.

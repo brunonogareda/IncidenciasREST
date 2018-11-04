@@ -61,7 +61,7 @@ public class XestionImaxes {
 		if(!user.podeEngadirImaxe()) {
 			return Error.CREARIMAXE_SENPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		}
@@ -135,7 +135,7 @@ public class XestionImaxes {
 		if(imx == null) {
 			return Error.OBTERIMAXE_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(imx.getIdIncidencia());
+		Incidencia inc = IncidenciaAccessor.obterPorId(imx.getIdIncidencia());
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
@@ -202,7 +202,7 @@ public class XestionImaxes {
 		if(imaxe == null) {
 			return Error.OBTERIMAXE_NONEXISTE.toJSONError();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(imaxe.getIdIncidencia());
+		Incidencia inc = IncidenciaAccessor.obterPorId(imaxe.getIdIncidencia());
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
@@ -234,7 +234,7 @@ public class XestionImaxes {
 			return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
 		}
 		
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
 		}
@@ -278,7 +278,7 @@ public class XestionImaxes {
 		if(imaxe == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(imaxe.getIdIncidencia());
+		Incidencia inc = IncidenciaAccessor.obterPorId(imaxe.getIdIncidencia());
 		if(inc == null) {
 			return Response.status(Status.FORBIDDEN).build();
 		}

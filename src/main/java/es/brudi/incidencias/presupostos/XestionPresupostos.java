@@ -59,7 +59,7 @@ public class XestionPresupostos {
 		if(!user.podeEngadirPresuposto()) {
 			return Error.USER_NOPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia);
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
 		if(inc == null) {
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		}
@@ -155,7 +155,7 @@ public class XestionPresupostos {
 		if(aceptado!=null && !user.podeAceptarPresuposto()) {
 			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
 		}
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
 		if(inc == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
@@ -236,7 +236,7 @@ public class XestionPresupostos {
 			return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
 		}
 		
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
 		if(inc == null) {
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
 		}
@@ -269,7 +269,7 @@ public class XestionPresupostos {
 			return Response.status(Status.FORBIDDEN).build();
 		}
 		
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorPresuposto(idPresuposto);
+		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
 		if(inc == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}

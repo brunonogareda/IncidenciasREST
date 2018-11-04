@@ -2,6 +2,8 @@ package es.brudi.incidencias.facturas;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import es.brudi.incidencias.util.JSONObject;
 
@@ -20,6 +22,7 @@ public class Factura {
 	private String rutaFicheiro;
 	private String tipoFicheiro;
 	private String comentarios;
+	private List<Integer> idIncidencias = new ArrayList<>();
 	
 	public Factura() {
 	}
@@ -91,6 +94,20 @@ public class Factura {
 		this.comentarios = comentarios;
 	}
 	
+	/**
+	 * @return the idInstalacions
+	 */
+	public List<Integer> getIdIncidencias() {
+		return idIncidencias;
+	}
+
+	/**
+	 * @param idInstalacions the idInstalacions to set
+	 */
+	public void setIdIncidencias(List<Integer> idIncidencias) {
+		this.idIncidencias = idIncidencias;
+	}
+
 	public JSONObject<String, Object> toJson() {
 		JSONObject<String, Object> ret = new JSONObject<>();
 		ret.put("id", id);

@@ -129,6 +129,18 @@ public class XestionFicheiros {
 	 * 
 	 * @param rutaBase
 	 * @param data
+	 * @return
+	 */
+	public static String getRuteToFile(String rutaBase) {
+		Calendar data = Calendar.getInstance();
+		return rutaBase + "/" + data.get(Calendar.YEAR) + "/" + (data.get(Calendar.MONTH)+1);
+	}
+	
+	/**
+	 * Obten a ruta onde se gardará o ficheiro
+	 * 
+	 * @param rutaBase
+	 * @param data
 	 * @param id
 	 * @return
 	 */

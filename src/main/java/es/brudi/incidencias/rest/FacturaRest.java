@@ -1,17 +1,18 @@
 package es.brudi.incidencias.rest;
 
 import java.io.InputStream;
-import java.util.EmptyStackException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,7 +28,6 @@ import es.brudi.incidencias.rest.util.Secured;
 import es.brudi.incidencias.usuarios.Usuario;
 import es.brudi.incidencias.usuarios.XestionUsuarios;
 import es.brudi.incidencias.util.JSONObject;
-import es.brudi.incidencias.util.Util;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -76,35 +76,23 @@ public class FacturaRest {
 	 *            (file)
 	 * @return
 	 */
-	@Path("/insertar")
 	@POST
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public JSONObject<String, Object> insertar(@FormDataParam("id_incidencia") String idIncidenciaS,
-			@FormDataParam("id_factura") String idFactura, @FormDataParam("comentarios") String comentarios,
-			@FormDataParam("file") InputStream uploadedInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+	public JSONObject<String, Object> insertar(@DefaultValue("-1") @FormDataParam("idIncidencia") int idIncidencia,
+											   @FormDataParam("idFactura") String idFactura, 
+											   @FormDataParam("comentarios") String comentarios,
+											   @FormDataParam("file") InputStream uploadedInputStream,
+											   @FormDataParam("file") FormDataContentDisposition fileDetail) {
 
 		logger.debug("Invocouse o método insertar() de factura.");
 
-		int idIncidencia;
-
-		// Compróbase que os parámetros obligatorios se pasaron e que están no formato
-		// adecuado, convertindo os string en int en caso de ser necesario
-		try {
-			idIncidencia = Util.stringToInt(false, idIncidenciaS);
-			if (idFactura == null || idFactura.equals(""))
-				throw new EmptyStackException();
-			if (idFactura.equals("-1"))
-				throw new NumberFormatException();
-		} catch (NumberFormatException e) {
-			return Error.ERRORPARAM.toJSONError();
-		} catch (EmptyStackException e) {
+		// Compróbase que os parámetros obligatorios se pasaron 
+		if(idIncidencia == -1 || idFactura == null || idFactura.isEmpty() || idFactura.equals("-1"))
 			return Error.FALTANPARAM.toJSONError();
-		}
-		logger.debug("Parámetros correctos.");
 
+		logger.debug("Parámetros correctos.");
 		XestionFacturas xest = new XestionFacturas();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
 		return xest.crear(user, idIncidencia, idFactura, comentarios, uploadedInputStream, fileDetail);
@@ -114,40 +102,28 @@ public class FacturaRest {
 	 * Modifica os parámetros de unha factura existente. Devolve a factura
 	 * modificada
 	 * 
-	 * @param idFactura
-	 *            - OBLIGATORIO
+	 * @param idFactura - OBLIGATORIO
 	 * @param comentarios
-	 * @param uploadedInputStream
-	 *            (file)
-	 * @param fileDetail
-	 *            (file)
+	 * @param uploadedInputStream (file)
+	 * @param fileDetail (file)
 	 * @return
 	 */
-	@Path("/modificar")
-	@POST
+	@PUT
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public JSONObject<String, Object> modificar(@FormDataParam("id_factura") String idFactura,
-			@FormDataParam("comentarios") String comentarios, @FormDataParam("file") InputStream uploadedInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+	public JSONObject<String, Object> modificar(@FormDataParam("idFactura") String idFactura,
+												@FormDataParam("comentarios") String comentarios,
+												@FormDataParam("file") InputStream uploadedInputStream,
+												@FormDataParam("file") FormDataContentDisposition fileDetail) {
 
 		logger.debug("Invocouse o método modificar() de factura.");
 
-		// Compróbase que os parámetros obligatorios se pasaron e que están no formato
-		// adecuado, convertindo os string en int en caso de ser necesario
-		try {
-			if (idFactura == null || idFactura.equals(""))
-				throw new EmptyStackException();
-			if (idFactura.equals("-1"))
-				throw new NumberFormatException();
-		} catch (NumberFormatException e) {
-			return Error.ERRORPARAM.toJSONError();
-		} catch (EmptyStackException e) {
+		// Compróbase que os parámetros obligatorios se pasaron.
+		if (idFactura == null || idFactura.equals(""))
 			return Error.FALTANPARAM.toJSONError();
-		}
+		
 		logger.debug("Parámetros correctos.");
-
 		XestionFacturas xest = new XestionFacturas();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
 		return xest.modificar(user, idFactura, comentarios, uploadedInputStream, fileDetail);
@@ -159,28 +135,17 @@ public class FacturaRest {
 	 * @param idFactura
 	 * @return
 	 */
-	@Path("/obter")
+	@Path("{id : .+}")
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject<String, Object> obter(@QueryParam("id_factura") String idFactura) {
-
+	public JSONObject<String, Object> obter(@PathParam("id") String idFactura) {
 		logger.debug("Invocouse o método obter() de factura.");
-
-		// Compróbase que os parámetros obligatorios se pasaron e que están no formato
-		// adecuado.
-		try {
-			if (idFactura == null || idFactura.equals(""))
-				throw new EmptyStackException();
-			if (idFactura.equals("-1"))
-				throw new NumberFormatException();
-		} catch (NumberFormatException e) {
-			return Error.ERRORPARAM.toJSONError();
-		} catch (EmptyStackException e) {
+		// Compróbase que os parámetros obligatorios se pasaron.
+		if (idFactura == null || idFactura.equals(""))
 			return Error.FALTANPARAM.toJSONError();
-		}
-		logger.debug("Parámetros correctos.");
 
+		logger.debug("Parámetros correctos.");
 		XestionFacturas xest = new XestionFacturas();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
 		return xest.obter(user, idFactura);
@@ -193,26 +158,18 @@ public class FacturaRest {
 	 * @param idFactura
 	 * @return
 	 */
-	@Path("/obterFicheiro")
+	@Path("{id : .+}/ficheiro")
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response obterFicheiro(@QueryParam("id_factura") String idFactura) {
-
+	public Response obterFicheiro(@PathParam("id") String idFactura) {
+		
 		logger.debug("Invocouse o método obterFicheiro() de factura.");
-
-		// Compróbase que os parámetros obligatorios se pasaron e que están no formato
-		// adecuado.
-		try {
-			if (idFactura == null || idFactura.equals(""))
-				throw new EmptyStackException();
-			if (idFactura.equals("-1"))
-				throw new NumberFormatException();
-		} catch (NumberFormatException | EmptyStackException e) {
+		// Compróbase que os parámetros obligatorios se pasaron
+		if (idFactura == null || idFactura.equals(""))
 			return Response.status(Status.BAD_REQUEST).entity("").build();
-		}
-		logger.debug("Parámetros correctos.");
 
+		logger.debug("Parámetros correctos.");
 		XestionFacturas xest = new XestionFacturas();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
 		return xest.obterFicheiro(user, idFactura);

@@ -20,8 +20,8 @@ public class IncidenciaAccessor {
 	 * @param id de Incidencia
 	 * @return Devolve o obxecto incidencia que corresponde co Id que se lle pasou.
 	 */
-	public static Incidencia obterIncidenciaPorId(int id) {
-		return IncidenciaDAO.obterIncidenciaPorId(id);
+	public static Incidencia obterPorId(int id) {
+		return IncidenciaDAO.obterPorId(id);
 	}
 	
 	/**
@@ -30,8 +30,8 @@ public class IncidenciaAccessor {
 	 * @param user
 	 * @return Devolve o obxecto incidencia que corresponde co Id que se lle pasou, sempre que pertenza a unha instalación que xestione o usuario.
 	 */
-	public static Incidencia obterIncidenciaPorId(int id, Usuario user) {
-		Incidencia inc = IncidenciaDAO.obterIncidenciaPorId(id);
+	public static Incidencia obterPorId(int id, Usuario user) {
+		Incidencia inc = IncidenciaDAO.obterPorId(id);
 		if(inc != null && !user.xestionaInstalacion(inc.getInstalacion().getId()))
 			inc = null;
 		
@@ -40,17 +40,17 @@ public class IncidenciaAccessor {
 	
 	/**
 	 * @param id de Factura
-	 * @return Devolve o obxecto incidencia que corresponde que conteña a factura correspondente.
+	 * @return Devolve unha lista de incidencias que conteñan a factura correspondente.
 	 */
-	public static Incidencia obterIncidenciaPorFactura(String factura) {
-		return IncidenciaDAO.obterIncidenciaPorFactura(factura);
+	public static List<Incidencia> obterPorFactura(String factura) {
+		return IncidenciaDAO.obterPorFactura(factura);
 	}
 
 	/**
 	 * @param id de Presuposto
 	 * @return Devolve o obxecto incidencia que corresponde que conteña o presuposto correspondente.
 	 */
-	public static Incidencia obterIncidenciaPorPresuposto(String presuposto) {
+	public static Incidencia obterPorPresuposto(String presuposto) {
 		return IncidenciaDAO.obterIncidenciaPorPresuposto(presuposto);
 	}
 	

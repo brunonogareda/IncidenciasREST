@@ -99,7 +99,7 @@ public class XestionIncidencias {
 		if (!user.podeVerIncidencia())
 			return Error.USER_NOPERMISOS.toJSONError();
 
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(id, user);
+		Incidencia inc = IncidenciaAccessor.obterPorId(id, user);
 		if (inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 
@@ -177,7 +177,7 @@ public class XestionIncidencias {
 		if (!user.podeCambiarEstadoIncidencia())
 			return Error.MODIFESTADOINCIDENCIA_SENPERMISOS.toJSONError();
 
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(id, user);
+		Incidencia inc = IncidenciaAccessor.obterPorId(id, user);
 		if (inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 
@@ -214,7 +214,7 @@ public class XestionIncidencias {
 		if (!user.podeBorrarIncidencia())
 			return Error.BORRARINCIDENCIA_SENPERMISOS.toJSONError();
 
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(id, user);
+		Incidencia inc = IncidenciaAccessor.obterPorId(id, user);
 		if (inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 

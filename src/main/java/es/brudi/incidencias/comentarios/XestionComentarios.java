@@ -42,7 +42,7 @@ public class XestionComentarios {
 		if(!user.podeEngadirComentario())
 			return Error.INSERTARCOMENTARIO_SENPERMISOS.toJSONError();
 
-		Incidencia inc = IncidenciaAccessor.obterIncidenciaPorId(idIncidencia, user);
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia, user);
 		if(inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
 		

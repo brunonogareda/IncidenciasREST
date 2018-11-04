@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.facturas.Factura;
+import es.brudi.incidencias.incidencias.db.IncidenciaDAO;
 
 /**
  * 
@@ -61,7 +62,6 @@ public class FacturaDAO {
 		catch(Exception e) {
 			logger.error("Exception: ", e);
 		 }
-		
 		return (result==1);
 	}
 	
@@ -70,23 +70,17 @@ public class FacturaDAO {
 	 * @param id
 	 * @return
 	 */
-	protected static Factura getById(String id) {
+	protected static Factura obterPorId(String id) {
 		Connection conn = DBConnectionManager.getConnection();
-
 		String query = "SELECT * FROM "+TABLENAME+" WHERE id = ?;";
-		
 		Factura factura = null;
 		ResultSet res = null;
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
-			
 			pst.setString(1, id);
 			res = pst.executeQuery();
-			
-			if(res.next()) {
+			if(res.next())
 				factura = new Factura(res);
-			}
-			
 		 }
 		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
@@ -108,6 +102,44 @@ public class FacturaDAO {
 		return factura;
 	}
 
+	/**
+	 * Obten unha Factura a través do Id da incidencia
+	 * @param id
+	 * @return
+	 */
+	public static Factura obterPorIdIncidencia(int id) {
+		Connection conn = DBConnectionManager.getConnection();
+		String query = "SELECT F.* FROM "+TABLENAME+" AS F INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON F.Id=I.Factura WHERE I.Id = ?;";
+		Factura factura = null;
+		ResultSet res = null;
+		try (PreparedStatement pst = conn.prepareStatement(query)) {
+			logger.debug("Realizase a consulta: "+query);
+			pst.setInt(1, id);
+			res = pst.executeQuery();
+			
+			if(res.next())
+				factura = new Factura(res);
+		 }
+		catch(SQLException se) {
+			logger.error("SQLException: " + se.getMessage());
+			logger.error("SQLState: " + se.getSQLState());
+			logger.error("VendorError: " + se.getErrorCode());
+		 }
+		catch(Exception e) {
+			logger.error("Exception: ", e);
+		 }
+		finally {
+			try {
+				if(res != null)
+					res.close();
+			} catch (SQLException e) {
+				logger.error("Excepción cerrando ResultSet: ", e);
+			}
+		}
+		
+		return factura;
+	}
+	
 	/**
 	 * Modifica os parámetros da factura na base de datos
 	 * @param id

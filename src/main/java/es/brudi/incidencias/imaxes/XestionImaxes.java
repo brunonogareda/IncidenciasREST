@@ -44,12 +44,12 @@ public class XestionImaxes {
 	 * @param idIncidencia
 	 * @param nome
 	 * @param comentarios
-	 * @param antesDespois
+	 * @param tipo
 	 * @param uploadedInputStream
 	 * @param fileDetail
 	 * @return
 	 */
-	public JSONObject<String, Object> crear(Usuario user, int idIncidencia, String nome, String comentarios, boolean antesDespois, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+	public JSONObject<String, Object> crear(Usuario user, int idIncidencia, String nome, String comentarios, Tipo tipo, InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 		JSONObject<String, Object> ret = new JSONObject<>();
 
 		String nomeFicheiro = null;
@@ -58,30 +58,24 @@ public class XestionImaxes {
 		String rutaFicheiro = null;
 		boolean errFile = false;
 		
-		if(!user.podeEngadirImaxe()) {
+		if(!user.podeEngadirImaxe())
 			return Error.CREARIMAXE_SENPERMISOS.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
-		if(inc == null) {
+
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia, user);
+		if(inc == null)
 			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Error.CREARIMAXE_SENPERMISOS.toJSONError();
-		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
 			int nextId = ImaxeAccessor.getNextId();
 			nomeFicheiro = nextId+"."+tipoFicheiro;
-			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaImaxes(), inc.getData())+"/"+inc.getId();
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaImaxes())+"/"+inc.getId();
 			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
-		Tipo tipo = Tipo.getTipoFromBool(antesDespois);
-		int idI = ImaxeAccessor.crear(idIncidencia, rutaFicheiro, tipoFicheiro, nome, comentarios, tipo); //Creamos o presuposto na táboa.
-		if(idI <= 0) {
+
+		Imaxe imaxe = ImaxeAccessor.crear(idIncidencia, rutaFicheiro, tipoFicheiro, nome, comentarios, tipo); //Creamos o presuposto na táboa.
+		if(imaxe == null)
 			return Error.CREARIMAXE_ERRODB.toJSONError();
-		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
 			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
@@ -91,18 +85,13 @@ public class XestionImaxes {
 			}
 		}
 		
-		Imaxe imaxe = new Imaxe(idI, idIncidencia, nome, tipo, rutaFicheiro, tipoFicheiro, comentarios);
-				
-		logger.debug("Creouse a imaxe correctamente: "+idI);
-
+		logger.debug("Creouse a imaxe correctamente: "+imaxe.getId());
 		//Engadimos o comentario de que se engadiu un presuposto
-		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(idI));
-		
+		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_IMAXE, Comentario.MODIFICACION_PUBLICA, imaxe.getId());
 		if(!errFile)
 			ret = Mensaxe.CREARIMAXE_OK.toJSONMensaxe();
 		
-		ret.put("Presuposto", imaxe.toJson());
-		
+		ret.put(Imaxe.JSON_TITLE, imaxe.toJson());
 		return ret;
 	}
 
@@ -127,40 +116,28 @@ public class XestionImaxes {
 		String rutaFicheiro = null;
 		boolean errFile = false;
 		
-		if(!user.podeEditarImaxe()) {
-			return Error.MODIFICARIMAXE_SENPERMISOS2.toJSONError();
-		}
+		if(!user.podeEditarImaxe())
+			return Error.MODIFICARIMAXE_SENPERMISOS.toJSONError();
 
-		Imaxe imx = ImaxeAccessor.getById(id);
-		if(imx == null) {
+		Imaxe imx = ImaxeAccessor.obterPorId(id, user);
+		if(imx == null)
 			return Error.OBTERIMAXE_NONEXISTE.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorId(imx.getIdIncidencia());
-		if(inc == null) {
-			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.MODIFICARIMAXE_SENPERMISOS1.toJSONError();
-		}
-		
+
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
 			nomeFicheiro = id+"."+tipoFicheiro;
-			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaImaxes(), inc.getData())+"/"+inc.getId();
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaImaxes())+"/"+imx.getId();
 			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 				
-		boolean iret = ImaxeAccessor.modificar(id, rutaFicheiro, tipoFicheiro, nome, comentarios, antesDespoisS); //modificamos o presuposto na bd.
-		if(!iret) {
+		Imaxe imaxe = ImaxeAccessor.modificar(id, imx.getIdIncidencia(), rutaFicheiro, tipoFicheiro, nome, comentarios, antesDespoisS, imx.getTipo()); //modificamos o presuposto na bd.
+		if(imaxe == null)
 			return Error.MODIFICARIMAXE_ERRORDB.toJSONError();
-		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			if(imx.getRutaFicheiro() != null && !imx.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
-				if(!XestionFicheiros.borrar(imx.getRutaFicheiro())) {
+			if(imx.getRutaFicheiro() != null && !imx.getRutaFicheiro().equals("") //Se existe boramos o ficheiro antigo.
+				&& !XestionFicheiros.borrar(imx.getRutaFicheiro())) {
 					logger.error("Erro o eliminar o ficheiro: "+imx.getRutaFicheiro());
-				}
 			}
 			
 			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
@@ -170,18 +147,13 @@ public class XestionImaxes {
 			}
 		}
 		
-		Imaxe imaxe = new Imaxe(id, imx.getIdIncidencia(), nome, Tipo.getTipoFromString(antesDespoisS), rutaFicheiro, tipoFicheiro, comentarios);
-		
 		logger.debug("Modificada a imaxe correctamente: "+id);
-
 		//Engadimos o comentario de que se engadiu a imaxe
-		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
-		
+		ComentarioAccessor.crear(imaxe.getIdIncidencia(), user.getId(), Comentario.ACCION_MODIFICAR_IMAXE, Comentario.MODIFICACION_PUBLICA, String.valueOf(id));
 		if(!errFile)
 			ret = Mensaxe.MODIFICARIMAXE_OK.toJSONMensaxe();
 		
-		ret.put("Imaxe", imaxe.toJson());
-		
+		ret.put(Imaxe.JSON_TITLE, imaxe.toJson());
 		return ret;
 	}
 	
@@ -194,28 +166,16 @@ public class XestionImaxes {
 	public JSONObject<String, Object> obter(Usuario user, int id) {
 		JSONObject<String, Object> ret;
 		
-		if(!user.podeVerImaxe()) {
-			return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
-		}
+		if(!user.podeVerImaxe())
+			return Error.OBTERIMAXE_SENPERMISOS.toJSONError();
 		
-		Imaxe imaxe = ImaxeAccessor.getById(id);
-		if(imaxe == null) {
+		Imaxe imaxe = ImaxeAccessor.obterPorId(id, user);
+		if(imaxe == null)
 			return Error.OBTERIMAXE_NONEXISTE.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorId(imaxe.getIdIncidencia());
-		if(inc == null) {
-			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
-		}
 				
 		logger.debug("Obtivose a imaxe correctamente: "+id);
-
 		ret = Mensaxe.OBTERIMAXE_OK.toJSONMensaxe();
-		ret.put("Imaxe", imaxe.toJson());
-		
+		ret.put(Imaxe.JSON_TITLE, imaxe.toJson());
 		return ret;
 	}
 	
@@ -227,38 +187,20 @@ public class XestionImaxes {
 	 */
 	public JSONObject<String, Object> obterXIncidencia(Usuario user, int idIncidencia) {
 		JSONObject<String, Object> ret;
-		JSONArray<Object> jsonImaxes = new JSONArray<>();
 
+		if(!user.podeVerImaxe())
+			return Error.OBTERIMAXE_SENPERMISOS.toJSONError();
 		
-		if(!user.podeVerImaxe()) {
-			return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
-		}
-		
-		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
-		if(inc == null) {
-			return Error.OBTERINCIDENCIAS_ERRORDB.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.OBTERIMAXE_SENPERMISOS2.toJSONError();
-		}
-		
-		List<Imaxe> imaxes = ImaxeAccessor.getByIdIncidencia(idIncidencia);
-		if(imaxes == null) {
+		List<Imaxe> imaxes = ImaxeAccessor.obterPorIdIncidencia(idIncidencia, user);
+		if(imaxes == null)
 			return Error.OBTERIMAXE_ERRORDB.toJSONError();
-		}
-		if(imaxes.isEmpty()) {
+		if(imaxes.isEmpty())
 			return Error.OBTERIMAXE_NONEXISTENAINC.toJSONError();
-		}
 				
 		logger.debug("Obtiveronse "+imaxes.size()+" imaxes na incidencia: "+idIncidencia);
 
-		for(Imaxe i : imaxes)
-			jsonImaxes.add(i.toJson());
-		
 		ret = Mensaxe.OBTERIMAXESINC_OK.toJSONMensaxe();
-		ret.put("Imaxes", jsonImaxes);
-		
+		ret.put(Imaxe.JSON_TITLE2, JSONArray.getFromList(imaxes));
 		return ret;
 	}
 
@@ -270,33 +212,20 @@ public class XestionImaxes {
 	 */
 	public Response obterFicheiro(Usuario user, int id) {
 
-		if(!user.podeVerImaxe()) {
+		if(!user.podeVerImaxe())
 			return Response.status(Status.FORBIDDEN).build();
-		}
 		
-		Imaxe imaxe = ImaxeAccessor.getById(id);
-		if(imaxe == null) {
+		Imaxe imaxe = ImaxeAccessor.obterPorId(id, user);
+		if(imaxe == null || imaxe.getRutaFicheiro() == null)
 			return Response.status(Status.NOT_FOUND).build();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorId(imaxe.getIdIncidencia());
-		if(inc == null) {
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		
+
 		File file = XestionFicheiros.obterFicheiro(imaxe.getRutaFicheiro());
-		if(file == null) {
+		if(file == null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
 		
 		logger.debug("Obtivose a imaxe correctamente: "+id);
-
 		ResponseBuilder response = Response.ok((Object) file);
 	    response.header("Content-Disposition", "attachment; filename="+file.getName());
-	    
 		return response.build();
 	}
 	

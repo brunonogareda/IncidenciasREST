@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
 import es.brudi.incidencias.imaxes.Imaxe;
+import es.brudi.incidencias.incidencias.db.IncidenciaDAO;
 
 /**
  * 
@@ -79,7 +80,7 @@ public class ImaxeDAO {
 	public static int crear(int idIncidencia, String rutaFicheiro, String tipoFicheiro, String nome, String comentarios, boolean antesDespois) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "INSERT INTO "+TABLENAME+" (Id_incidencia, Nome, Ruta_ficheiro, Tipo_ficheiro, Antes_despois, Comentarios) VALUES (?, ?, ?, ?, ?, ?);";
+		String query = "INSERT INTO "+TABLENAME+" (Id_incidencia, Nome, Ruta_imaxe, Tipo_imaxe, Antes_despois, Comentarios) VALUES (?, ?, ?, ?, ?, ?);";
 		
 		ResultSet res = null;
 		int ret = -1;
@@ -129,10 +130,10 @@ public class ImaxeDAO {
 	 * @param id
 	 * @return
 	 */
-	public static Imaxe getById(int id) {
+	public static Imaxe obterPorId(int id) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "SELECT * FROM "+TABLENAME+" WHERE id = ?;";
+		String query = "SELECT IM.*, I.Instalacion FROM "+TABLENAME+" AS IM INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON IM.Id_incidencia=I.Id WHERE IM.Id = ?;";
 		
 		Imaxe ret = null;
 		ResultSet res = null;
@@ -144,8 +145,8 @@ public class ImaxeDAO {
 			
 			if(res.next()) {
 				ret = new Imaxe(res);
+				ret.setIdInstalacion(res.getInt("Instalacion"));
 			}
-			
 		 }
 		catch(SQLException se) {
 			logger.error("SQLException: " + se.getMessage());
@@ -173,13 +174,13 @@ public class ImaxeDAO {
 	 * @param idIncidencia
 	 * @return
 	 */
-	public static List<Imaxe> getByIdIncidencia(int idIncidencia) {
+	public static List<Imaxe> obterPorIdIncidencia(int idIncidencia) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "SELECT * FROM "+TABLENAME+" WHERE Id_incidencia = ?";
+		String query = "SELECT IM.*, I.Instalacion FROM "+TABLENAME+" AS IM INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON IM.Id_incidencia=I.Id WHERE I.Id = ?;";
 		
 		ResultSet res = null;
-		ArrayList<Imaxe> ret = new ArrayList<>();
+		List<Imaxe> ret = new ArrayList<>();
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
 			logger.debug("Realizase a consulta: "+query);
 			
@@ -187,8 +188,11 @@ public class ImaxeDAO {
 						
 			res = pst.executeQuery();
 					
-			while(res.next()) {			
-				ret.add(new Imaxe(res));
+			while(res.next()) {	
+				Imaxe imx = new Imaxe(res);
+				imx.setIdInstalacion(res.getInt("Instalacion"));
+				ret.add(imx);
+
 			}
 			
 		 }
@@ -228,8 +232,8 @@ public class ImaxeDAO {
 
 		//Contruese a query segundo os datos proporcionados.
 		String query = "UPDATE "+TABLENAME+" SET";
-		query += (rutaFicheiro != null && !rutaFicheiro.isEmpty()) ? " Ruta_ficheiro = ?," : "";
-		query += (tipoFicheiro != null && !tipoFicheiro.isEmpty()) ? " Tipo_ficheiro = ?," : "";
+		query += (rutaFicheiro != null && !rutaFicheiro.isEmpty()) ? " Ruta_imaxe = ?," : "";
+		query += (tipoFicheiro != null && !tipoFicheiro.isEmpty()) ? " Tipo_imaxe = ?," : "";
 		query += (nome != null && !nome.isEmpty()) ? " Nome = ?," : "";
 		query += (comentarios != null && !comentarios.isEmpty()) ? " Comentarios = ?," : "";
 		query += ("antes".equalsIgnoreCase(antesDespois) || "despois".equalsIgnoreCase(antesDespois)

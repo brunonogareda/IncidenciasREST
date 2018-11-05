@@ -46,6 +46,10 @@ public class Imaxe {
 	private String rutaFicheiro;
 	private String tipoFicheiro;
 	private String comentarios;
+	private int idInstalacion; //Instalación a que pertence a Incidencia asociada a imaxe.
+	
+	public static final String JSON_TITLE 	= "Imaxe";
+	public static final String JSON_TITLE2	= "Imaxes";
 	
 	public Imaxe() {}
 	
@@ -65,8 +69,8 @@ public class Imaxe {
 		this.idIncidencia = res.getInt("Id_incidencia");
 		this.nome = res.getString("Nome");
 		this.tipo = Tipo.getTipoFromBool(res.getBoolean("Antes_despois"));
-		this.rutaFicheiro = res.getString("Ruta_ficheiro");
-		this.tipoFicheiro = res.getString("Tipo_ficheiro");
+		this.rutaFicheiro = res.getString("Ruta_imaxe");
+		this.tipoFicheiro = res.getString("Tipo_imaxe");
 		this.comentarios = res.getString("Comentarios");
 	}
 	
@@ -165,13 +169,27 @@ public class Imaxe {
 		this.comentarios = comentarios;
 	}
 	
+	/**
+	 * @return the idInstalacion
+	 */
+	public int getIdInstalacion() {
+		return idInstalacion;
+	}
+
+	/**
+	 * @param idInstalacion the idInstalacion to set
+	 */
+	public void setIdInstalacion(int idInstalacion) {
+		this.idInstalacion = idInstalacion;
+	}
+
 	@SuppressWarnings("unchecked")
 	public JSONObject toJson() {
 		JSONObject ret = new JSONObject();
 		ret.put("id", id);
 		ret.put("idIncidencia", idIncidencia);
 		ret.put("nome", nome);
-		ret.put("tipo", tipo.getBoolTipo());
+		ret.put("tipo", tipo);
 		ret.put("tipoFicheiro", tipoFicheiro);
 		ret.put("comentarios", comentarios);
 		return ret;

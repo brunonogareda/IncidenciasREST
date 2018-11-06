@@ -32,7 +32,7 @@ import es.brudi.incidencias.util.Variables;
 public class UsuarioDAO {
 
 	private static final String TABLENAME = "Usuarios";
-	private static final String TABLENAME_INSTALACIONS = "Usuario_instalacion";
+	public static final String TABLENAME_INSTALACIONS = "Usuario_instalacion";
 	private static Logger logger = Logger.getLogger(UsuarioDAO.class);
 	
 	private UsuarioDAO() {

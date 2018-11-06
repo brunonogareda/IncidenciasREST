@@ -25,27 +25,41 @@ public class XestionInstalacions {
 	 * @param idCliente - identificador do cliente
 	 * @return Obxecto JSON coa resposta.
 	 */
-	public JSONObject<String, Object> getInstalacionsByCliente(Usuario user, int idCliente) {
+	public JSONObject<String, Object> obterInstalacionsPorCliente(Usuario user, int idCliente) {
 		JSONObject<String, Object> ret;
 
-		if(user.getCliente().getCodCliente()!=idCliente && user.getCliente().getCodCliente()!=0) {
-			return Error.GETINSTALACIONS_SENPERMISOS.toJSONError();
-		}
+		List<Instalacion> instalacions = InstalacionAccessor.obterInstalacionsPorCliente(idCliente, user);
 		
-		List<Instalacion> instalacions = InstalacionAccessor.getInstalacionsByCliente(idCliente);
+		if(instalacions == null)
+			return Error.GETINSTALACIONS_ERRORDB.toJSONError();
 		
-		if(instalacions != null) {
-			if(!instalacions.isEmpty()) {
-				ret = Mensaxe.GETINSTALACIONS_OK.toJSONMensaxe();
-				ret.put("instalacions", instalacions);
-			}
-			else {
-				ret = Error.GETINSTALACIONS_SENINSTALACIONS.toJSONError();
-			}
-		}
-		else {
-			ret = Error.GETINSTALACIONS_ERRORDB.toJSONError();
-		}
+		if(instalacions.isEmpty())
+			return Error.GETINSTALACIONS_SENINSTALACIONS.toJSONError();
+		
+		ret = Mensaxe.GETINSTALACIONS_OK.toJSONMensaxe();
+		ret.put("instalacions", instalacions);
+		return ret;
+	}
+
+	/**
+	 * Devolve un listado das Instalacións que xestiona o usuario.
+	 * @param user
+	 * @return
+	 */
+	public JSONObject<String, Object> obterInstalacionsXestionadas(Usuario user) {
+		JSONObject<String, Object> ret;
+		
+		List<Instalacion> instalacions = InstalacionAccessor.obterInstalacionsXestionadas(user);
+		
+		if(instalacions == null)
+			return Error.GETINSTALACIONS_ERRORDB.toJSONError();
+		
+		if(instalacions.isEmpty())
+			return Error.GETINSTALACIONS_SENINSTALACIONSXEST.toJSONError();
+		
+		ret = Mensaxe.GETINSTALACIONS_OK.toJSONMensaxe();
+		ret.put("instalacions", instalacions);
+		
 		return ret;
 	}
 	

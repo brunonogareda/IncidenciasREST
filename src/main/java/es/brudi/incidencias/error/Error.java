@@ -34,6 +34,7 @@ public enum Error {
 	GETINSTALACIONS_ERRORDB(161, "Erro obtendo as instalacións."),
 	GETINSTALACIONS_SENINSTALACIONS(162, "Non se encontraron instalacións de este cliente."),
 	GETINSTALACIONS_SENPERMISOS(163, "Non ten permisos suficientes para consultar as instalacións de este cliente."),
+	GETINSTALACIONS_SENINSTALACIONSXEST(164, "Non se encontraron instalacións xestionadas."),
 	CREATEINCIDENCIA_NONEXISTEINST(170, "Non se encontra a instalación solicitada."),
 	CREATEINCIDENCIA_INSTPERMISOS(171, "Non ten permisos para crear unha incidencia en esta instalación."),
 	CREATEINCIDENCIA_ERRORCREANDO(172, "Problemas ao insertar a incidencia na base de datos"),

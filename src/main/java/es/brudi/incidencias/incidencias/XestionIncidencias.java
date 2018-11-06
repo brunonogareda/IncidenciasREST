@@ -55,7 +55,7 @@ public class XestionIncidencias {
 		Estado estado = Estado.PENDENTE_R;
 		int autor = user.getId();
 
-		Instalacion instalacion = InstalacionAccessor.getInstalacionById(idInstalacion);
+		Instalacion instalacion = InstalacionAccessor.obterInstalacionPorId(idInstalacion);
 		if (instalacion == null)// Comprobamos se existe a instalación
 			return Error.CREATEINCIDENCIA_NONEXISTEINST.toJSONError();
 		if (!user.xestionaInstalacion(instalacion.getId())) // Comprobamos que a instalación pertence o usuario que crea

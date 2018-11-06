@@ -57,7 +57,7 @@ public class Incidencia {
 		id = res.getInt("Id");
 		codParte = res.getInt("Cod_parte");
 		ot = res.getInt("Orden_traballo");
-		instalacion = InstalacionAccessor.getInstalacionById(res.getInt("Instalacion"));
+		instalacion = InstalacionAccessor.obterInstalacionPorId(res.getInt("Instalacion"));
 		zonaApartamento = res.getString("Zona_apartamento");
 		descripcionCurta = res.getString("descripcion_curta");
 		observacions = res.getString("Observacions");

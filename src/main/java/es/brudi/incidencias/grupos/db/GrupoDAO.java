@@ -22,7 +22,7 @@ import es.brudi.incidencias.grupos.Grupo;
 public class GrupoDAO {
 	
 	private static final String TABLENAME = "Grupos";
-	private static final String TABLENAME_INSTALACIONS = "Grupo_instalacion";
+	public static final String TABLENAME_INSTALACIONS = "Grupo_instalacion";
 	private static Logger logger = Logger.getLogger(GrupoDAO.class);
 	
 	private GrupoDAO() {

@@ -108,11 +108,12 @@ public class FacturaRest {
 	 * @param fileDetail (file)
 	 * @return
 	 */
+	@Path("{id : .+}")
 	@PUT
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public JSONObject<String, Object> modificar(@FormDataParam("idFactura") String idFactura,
+	public JSONObject<String, Object> modificar(@PathParam("id") String id,
 												@FormDataParam("comentarios") String comentarios,
 												@FormDataParam("file") InputStream uploadedInputStream,
 												@FormDataParam("file") FormDataContentDisposition fileDetail) {
@@ -120,13 +121,13 @@ public class FacturaRest {
 		logger.debug("Invocouse o método modificar() de factura.");
 
 		// Compróbase que os parámetros obligatorios se pasaron.
-		if (idFactura == null || idFactura.equals(""))
+		if (id == null || id.equals(""))
 			return Error.FALTANPARAM.toJSONError();
 		
 		logger.debug("Parámetros correctos.");
 		XestionFacturas xest = new XestionFacturas();
 		Usuario user = XestionUsuarios.getUsuario(securityContext);
-		return xest.modificar(user, idFactura, comentarios, uploadedInputStream, fileDetail);
+		return xest.modificar(user, id, comentarios, uploadedInputStream, fileDetail);
 	}
 
 	/**

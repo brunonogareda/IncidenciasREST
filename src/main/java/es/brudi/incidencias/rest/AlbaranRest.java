@@ -102,11 +102,12 @@ public class AlbaranRest {
 	 * @param fileDetail (file)
 	 * @return
 	 */
+	@Path("{id}")
 	@PUT
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-    public JSONObject<String, Object> modificar(@DefaultValue("-1") @FormDataParam("id") int id,
+    public JSONObject<String, Object> modificar(@DefaultValue("-1") @PathParam("id") int id,
     										    @FormDataParam("nome") String nome,
     										    @FormDataParam("numAlbaran") String numAlbaran,
 								    		    @FormDataParam("comentarios") String comentarios,

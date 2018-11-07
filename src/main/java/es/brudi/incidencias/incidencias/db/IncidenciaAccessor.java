@@ -48,9 +48,9 @@ public class IncidenciaAccessor {
 
 	/**
 	 * @param id de Presuposto
-	 * @return Devolve o obxecto incidencia que corresponde que conteña o presuposto correspondente.
+	 * @return Devolve unha lista de incidencias que que conteña o presuposto correspondente.
 	 */
-	public static Incidencia obterPorPresuposto(String presuposto) {
+	public static List<Incidencia> obterPorPresuposto(String presuposto) {
 		return IncidenciaDAO.obterIncidenciaPorPresuposto(presuposto);
 	}
 	

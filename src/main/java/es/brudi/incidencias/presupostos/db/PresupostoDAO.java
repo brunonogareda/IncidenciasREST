@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
-import es.brudi.incidencias.incidencias.db.IncidenciaDAO;
 import es.brudi.incidencias.presupostos.Presuposto;
 
 /**
@@ -108,14 +107,14 @@ public class PresupostoDAO {
 	}
 	
 	/**
-	 * Obten o presuposto solicitado coa incidencia a que pertence a instalación a que está asignado.
+	 * Obten o presuposto solicitado.
 	 * @param id_presuposto
 	 * @return Presuposto
 	 */
-	protected static Presuposto obterPresupostoEInstalacionPorId(String id) {
+	protected static Presuposto obterPresupostoPorId(String id) {
 		Connection conn = DBConnectionManager.getConnection();
 
-		String query = "SELECT P.*, I.Instalacion AS Instalacion FROM "+TABLENAME+" AS P INNER JOIN "+IncidenciaDAO.TABLENAME+" AS I ON P.Id=I.Presuposto WHERE P.Id=?;";
+		String query = "SELECT * FROM "+TABLENAME+" WHERE Id=?;";
 		Presuposto presuposto = null;
 		ResultSet res = null;
 		try (PreparedStatement pst = conn.prepareStatement(query)) {
@@ -127,7 +126,6 @@ public class PresupostoDAO {
 			
 			if(res.next()) {
 				presuposto = new Presuposto(res);
-				presuposto.setInstalacion(res.getInt("Instalacion"));
 			}
 		 }
 		catch(SQLException se) {

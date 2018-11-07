@@ -154,7 +154,7 @@ public class IncidenciaRest {
 										 	 @DefaultValue("-1") @QueryParam("ot") int ot,
 										 	 @DefaultValue("-1") @QueryParam("idInstalacion") int idInstalacion,
 										 	 @QueryParam("zonaApartamento") String zonaApartamento,
-										 	 @QueryParam("descripcion_curta") String descripcionCurta,
+										 	 @QueryParam("descripcionCurta") String descripcionCurta,
 										 	 @QueryParam("observacions") String observacions,
 										 	 @QueryParam("estado") List<String> estados,
 										 	 @QueryParam("solPresuposto") String solPresuposto,

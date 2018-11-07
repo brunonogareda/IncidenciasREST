@@ -160,7 +160,7 @@ public class XestionFacturas {
 		logger.debug("Modificada a factura correctamente: "+idFactura);
 
 		//Engadimos un comentario de que se engadiu unha factura por cada incidencia coa que está realacionada a factura.
-		for(int inc : factura.getIdIncidencias())
+		for(int inc : factOld.getIdIncidencias())
 			ComentarioAccessor.crear(inc, user.getId(), Comentario.ACCION_MODIFICAR_FACTURA, Comentario.MODIFICACION_ADMINISTRACION_BRUDI, idFactura);
 		
 		if(!errFile)

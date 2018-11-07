@@ -1,5 +1,10 @@
 package es.brudi.incidencias.presupostos.db;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import es.brudi.incidencias.incidencias.Incidencia;
+import es.brudi.incidencias.incidencias.db.IncidenciaAccessor;
 import es.brudi.incidencias.presupostos.Presuposto;
 import es.brudi.incidencias.usuarios.Usuario;
 
@@ -24,13 +29,19 @@ public class PresupostoAccessor {
 	 * @param usuario
 	 * @return
 	 */
-	public static Presuposto obterPorId(String id, Usuario usuario) {
-		Presuposto presuposto = null;
-		presuposto = PresupostoDAO.obterPresupostoEInstalacionPorId(id);
-		if(presuposto != null && usuario.xestionaInstalacion(presuposto.getInstalacion()))
-			return presuposto;
-		else
-			return null;
+	public static Presuposto obterPorId(String id, Usuario user) {
+		Presuposto presuposto = PresupostoDAO.obterPresupostoPorId(id);
+		if(presuposto != null) {
+			List<Incidencia> incidencias = IncidenciaAccessor.obterPorPresuposto(id);
+			List<Integer> idIncidencias = new ArrayList<>();
+			for(Incidencia inc : incidencias) {
+				idIncidencias.add(inc.getId());
+				if(!user.xestionaInstalacion(inc.getInstalacion().getId()))
+					return null;
+			}
+			presuposto.setIdIncidencias(idIncidencias);
+		}
+		return presuposto;
 	}
 	
 	/**
@@ -49,10 +60,13 @@ public class PresupostoAccessor {
 	 * @param tipo_ficheiro
 	 * @param aceptado
 	 * @param comentarios
-	 * @return
+	 * @return Presuposto creado
 	 */
-	public static boolean crear(String id, String rutaFicheiro, String tipoFicheiro, String comentarios, boolean aceptado) {
-		return PresupostoDAO.crear(id, rutaFicheiro, tipoFicheiro, comentarios, aceptado);
+	public static Presuposto crear(String id, String rutaFicheiro, String tipoFicheiro, String comentarios, boolean aceptado) {
+		Presuposto presuposto = null;
+		if (PresupostoDAO.crear(id, rutaFicheiro, tipoFicheiro, comentarios, aceptado))
+			presuposto = new Presuposto(id, aceptado, rutaFicheiro, tipoFicheiro, comentarios);
+		return presuposto;
 	}
 	
 	/**
@@ -61,7 +75,7 @@ public class PresupostoAccessor {
 	 * @return Presuposto
 	 */
 	public static Presuposto obterPresupostoEInstalacionPorId(String idPresuposto) {
-		return PresupostoDAO.obterPresupostoEInstalacionPorId(idPresuposto);
+		return PresupostoDAO.obterPresupostoPorId(idPresuposto);
 	}	
 
 	/**
@@ -71,9 +85,14 @@ public class PresupostoAccessor {
 	 * @param tipo_ficheiro - Extensión do ficheiro. NULL non o modifica.
 	 * @param comentarios - Comentarios do presuposto. NULL non o modifica.
 	 * @param aceptado - Presuposto aceptado. NULL non o modifica
-	 * @return
+	 * @param aceptadoOrixinal - Estado de aceptado antes de modificar
+	 * @return Presuposto modificado
 	 */
-	public static boolean modificar(String id, String rutaFicheiro, String tipoFicheiro, String comentarios, String aceptado) {
-		return PresupostoDAO.modificar(id, rutaFicheiro, tipoFicheiro, comentarios, aceptado);
+	public static Presuposto modificar(String id, String rutaFicheiro, String tipoFicheiro, String comentarios, String aceptado, boolean aceptadoOrixinal) {
+		Presuposto presuposto = null;
+		boolean aceptadoNovo = (aceptado == null || aceptado.isEmpty()) ?  aceptadoOrixinal : Boolean.valueOf(aceptado);
+		if(PresupostoDAO.modificar(id, rutaFicheiro, tipoFicheiro, comentarios, aceptado))
+			presuposto = new Presuposto(id, aceptadoNovo, rutaFicheiro, tipoFicheiro, comentarios);
+		return presuposto;
 	}
 }

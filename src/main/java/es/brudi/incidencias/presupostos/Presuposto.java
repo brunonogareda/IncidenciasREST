@@ -2,6 +2,8 @@ package es.brudi.incidencias.presupostos;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONObject;
 
@@ -21,14 +23,12 @@ public class Presuposto {
 	private String rutaFicheiro;
 	private String tipoFicheiro;
 	private String comentarios;
-	private int instalacion; //Instalación a que pertence a Incidencia asociada o presuposto.
+	private List<Integer> idIncidencias = new ArrayList<>();
+	
+	public static final String JSON_TITLE 	= "Presuposto";
+	public static final String JSON_TITLE2	= "Presupostos";
 	
 	public Presuposto() {}
-	
-	public Presuposto(String id, boolean aceptado, String rutaFicheiro, String tipoFicheiro, String comentarios, int instalacion) {
-		new Presuposto(id, aceptado, rutaFicheiro, tipoFicheiro, comentarios);
-		this.instalacion = instalacion;
-	}
 	
 	public Presuposto(String id, boolean aceptado, String rutaFicheiro, String tipoFicheiro, String comentarios) {
 		super();
@@ -113,17 +113,17 @@ public class Presuposto {
 	}
 	
 	/**
-	 * @return the instalacion
+	 * @return the idIncidencias
 	 */
-	public int getInstalacion() {
-		return instalacion;
+	public List<Integer> getIdIncidencias() {
+		return idIncidencias;
 	}
 
 	/**
-	 * @param instalacion the instalacion to set
+	 * @param idIncidencias the idIncidencias to set
 	 */
-	public void setInstalacion(int instalacion) {
-		this.instalacion = instalacion;
+	public void setIdIncidencias(List<Integer> idIncidencias) {
+		this.idIncidencias = idIncidencias;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -56,58 +56,48 @@ public class XestionPresupostos {
 		String rutaFicheiro = null;
 		boolean errFile = false;
 		
-		if(!user.podeEngadirPresuposto()) {
+		if(!user.podeEngadirPresuposto())
 			return Error.USER_NOPERMISOS.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia);
-		if(inc == null) {
-			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Error.CREARPRESUPOSTO_SENPERMISOS.toJSONError();
-		}
-		if(aceptado && !user.podeAceptarPresuposto()) {
+		
+		if(aceptado && !user.podeAceptarPresuposto())
 			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
-		}
-		if(inc.getPresuposto() != null) {//A incidencia xa ten presuposto
+
+		Incidencia inc = IncidenciaAccessor.obterPorId(idIncidencia, user);
+		if(inc == null)
+			return Error.OBTERINCIDENCIA_NONEXISTE.toJSONError();
+
+		if(inc.getPresuposto() != null)//A incidencia xa ten presuposto
 			return Error.CREARPRESUPOSTO_EXISTE.toJSONError();
-		}
+
 		//comprobamos se xa existe algun presuposto con ese Id.
 		Presuposto presu = PresupostoAccessor.obterPorId(idPresuposto);
-		if(presu != null) {
+		if(presu != null)
 			return Error.CREARPRESUPOSTO_DUPLICADO.toJSONError();
-		}
-		if(!inc.getEstado().equals(Estado.PENDENTE_P)) { //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
+
+		if(!inc.getEstado().equals(Estado.PENDENTE_P)) //Comprobamos que o estado da incidencia é o correcto para engadir a factura.
 			return Error.CREARPRESUPOSTO_ERRORESTADO.toJSONError();
-		}
 		
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
 			nomeFicheiro = idPresuposto.replaceAll("/", "-")+"."+tipoFicheiro;
-			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos(), inc.getData());
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos());
 			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean Pret = PresupostoAccessor.crear(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado); //Creamos o presuposto na táboa.
-		if(!Pret) {
+		Presuposto presuposto = PresupostoAccessor.crear(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado); //Creamos o presuposto na táboa.
+		if(presuposto == null)
 			return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
-		}
 		
 		//Engadese o id de presuposto na incidencia correspondente e cambiase o estado
 		if(aceptado) {
-			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_R.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_R.getEstado()))
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
-			}
 		}
 		else {
-			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_A.getEstado())) { 
+			if(!IncidenciaAccessor.modifcarPresupostoEstado(idIncidencia, idPresuposto, Estado.PENDENTE_A.getEstado()))
 				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
-			}
 		}
 		
-		Presuposto presuposto = new Presuposto(idPresuposto, aceptado, rutaFicheiro, tipoFicheiro, comentarios);
-
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
 			String path = XestionFicheiros.subirFicheiroEGardar(uploadedInputStream, dirFicheiro, nomeFicheiro);
 			if(path == null ) {
@@ -118,14 +108,12 @@ public class XestionPresupostos {
 
 		logger.debug("Creouse o presuposto correctamente: "+idPresuposto);
 
-		//Engadimos o comentario de que se engadiu un presuposto
 		ComentarioAccessor.crear(idIncidencia, user.getId(), Comentario.ACCION_INSERTAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.CREARPRESUPOSTO_OK.toJSONMensaxe();
 		
-		ret.put("Presuposto", presuposto.toJson());
-		
+		ret.put(Presuposto.JSON_TITLE, presuposto.toJson());
 		return ret;
 	}
 
@@ -149,52 +137,44 @@ public class XestionPresupostos {
 		String rutaFicheiro = null;
 		boolean errFile = false;
 		
-		if(!user.podeEditarPresuposto() && (comentarios != null || uploadedInputStream != null) ) {
-			return Error.MODIFICARPRESUPOSTO_SENPERMISOS2.toJSONError();
-		}
-		if(aceptado!=null && !user.podeAceptarPresuposto()) {
+		if(!user.podeEditarPresuposto() && (comentarios != null || uploadedInputStream != null) )
+			return Error.MODIFICARPRESUPOSTO_SENPERMISOS.toJSONError();
+
+		if(aceptado!=null && !user.podeAceptarPresuposto())
 			return Error.ACEPTARPRESUPOSTO_SENPERMISOS.toJSONError();
-		}
-		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
-		if(inc == null) {
+
+		Presuposto presuOld = PresupostoAccessor.obterPorId(idPresuposto, user);
+		if(presuOld == null)
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.MODIFICARPRESUPOSTO_SENPERMISOS1.toJSONError();
-		}
-		Presuposto presu = PresupostoAccessor.obterPorId(idPresuposto);
-		if(presu == null) {
-			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
-		}
 			
 		if(uploadedInputStream != null && fileDetail != null) { //Se existe, obtemos os datos para o ficheiro
 			tipoFicheiro = FilenameUtils.getExtension(fileDetail.getFileName());
 			nomeFicheiro = idPresuposto.replaceAll("/", "-")+"."+tipoFicheiro;
-			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos(), inc.getData());
+			dirFicheiro = XestionFicheiros.getRuteToFile(XestionFicheiros.getRutaPresupostos());
 			rutaFicheiro = dirFicheiro+"/"+nomeFicheiro;
 		}
 		
-		boolean pret = PresupostoAccessor.modificar(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado); //modificamos o presuposto na bd.
-		if(!pret) {
+		Presuposto presuposto = PresupostoAccessor.modificar(idPresuposto, rutaFicheiro, tipoFicheiro, comentarios, aceptado, presuOld.isAceptado()); //modificamos o presuposto na bd.
+		if(presuposto == null)
 			return Error.MODIFICARPRESUPOSTO_ERRORDB.toJSONError();
-		}
 		
-		if(aceptado != null && aceptado.equals("true") && !presu.isAceptado())  {
-			if(!IncidenciaAccessor.modifcarPresupostoEstado(inc.getId(), idPresuposto, Estado.PENDENTE_R.getEstado())) { 
-				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+		if(aceptado != null && aceptado.equalsIgnoreCase("true") && !presuOld.isAceptado())  {
+			for(int inc : presuOld.getIdIncidencias()) {
+				if(!IncidenciaAccessor.modifcarPresupostoEstado(inc, idPresuposto, Estado.PENDENTE_R.getEstado()))
+					return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
-		else if(aceptado != null && aceptado.equals("false") && presu.isAceptado()) {
-			if(!IncidenciaAccessor.modifcarPresupostoEstado(inc.getId(), idPresuposto, Estado.PENDENTE_A.getEstado())) { 
-				return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
+		else if(aceptado != null && aceptado.equals("false") && presuOld.isAceptado()) {
+			for(int inc : presuOld.getIdIncidencias()) {
+				if(!IncidenciaAccessor.modifcarPresupostoEstado(inc, idPresuposto, Estado.PENDENTE_A.getEstado())) 
+					return Error.CREARPRESUPOSTO_ERRORDB.toJSONError();
 			}
 		}
 		
 		if(uploadedInputStream != null) {//Se existe, garda o ficheiro en local.
-			if(presu.getRutaFicheiro() != null && !presu.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
-				if(!XestionFicheiros.borrar(presu.getRutaFicheiro())) {
-					logger.error("Erro o eliminar o ficheiro: "+presu.getRutaFicheiro());
+			if(presuOld.getRutaFicheiro() != null && !presuOld.getRutaFicheiro().equals("")) {//Se existe boramos o ficheiro antigo.
+				if(!XestionFicheiros.borrar(presuOld.getRutaFicheiro())) {
+					logger.error("Erro o eliminar o ficheiro: "+presuOld.getRutaFicheiro());
 				}
 			}
 			
@@ -205,21 +185,15 @@ public class XestionPresupostos {
 			}
 		}
 		
-		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto); //Buscamos o presuposto que acabamos de modificar
-		if(presuposto == null) {
-			return Error.MODIFICARPRESUPOSTO_ERRORDB.toJSONError();
-		}
-		
 		logger.debug("Modificado o presuposto correctamente: "+idPresuposto);
-
-		//Engadimos o comentario de que se modificou o presuposto
-		ComentarioAccessor.crear(inc.getId(), user.getId(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
+		//Engadimos o comentario de que se modificou o presuposto para cada incidencia.
+		for(int inc : presuOld.getIdIncidencias())
+			ComentarioAccessor.crear(inc, user.getId(), Comentario.ACCION_MODIFICAR_PRESUPOSTO, Comentario.MODIFICACION_ADMINISTRACION, idPresuposto);
 		
 		if(!errFile)
 			ret = Mensaxe.MODIFICARPRESUPOSTO_OK.toJSONMensaxe();
 		
-		ret.put("Presuposto", presuposto.toJson());
-		
+		ret.put(Presuposto.JSON_TITLE, presuposto.toJson());
 		return ret;
 	}
 	
@@ -232,27 +206,17 @@ public class XestionPresupostos {
 	public JSONObject<String, Object> obter(Usuario user, String idPresuposto) {
 		JSONObject<String, Object> ret;
 		
-		if(!user.podeVerPresuposto()) {
+		if(!user.podeVerPresuposto())
 			return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
-		}
 		
-		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
-		if(inc == null) {
+		logger.debug("Buscando presuposto con ID: "+idPresuposto);
+		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto, user);
+		if(presuposto == null)
 			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-				return Error.OBTERPRESUPOSTO_SENPERMISOS2.toJSONError();
-		}
-		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto);
-		if(presuposto == null) {
-			return Error.OBTERPRESUPOSTO_NONEXISTE.toJSONError();
-		}
 				
 		logger.debug("Obtivose o presuposto correctamente: "+idPresuposto);
-
 		ret = Mensaxe.OBTERPRESUPOSTO_OK.toJSONMensaxe();
-		ret.put("Presuposto", presuposto.toJson());
+		ret.put(Presuposto.JSON_TITLE, presuposto.toJson());
 		
 		return ret;
 	}
@@ -260,39 +224,26 @@ public class XestionPresupostos {
 	/**
 	 * Obten o ficheiro local.
 	 * @param user
-	 * @param id_presuposto
+	 * @param idpresuposto
 	 * @return
 	 */
 	public Response obterFicheiro(Usuario user, String idPresuposto) {
 
-		if(!user.podeVerPresuposto()) {
+		if(!user.podeVerPresuposto())
 			return Response.status(Status.FORBIDDEN).build();
-		}
 		
-		Incidencia inc = IncidenciaAccessor.obterPorPresuposto(idPresuposto);
-		if(inc == null) {
+		logger.debug("Buscando ficheiro de presuposto con ID: "+idPresuposto);
+		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto, user);
+		if(presuposto == null || presuposto.getRutaFicheiro() == null)
 			return Response.status(Status.NOT_FOUND).build();
-		}
-		if(inc.getInstalacion().getCliente().getCodCliente() != user.getCliente().getCodCliente() &&
-		user.getCliente().getCodCliente() != 0) {  //Comprobamos que a instalación pertence o usuario que crea a incidencia ou é 0.
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		Presuposto presuposto = PresupostoAccessor.obterPorId(idPresuposto);
-		if(presuposto == null) {
-			return Response.status(Status.NOT_FOUND).build();
-		}
 		
 		File file = XestionFicheiros.obterFicheiro(presuposto.getRutaFicheiro());
-		if(file == null) {
+		if(file == null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-		
 		
 		logger.debug("Obtivose o presuposto correctamente: "+idPresuposto);
-
 		ResponseBuilder response = Response.ok((Object) file);
 	    response.header("Content-Disposition", "attachment; filename="+file.getName());
-	    
 		return response.build();
 	}
 	

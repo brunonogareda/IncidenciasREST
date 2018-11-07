@@ -112,13 +112,13 @@ public class IncidenciaDAO {
 
 	/**
 	 * @param id de Presuposto
-	 * @return Devolve o obxecto incidencia que corresponde que conteña o presuposto correspondente.
+	 * @return Devolve unha lista de incidencias que conteña o presuposto correspondente.
 	 */
-	protected static Incidencia obterIncidenciaPorPresuposto(String presuposto) {
+	protected static List<Incidencia> obterIncidenciaPorPresuposto(String presuposto) {
 		
 		Connection conn = DBConnectionManager.getConnection();
 		String query = "SELECT * FROM "+TABLENAME+" WHERE Presuposto=?;";
-		Incidencia ret = null;
+		List<Incidencia> ret = new ArrayList<>();
 		ResultSet res = null;
 		try (PreparedStatement pst = conn.prepareStatement(query))
 		 {			
@@ -126,8 +126,8 @@ public class IncidenciaDAO {
 
 			pst.setString(1, presuposto);
 			res = pst.executeQuery();
-			if(res.next()) {
-				ret = new Incidencia(res);
+			while(res.next()) {
+				ret.add(new Incidencia(res));
 			}
 		 }
 		catch(SQLException se) {

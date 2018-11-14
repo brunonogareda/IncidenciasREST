@@ -2,8 +2,6 @@ package es.brudi.incidencias.servlet;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Random;
 
 import javax.crypto.KeyGenerator;
@@ -16,7 +14,7 @@ import javax.servlet.annotation.WebListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.db.XestorConexions;
 import es.brudi.incidencias.documentos.XestionFicheiros;
 import es.brudi.incidencias.usuarios.XestionTokens;
 
@@ -78,34 +76,6 @@ public class AppContextListener implements ServletContextListener {
 			e.printStackTrace();
 		}
     	
-    	//Iniciase a conexión coa base de datos según os parámetros do web.xml
-    	@SuppressWarnings("unused")
-		DBConnectionManager connectionManager;
-   	   	String dbURL = ctx.getInitParameter("dbURL");
-	   	String dbName = ctx.getInitParameter("dbName");
-	   	String user = ctx.getInitParameter("dbUser");
-	   	String pwd = ctx.getInitParameter("dbPassword");
-	    
-	   	if(dbURL==null || dbURL.equals("") || dbName==null || dbName.equals("") || user==null || user.equals("") || pwd==null || pwd.equals("")) {
-	    	connectionManager = new DBConnectionManager();
-	   	}
-	   	else {
-	   		connectionManager = new DBConnectionManager(dbURL, dbName, user, pwd);
-	   	}
-
-    	ctx.setAttribute("DBConnection", DBConnectionManager.getConnection());
+		XestorConexions.iniciarPool();
     }
-
-    /**
-     * Destrue o contexto, pechando a conexión coa base de datos.
-     */
-    public void contextDestroyed(ServletContextEvent servletContextEvent) {
-    	Connection con = (Connection) servletContextEvent.getServletContext().getAttribute("DBConnection");
-    	try {
-			con.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-    }
-	
 }

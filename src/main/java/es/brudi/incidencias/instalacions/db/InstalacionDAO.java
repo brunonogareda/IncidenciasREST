@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import es.brudi.incidencias.db.DBConnectionManager;
+import es.brudi.incidencias.db.XestorConexions;
 import es.brudi.incidencias.grupos.db.GrupoDAO;
 import es.brudi.incidencias.instalacions.Instalacion;
 import es.brudi.incidencias.usuarios.db.UsuarioDAO;
@@ -77,7 +78,13 @@ public class InstalacionDAO {
 	 * @return Lista de instalacions
 	 */
 	protected static List<Instalacion> obterInstalacionsPorCliente(int idCliente) {
-		Connection conn = DBConnectionManager.getConnection();
+		Connection conn = null;
+		try {
+			conn = XestorConexions.getConexion();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		String query = "SELECT * FROM " + TABLENAME + " WHERE Cod_cliente=?;";
 		ResultSet res = null;
 		List<Instalacion> instalacions = new ArrayList<>();
